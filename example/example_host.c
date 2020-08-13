@@ -34,6 +34,8 @@ int main(void)
     a = (int)rand();
     b = (int)rand();
 
+    hirtCreateScheduler();
+
     hirtQueue_t queue;
     hirtCreateQueue(&queue);
 

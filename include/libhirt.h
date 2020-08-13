@@ -97,6 +97,9 @@ typedef enum {
   HIRT_RET_ERR_FILENOTFOUND        = 632065, /**< FileNotFound         */
   HIRT_RET_ERR_TESTAPPFAILED       = 632066, /**< TestAppFailed        */
   HIRT_RET_ERR_DEVICENOTFOUND      = 632067, /**< DeviceNotFound       */
+  HIRT_RET_ERR_FIFOEMPTY           = 632068, /**< fifoempty            */
+  HIRT_RET_ERR_FIFOFULL            = 632069, /**< fifofull             */
+  HIRT_RET_ERR_CREATETHREAD        = 632070, /**< createthread         */
   HIRT_RET_ERR_UNKNOWN             = 999991, /**< Unknown error */
   HIRT_RET_ERR_MAX,                          /**< The last one */
 } hirtRet_t;
@@ -144,6 +147,8 @@ typedef enum hirtDimOrder {
   HIRT_NHWC = 0x0231,
 } hirtDimOrder_t;
 
+typedef int hirtTaskDim_t;
+
 typedef unsigned long hirtDev_t;
 
 typedef u64_t hirtDevMemAddress_t;
@@ -152,16 +157,23 @@ typedef u64_t hirtDevMemAddress_t;
 /**< Compiler */
 /**< hirt.h */
 
+#define HIRT_CMDQUEUE_SIZMAX      (1024)
 #define HIRT_PARAMBUF_MAXSIZE     (1024)
 #define HIRT_HIPU200_CORENUMMAX   (13)
 /**< hirt_internal.h */
-struct hirtKernelParamsBuffer {
-  void *host_ptr;
-  void *dev_prt;
+typedef struct hirtKernelParamsBuffer {
+  void *pbuf_host;
+  void *pbuf_dev;
   unsigned int max_param;
   unsigned int cur_param;
-};
-typedef struct hirtKernelParamsBuffer  hirtKernelParamsBuffer_t;
+} hirtKernelParamsBuffer_t;
+
+typedef struct hirtKernelBinBuffer
+{
+  void *pbuf_host;
+  void *pbuf_dev;
+  unsigned int size;
+} hirtKernelBinBuffer_t;
 
 typedef struct hirtKernelFunction {
   u64_t function_start;
@@ -186,6 +198,8 @@ typedef struct hirtKernelTaskParam
   hirtKernelGramAllocInfo_t mem_bias;
   hirtKernelGramAllocInfo_t mem_lut;
 } hirtKernelTaskParam_t;
+
+typedef void (*hirtThreadFunction_t)(void *arg);
 
 #ifdef NDEBUG
 #define hirt_assert(cond) do {} while (0);
