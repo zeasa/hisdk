@@ -51,8 +51,12 @@ int main(void)
     //hirtKernelParamsBufferAddParams(pParams, &k_b, sizeof(int *));
 
 
-    hirtInvokeKernel_V2(&kernel, 3, pParams, queue);
+    hirtInvokeKernel(&kernel0, 3, pParams, queue);
+    hirtInvokeKernel(&kernel1, 3, pParams, queue);
+    hirtInvokeKernel(&kernel2, 3, pParams, queue);
     hirtSyncQueue(queue);
+    
+    hirtInvokeKernel(&kernel3, 3, pParams, queue);
 
     hirtMemcpy(&out, k_a, sizeof(int), HIRT_MEM_TRANS_DIR_DEV2HOST);
     hirtFree(k_a);

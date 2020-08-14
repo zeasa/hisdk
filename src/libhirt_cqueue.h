@@ -28,12 +28,12 @@ typedef struct hirtCmdQueue
     libhirt_fifo_t *pfifo;
 } hirtCmdQueue_t;
 
-hirtRet_t libhirt_cmdqueue_create(hirtCmdQueue_t *pqueue);
-hirtRet_t libhirt_cmdqueue_destory(hirtCmdQueue_t *pqueue);
-hirtRet_t libhirt_cmdqueue_sync_put(hirtCmdQueue_t *pqueue, sem_t *psem);
+hirtRet_t libhirt_cmdqueue_create(hirtCmdQueue_t **ppQueue);
+hirtRet_t libhirt_cmdqueue_destory(hirtCmdQueue_t *pQueue);
+hirtRet_t libhirt_cmdqueue_sync_put(hirtCmdQueue_t *pQueue, sem_t *pSem);
 hirtRet_t libhirt_cmdqueue_kernel_put(hirtCmdQueue_t *pQueue, hirtKernelParamsBuffer_t *pParams, hirtKernelBinBuffer_t *pKernelBin);
 hirtRet_t libhirt_cmdqueue_get(hirtCmdQueue_t *pQueue, hirtCmdNode_t *pNode);
-hirtRet_t hirtSyncQueue(hirtCmdQueue *pqueue);
+hirtRet_t hirtSyncQueue(hirtCmdQueue *pQueue);
 
 
 #endif /*LIBHIRT_CMDQUEUE_H__*/

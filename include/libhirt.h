@@ -35,7 +35,8 @@ typedef int      bool_t;
 typedef u64_t    hirt_size_t;
 
 /**< Error codes */
-typedef enum {
+typedef enum 
+{
   HIRT_RET_SUCCESS                 = 0,      /**< No error */
   HIRT_RET_WARNING_FAKE_DEVICE     = 1,      /**< Use fake device */
   HIRT_RET_ERR_INVALID             = 632007, /**< Invalid argument */
@@ -151,15 +152,31 @@ typedef int hirtTaskDim_t;
 
 typedef unsigned long hirtDev_t;
 
-typedef u64_t hirtDevMemAddress_t;
-#define MAKE_DEVADDRESS(nodenoc, low32)    ((((u64_t)nodenoc) << 32) + low32)
+typedef u64_t hirtGMemAddress_t;
+#define MAKE_DEVADDR(nodenoc, low32)    ((((u64_t)nodenoc) << 32) + low32)
+#define MAKE_DEVADDR_BLK(nodenoc, blk)  ((((u64_t)nodenoc) << 32) + blk*HIRT_HIPU200_MEM_BLK_SIZ)
 
 /**< Compiler */
 /**< hirt.h */
 
-#define HIRT_CMDQUEUE_SIZMAX      (1024)
-#define HIRT_PARAMBUF_MAXSIZE     (1024)
-#define HIRT_HIPU200_CORENUMMAX   (13)
+#define HIRT_CMDQUEUE_SIZMAX            (1024)
+#define HIRT_PARAMBUF_MAXSIZE           (1024)
+#define HIRT_HIPU200_CORENUMMAX         (13)
+
+#define HIRT_HIPU200_MEM_CH_NUM         (2)
+#define HIRT_HIPU200_MEM_CH_SIZ         (4096*1024*1024)
+#define HIRT_HIPU200_MEM_BLK_SIZ        (64*1024*1024)
+#define HIRT_HIPU200_MEM_BLK_NUM        (HIRT_HIPU200_MEM_CH_SIZ/HIRT_HIPU200_MEM_BLK_SIZ)
+
+#define HIRT_HIPU200_MEM_CH0_NOCADDR    (0)
+#define HIRT_HIPU200_MEM_CH1_NOCADDR    (1)
+
+const int HIRT_HIPU200_MEM_CH_NOCADDR_TBL[HIRT_HIPU200_MEM_CH_NUM] = 
+{
+    HIRT_HIPU200_MEM_CH0_NOCADDR,
+    HIRT_HIPU200_MEM_CH1_NOCADDR
+};
+
 /**< hirt_internal.h */
 typedef struct hirtKernelParamsBuffer {
   void *pbuf_host;
@@ -183,28 +200,28 @@ typedef struct hirtKernelFunction {
 
 typedef struct hirtKernelGramAllocInfo
 {
-  hirtDevMemAddress_t base;
+  hirtGMemAddress_t base;
   size_t size;
-} hirtKernelGramAllocInfo_t;
+} hirtKernelGMemAllocInfo_t;
 
 typedef struct hirtKernelTaskParam
 {
   int task_parallelism;
   int task_thread_coreid[HIRT_HIPU200_CORENUMMAX];
-  hirtKernelGramAllocInfo_t mem_input;
-  hirtKernelGramAllocInfo_t mem_output;
-  hirtKernelGramAllocInfo_t mem_fm;
-  hirtKernelGramAllocInfo_t mem_weight;
-  hirtKernelGramAllocInfo_t mem_bias;
-  hirtKernelGramAllocInfo_t mem_lut;
+  hirtKernelGMemAllocInfo_t mem_input;
+  hirtKernelGMemAllocInfo_t mem_output;
+  hirtKernelGMemAllocInfo_t mem_fm;
+  hirtKernelGMemAllocInfo_t mem_weight;
+  hirtKernelGMemAllocInfo_t mem_bias;
+  hirtKernelGMemAllocInfo_t mem_lut;
 } hirtKernelTaskParam_t;
 
 typedef void (*hirtThreadFunction_t)(void *arg);
 
 #ifdef NDEBUG
-#define hirt_assert(cond) do {} while (0);
+#define HIRT_ASSERT(cond) do {} while (0);
 #else
-#define hirt_assert(cond) if (!(cond)) { \
+#define HIRT_ASSERT(cond) if (!(cond)) { \
     std::cout << "Error occur: " << __func__ << __LINE__; \
     exit(0); }
 #endif
@@ -303,7 +320,7 @@ hirtRet_t hirtGetDeviceHandle(hirtDev_t *dev, int ordinal);
  * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtSetCurrentDevice(hirtDev_t dev);7
+hirtRet_t hirtSetCurrentDevice(hirtDev_t dev);
 
 /**
  * @brief Get the hirtDevice handle from current thread execution context.
