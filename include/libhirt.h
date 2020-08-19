@@ -204,17 +204,35 @@ typedef struct hirtKernelGramAllocInfo
   size_t size;
 } hirtKernelGMemAllocInfo_t;
 
-typedef struct hirtKernelTaskParam
+typedef struct
 {
-  int task_parallelism;
-  int task_thread_coreid[HIRT_HIPU200_CORENUMMAX];
-  hirtKernelGMemAllocInfo_t mem_input;
-  hirtKernelGMemAllocInfo_t mem_output;
-  hirtKernelGMemAllocInfo_t mem_fm;
-  hirtKernelGMemAllocInfo_t mem_weight;
-  hirtKernelGMemAllocInfo_t mem_bias;
-  hirtKernelGMemAllocInfo_t mem_lut;
-} hirtKernelTaskParam_t;
+  u32_t kernelparambuf_maxsize;
+  u32_t task_parallelism;
+  u32_t task_thread_coreid[HIRT_HIPU200_CORENUMMAX];
+} hirtKernelParamParallel_t;
+
+typedef struct
+{
+  u32_t dummy;
+}hirtKernelParamMemory_t;
+
+typedef struct
+{
+    hirtKernelParamParallel_t parallel_info;
+    hirtKernelParamMemory_t   memory_info;
+}hirtKernelParamTable_t;
+
+//typedef struct hirtKernelTaskParam
+//{
+//  int task_parallelism;
+//  int task_thread_coreid[HIRT_HIPU200_CORENUMMAX];
+//  hirtKernelGMemAllocInfo_t mem_input;
+//  hirtKernelGMemAllocInfo_t mem_output;
+//  hirtKernelGMemAllocInfo_t mem_fm;
+//  hirtKernelGMemAllocInfo_t mem_weight;
+//  hirtKernelGMemAllocInfo_t mem_bias;
+//  hirtKernelGMemAllocInfo_t mem_lut;
+//} hirtKernelTaskParam_t;
 
 typedef void (*hirtThreadFunction_t)(void *arg);
 
