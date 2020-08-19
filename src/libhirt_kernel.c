@@ -99,6 +99,70 @@ hirtRet_t hirtDestroyKernelParamsBuffer(hirtKernelParamsBuffer_t params)
     return HIRT_RET_SUCCESS;
 }
 
+__R_HOST static
+hirtRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char *ppbuf, size_t *pSize)
+{
+    hirtRet_t ret = HIRT_RET_SUCCESS;
+    hirtRet_t rc;
+    hirtFileHandle_t file;
+    hirtStatType_t   finfo;
+    size_t file_size;
+    unsigned char *pbuf;
+    size_t actually_read = 0;
+
+    if(strlen(kernel_filename) == 0)
+    {
+        ret = HIRT_RET_ERR_FILEOPERATIONFAILED;
+        goto fail;
+    }
+
+    rc = hirtPortOsFopen(kernel_filename, HIRT_OPEN_READ, &file);
+    if(rc != HIRT_RET_SUCCESS)
+    {
+        ret = HIRT_RET_ERR_FILENOTFOUND;
+        goto fail;
+    }
+
+    rc = hirtPortOsFstat(file, &finfo);
+    if(rc != HIRT_RET_SUCCESS)
+    {
+        ret = HIRT_RET_ERR_FILEOPERATIONFAILED;
+        goto fail;
+    }
+
+    file_size = hirtPortOsStatGetSize(&finfo);
+    if(!file_size)
+    {
+        ret = HIRT_RET_ERR_FILEOPERATIONFAILED;
+    }
+
+    pbuf = (unsigned char*)malloc(file_size);
+
+    hirtPortOsFseek(file, 0, HirtSeek_Set);
+
+    rc = hirtPortOsFread(file, pbuf, file_size, &actually_read);
+    if(rc != HIRT_RET_SUCCESS)
+    {
+        free(pbuf);
+        ret = HIRT_RET_ERR_FILEOPERATIONFAILED;
+        goto fail;
+    }
+
+    hirtPortOsFclose(file);
+    if(actually_read != file_size)
+    {
+        free(pbuf);
+        ret = HIRT_RET_ERR_FILEOPERATIONFAILED;
+        goto fail;
+    }
+
+    *ppbuf = pbuf;
+    *pSize = file_size;
+
+fail:
+    return ret;
+}
+
 /**
  * @brief Invoke a kernel written in Bang with given params on MLU.
  *
@@ -119,23 +183,31 @@ hirtRet_t hirtDestroyKernelParamsBuffer(hirtKernelParamsBuffer_t params)
  */
 __R_HOST
 hirtRet_t hirtInvokeKernel(const hirtKernelFunction_t *function, hirtTaskDim_t dim,
-      hirtKernelParamsBuffer_t *pparams, hirtKernelBinBuffer_t **pKernelBin, hirtCmdQueue_t *pqueue)
+      hirtKernelParamsBuffer_t *pparams, hirtKernelBinBuffer_t **ppKernelBin, hirtCmdQueue_t *pqueue)
 {
+    hirtRet_t ret = HIRT_RET_SUCCESS;
+    hirtRet_t rc;
+    char *filename;
+    unsigned char* pbuf;
+    size_t filesize;
     hirtKernelBinBuffer_t *pKernel;
     size_t param_size;
     void *pKernelGdramPtr;
 
     //alloc kernelbin struct
     pKernel = (hirtKernelBinBuffer_t *)malloc(sizeof(hirtKernelBinBuffer_t));
-    *pKernelBin = pKernel;
+    *ppKernelBin = pKernel;
 
     //get kernelfile size
+    hirtLoadKernelFromFile(filename, &pbuf, &filesize);
     //malloc kernel gdram in device memory
-    pKernel->size = function->function_end - function->function_start;
+    pKernel->size = filesize;
     hirtMalloc(&pKernel->pbuf_dev, pKernel->size);
-    
+    pKernel->pbuf_host = pbuf;
     //fill some param in parambuf(dim)
 
     //libhirt_cmdqueue_kernel_put
     libhirt_cmdqueue_kernel_put(pqueue, pparams, pKernel, dim);
+
+    return ret;
 }

@@ -133,7 +133,8 @@ himlRet_t himlCreateCpuTensor(himlCpuTensor_t** ppCpu_tensor,
     pCpu_Tensor->shape.h = h;
     pCpu_Tensor->shape.w = w;
     pCpu_Tensor->haddr = (void*)0;
-
+    pCpu_Tensor->bufsize = 0;
+    
     return ret;
 }
 
@@ -141,10 +142,54 @@ himlRet_t himlDestroyCpuTensor(himlCpuTensor_t* pCpu_tensor)
 {
     himlRet_t ret = HIML_RET_SUCCESS;
 
+    if(pCpu_tensor->haddr != 0)
+    {
+        free(pCpu_tensor->haddr);
+    }
     free(pCpu_tensor);
 
     return ret;
 }
+
+himlRet_t himlCreateDevTensor(himlDevTensor_t** ppDev_tensor,
+                              himlTensorType_t  tensor_type,
+                              himlDataType_t    data_type,
+                              himlDataOrder_t   data_order,
+                              int n,
+                              int c,
+                              int h,
+                              int w)
+{
+    himlRet_t ret = HIML_RET_SUCCESS;
+    himlDevTensor_t *pDev_Tensor;
+
+    pDev_Tensor = (himlDevTensor_t*)malloc(sizeof(himlDevTensor_t));
+    *ppDev_tensor = pDev_Tensor;
+
+    pDev_Tensor->tensor_type = tensor_type;
+    pDev_Tensor->data_type   = data_type;
+    pDev_Tensor->data_order  = data_order;
+    pDev_Tensor->shape.n = n;
+    pDev_Tensor->shape.c = c;
+    pDev_Tensor->shape.h = h;
+    pDev_Tensor->shape.w = w;
+    pDev_Tensor->gmemaddr = (gaddr_t)0;
+    pDev_Tensor->bufsize = 0;
+
+    return ret;
+}
+
+himlRet_t himlDestroyDevTensor(himlDevTensor_t* pDev_tensor)
+{
+    himlRet_t ret = HIML_RET_SUCCESS;
+
+    hirtFree(pDev_tensor->gmemaddr);
+    
+    free(pDev_tensor);
+
+    return ret;
+}
+
 
 himlRet_t himlCreateConvOpParam(himlConvOpParam_t **ppParam,
                 int stride_h,
@@ -181,7 +226,6 @@ himlRet_t himlDestroyConvOpParam(himlConvOpParam_t *pParam)
 #define HIPU300_CHANEL_NUM_PERGROUP     (8)
 #define CALC_CHANNEL_GROUP8(ch)			(((ch-1) >> 3) + 1)			
 #define CALC_KERNEL_GROUP8(n)			(((n-1) >> 3) + 1)	
-
 
 u32_t himlCalcShapeBufsize(shape_t *pShape)
 {
@@ -272,37 +316,28 @@ himlRet_t himlCreateConvOp(
     return ret;
 }
 
-himlRet_t himlComputeConvOpForward(himlBaseOp_t *op,
-                himlDevTensor_t *pTensorInput,
-                himlDevTensor_t *pTensorOutput,
-                himlFuncType_t type,
-                hirtCmdQueue_t *pQueue)
+himlRet_t himlComputeConvOpForward(
+    himlBaseOp_t *op,
+    himlDevTensor_t *pTensorInput,
+    himlDevTensor_t *pTensorOutput,
+    himlFuncType_t type,
+    hirtCmdQueue_t *pQueue)
 {
     himlRet_t ret = HIML_RET_SUCCESS;
-    hirtRet_t retRT;
+    hirtRet_t rc;
+    hirtKernelBinBuffer_t *kernel_binbuf;
     /*alloc the kernelbin gmem and load the kernelbin into the gmembin*/
     
-    retRT = hirtRet_t hirtInvokeKernel(op->kernel_parambuf, type,
-          op->kernel_parambuf, hirtKernelBinBuffer_t **pKernelBin, pQueue);
-
+    rc = hirtInvokeKernel(op->kernel_parambuf, type, op->kernel_parambuf, &kernel_binbuf, pQueue);
+    if(rc != HIRT_RET_SUCCESS)
+    {
+        ret = HIML_RET_UNSUPPORT;
+        goto fail;
+    }
+    
+fail:
     return ret;
 }
-
-himlRet_t himlDestroyConvOpParam(himlConvOpParam_t *pParam)
-{
-    
-}
-
-himlRet_t himlDestroyCpuTensor(himlCpuTensor_t *pCpuTensor)
-{
-    free(pCpuTensor->haddr);
-}
-
-himlRet_t himlDestroyDevTensor(himlDevTensor_t *pDevTensor)
-{
-    free(pDevTensor->gmemaddr);
-}
-
 
 
 #endif /*__LIBHIRT_H__*/

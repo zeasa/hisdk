@@ -36,21 +36,19 @@ typedef enum
     HirtFileType_Force32 = 0x7FFFFFFF
 } hirtFileType_t;
 
-struct hirtStatTypeRec
+typedef struct
 {
     u64_t size;
     hirtFileType_t type;
     u64_t mtime;
-};
-typedef struct hirtStatTypeRec hirtStatType_t;
+} hirtStatType_t;
 
-enum hirtSeek 
+typedef enum hirtSeek 
 {
     HirtSeek_Set,
     HirtSeek_Cur,
     HirtSeek_End
-};
-typedef enum hirtSeek hirtSeekEnum_t;
+} hirtSeekEnum_t;
 
 struct hirtFileRec 
 {
