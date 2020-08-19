@@ -238,14 +238,14 @@ u32_t himlCalcShapeBufsize(shape_t *pShape)
 himlRet_t himlMallocBuffer(himlDevTensor_t *tensor_himl)
 {
     himlRet_t ret = HIML_RET_SUCCESS;
-    hirtRet_t retRT;
+    hirtRet_t rc;
     u32_t bufsize;
     gaddr_t gmem_addr;
 
     bufsize = himlCalcShapeBufsize(&tensor_himl->shape);
 
-    retRT = hirtMalloc(&gmem_addr, bufsize);
-    if(retRT != HIRT_RET_SUCCESS)
+    rc = hirtMalloc(&gmem_addr, bufsize);
+    if(rc != HIRT_RET_SUCCESS)
     {
         ret = HIML_RET_BADALLOC; 
     }
@@ -261,10 +261,10 @@ himlRet_t himlMemcpyTensorToDevice(
     himlDevTensor_t *tensor_dev)
 {
     himlRet_t ret = HIML_RET_SUCCESS;
-    hirtRet_t retRT;
+    hirtRet_t rc;
     
-    retRT = hirtMemcpy(tensor_dev->gmemaddr , tensor_cpu->haddr, tensor_dev->bufsize, HIRT_MEM_TRANS_DIR_HOST2DEV);
-    if(retRT != HIRT_RET_SUCCESS)
+    rc = hirtMemcpy(tensor_dev->gmemaddr , tensor_cpu->haddr, tensor_dev->bufsize, HIRT_MEM_TRANS_DIR_HOST2DEV);
+    if(rc != HIRT_RET_SUCCESS)
     {
         ret = HIML_RET_BADALLOC;
     }
@@ -278,10 +278,10 @@ himlRet_t himlMemcpyTensorToHost(
     himlDevTensor_t *tensor_dev)
 {
     himlRet_t ret = HIML_RET_SUCCESS;
-    hirtRet_t retRT;
+    hirtRet_t rc;
     
-    retRT = hirtMemcpy(tensor_cpu->haddr, tensor_dev->gmemaddr, tensor_dev->bufsize, HIRT_MEM_TRANS_DIR_DEV2HOST);
-    if(retRT != HIRT_RET_SUCCESS)
+    rc = hirtMemcpy(tensor_cpu->haddr, tensor_dev->gmemaddr, tensor_dev->bufsize, HIRT_MEM_TRANS_DIR_DEV2HOST);
+    if(rc != HIRT_RET_SUCCESS)
     {
         ret = HIML_RET_BADALLOC;
     }
