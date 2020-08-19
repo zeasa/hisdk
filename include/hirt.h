@@ -1,9 +1,7 @@
 #ifndef __LIBHIRT_H__
 #define __LIBHIRT_H__
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stddef.h>
+#include "hisdk.h"
 
 #define HIRT_DEVICE_NODE      "/dev/dri/renderD128"
 
@@ -20,90 +18,6 @@ extern "C" {
 #ifndef __R_MLU
 #define __R_MLU
 #endif /*__R_MLU*/
-
-typedef uint64_t u64_t;
-typedef int64_t  i64_t;
-typedef uint64_t hirt_u64_t;
-typedef int64_t  hirt_i64_t;
-typedef uint32_t u32_t;
-typedef uint16_t u16_t;
-typedef uint8_t  u8_t;
-typedef int32_t  i32_t;
-typedef int16_t  i16_t;
-typedef int8_t   i8_t;
-typedef int      bool_t;
-typedef u64_t    hirt_size_t;
-
-/**< Error codes */
-typedef enum 
-{
-  HIRT_RET_SUCCESS                 = 0,      /**< No error */
-  HIRT_RET_WARNING_FAKE_DEVICE     = 1,      /**< Use fake device */
-  HIRT_RET_ERR_INVALID             = 632007, /**< Invalid argument */
-  HIRT_RET_ERR_NOMEM               = 632008, /**< Out of memory */
-  HIRT_RET_ERR_NODEV               = 632009, /**< No such device */
-  HIRT_RET_ERR_IO                  = 632010, /**< I/O error */
-  HIRT_RET_ERR_SYS                 = 632011, /**< System error */
-  HIRT_RET_ERR_ACCES               = 632012, /**< Permission denied */
-  HIRT_RET_ERR_FAULT               = 632013, /**< Bad address */
-  HIRT_RET_ERR_BUSY                = 632014, /**< Device or resource busy */
-  HIRT_RET_ERR_TIMEOUT             = 632015, /**< Time expired */
-  HIRT_RET_ERR_EXIST               = 632016, /**< Resource or file already exists */
-  HIRT_RET_ERR_NOSYS               = 632017, /**< Function not implemenmted */
-  HIRT_RET_ERR_AGAIN               = 632018, /**< try again later */
-  HIRT_RET_ERR_NORES               = 632019, /**< Out of resource */
-  HIRT_RET_ERR_UNSUPPORTED         = 632020, /**< Unsupported operation */
-  HIRT_RET_ERR_INVALID_POINTER     = 632021, /**< Invalid pointer */
-  HIRT_RET_ERR_NO_EXIST            = 632022, /**< Resource or file doesn't exist */
-  HIRT_RET_ERR_BROKEN              = 632023, /**< Data transmission is broken */
-  HIRT_RET_ERR_INIT                = 632024, /**< Uninitialized */
-  HIRT_RET_ERR_STREAM              = 632025, /**< Failure on Stream */
-  HIRT_RET_ERR_OUT_RANGE           = 632026, /**< Number out of range */
-  HIRT_RET_ERR_MATH_OVERFLOW       = 632027, /**< Math result not representable */
-  HIRT_RET_ERR_FUNC_CALL           = 632028, /**< Failure to call runtime functions */
-  HIRT_RET_ERR_UNHANDLED           = 632029, /**< Unhandled error */
-  HIRT_RET_ERR_INVALID_TYPE        = 632030, /**< Invalid type */
-  HIRT_RET_ERR_INVALID_OP          = 632031, /**< Invalid operation */
-  HIRT_RET_ERR_MLU                 = 632032, /**< MLU error */
-  HIRT_RET_ERR_ONCHIP_CORE         = 632033, /**< Onchip core error */
-  HIRT_RET_ERR_EVENT               = 632034, /**< Failure on event operation */
-  HIRT_RET_ERR_RESHAPE             = 632035, /**< Failure on data reshape */
-  HIRT_RET_ERR_MEMCPY              = 632036, /**< Failure on memory copy */
-  HIRT_RET_ERR_ENCRYPT             = 632037, /**< Failure on encrypt */
-  HIRT_RET_ERR_INVALID_DATADESC    = 632038, /**< Invalid data descriptor */
-  HIRT_RET_ERR_FILEWRITEFAILED     = 632039, /**< FileWriteFailed      */
-  HIRT_RET_ERR_FILEREADFAILED      = 632040, /**< FileReadFailed       */
-  HIRT_RET_ERR_ENDOFFILE           = 632041, /**< EndOfFile            */
-  HIRT_RET_ERR_FILEOPERATIONFAILED = 632042, /**< FileOperationFailed  */
-  HIRT_RET_ERR_DIROPERATIONFAILED  = 632043, /**< DirOperationFailed   */
-  HIRT_RET_ERR_ENDOFDIRLIST        = 632044, /**< EndOfDirList         */
-  HIRT_RET_ERR_IOCTLFAILED         = 632045, /**< IoctlFailed          */
-  HIRT_RET_ERR_PATHALREADYEXISTS   = 632046, /**< PathAlreadyExists    */
-  HIRT_RET_ERR_SURFACENOTSUPPORTED = 632047, /**< SurfaceNotSupported  */
-  HIRT_RET_ERR_NOTIMPLEMENTED      = 632048, /**< NotImplemented       */
-  HIRT_RET_ERR_NOTINITIALIZED      = 632050, /**< NotInitialized       */
-  HIRT_RET_ERR_BADPARAMETER        = 632051, /**< BadParameter         */
-  HIRT_RET_ERR_INSUFFICIENTMEMORY  = 632053, /**< InsufficientMemory   */
-  HIRT_RET_ERR_READONLYATTRIBUTE   = 632054, /**< ReadOnlyAttribute    */
-  HIRT_RET_ERR_INVALIDSTATE        = 632055, /**< InvalidState         */
-  HIRT_RET_ERR_INVALIDADDRESS      = 632056, /**< InvalidAddress       */
-  HIRT_RET_ERR_INVALIDSIZE         = 632057, /**< InvalidSize          */
-  HIRT_RET_ERR_BADVALUE            = 632058, /**< BadValue             */
-  HIRT_RET_ERR_ALREADYALLOCATED    = 632059, /**< AlreadyAllocated     */
-  HIRT_RET_ERR_MODULENOTPRESENT    = 632060, /**< ModuleNotPresent     */
-  HIRT_RET_ERR_RESOURCEERROR       = 632061, /**< ResourceError        */
-  HIRT_RET_ERR_COUNTMISMATCH       = 632062, /**< CountMismatch        */
-  HIRT_RET_ERR_OVERFLOW            = 632063, /**< OverFlow             */
-  HIRT_RET_ERR_DISCONNECTED        = 632064, /**< Disconnected         */
-  HIRT_RET_ERR_FILENOTFOUND        = 632065, /**< FileNotFound         */
-  HIRT_RET_ERR_TESTAPPFAILED       = 632066, /**< TestAppFailed        */
-  HIRT_RET_ERR_DEVICENOTFOUND      = 632067, /**< DeviceNotFound       */
-  HIRT_RET_ERR_FIFOEMPTY           = 632068, /**< fifoempty            */
-  HIRT_RET_ERR_FIFOFULL            = 632069, /**< fifofull             */
-  HIRT_RET_ERR_CREATETHREAD        = 632070, /**< createthread         */
-  HIRT_RET_ERR_UNKNOWN             = 999991, /**< Unknown error */
-  HIRT_RET_ERR_MAX,                          /**< The last one */
-} hirtRet_t;
 
 /**< Direction of data transmission */
 typedef enum {
@@ -235,19 +149,6 @@ typedef struct
 //} hirtKernelTaskParam_t;
 
 typedef void (*hirtThreadFunction_t)(void *arg);
-
-#ifdef NDEBUG
-#define HIRT_ASSERT(cond) do {} while (0);
-#else
-#define HIRT_ASSERT(cond) if (!(cond)) { \
-    std::cout << "Error occur: " << __func__ << __LINE__; \
-    exit(0); }
-#endif
-
-#define ERROR_CHECK(ret) if (ret != hirt_RET_SUCCESS) {\
-    printf("error occur, func: %s, line: %d\n", __func__, __LINE__);\
-    exit(0);\
-}
 
 /************************************************************************
  * Error handling

@@ -1,6 +1,8 @@
 #ifndef __HIML_H__
 #define __HIML_H__
 
+#include "hisdk.h"
+
 typedef enum {
     HIML_RET_NODEVICE     = -1,
     HIML_RET_SUCCESS      = 0,
