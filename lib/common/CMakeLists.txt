@@ -1,7 +1,12 @@
 ########################################
+#  Subdirectories
+add_subdirectory(argtable3)
+
+########################################
 # put all sources in to {DIR_LIBCOMMON_SRCS}
 aux_source_directory(. DIR_LIBCOMMON_SRCS)
 
 ########################################
 # generate library
 add_library(common ${DIR_LIBCOMMON_SRCS})
+
