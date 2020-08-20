@@ -264,7 +264,7 @@ unsigned long hisdkLOGInit(const unsigned char *ucLogFileName, unsigned long ulF
 /*判断是否将日志输出到日志文件*/
     if ((HISDK_LOG_TO_FILE != g_ulPrintLogPlaceFlag) || (0 != g_ulLogInitFlag))
     {
-        printf("g_ulPrintLogPlaceFlag = %ld g_ulLogInitFlag = %ld\n", g_ulPrintLogPlaceFlag, g_ulLogInitFlag);
+        //printf("g_ulPrintLogPlaceFlag = %ld g_ulLogInitFlag = %ld\n", g_ulPrintLogPlaceFlag, g_ulLogInitFlag);
         LOG_PRINT("print log to termination!!");
         return 0;
     }
