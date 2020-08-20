@@ -34,12 +34,13 @@ typedef u64_t    hirt_size_t;
                 __FILE__, __FUNCTION__, __LINE__, #expr);   \
         } \
     }while(0);\
-    exit(0);\
+    exit(0);
 #endif
 
 #define HISDK_ERRCHECK(ret) if (ret != hirt_RET_SUCCESS) {\
     printf("error occur, func: %s, line: %d\n", __func__, __LINE__);\
     exit(0);\
-}
+    }
 
 #endif /*__HISDK_H__*/
+

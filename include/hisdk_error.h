@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "hisdk.h"
+
 /**< Error codes */
 typedef enum
 {

@@ -1,8 +1,9 @@
-#include "ErrorMacros.h"
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+
+#include "hisdk_error.h"
+#include "hisdk_port.h"
 
 const char* hisdkUtilsGetErrorString(hisdkRet_t e)
 {
@@ -51,6 +52,6 @@ void hisdkUtilsLogError(const char* tag, const char* path, hisdkRet_t e, const c
     snprintf(cur, msg + sizeof(msg) - cur, "%s, function %s(), line %d)", file, func, line);
 
     // Output the error.
-    hirtPortOsDebugPrintf("%s\n", msg);
+    hisdkPortOsDebugPrintf("%s\n", msg);
 }
 #endif // defined(HISDK_UTILS_ERROR_TAG)

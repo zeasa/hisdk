@@ -2,6 +2,7 @@
 #define _HISDK_LOG_H__
 
 #include <string.h>
+#include "hisdk.h"
 
 /*通用字符串存储大小定义*/
 #define STR_COMM_SIZE               128

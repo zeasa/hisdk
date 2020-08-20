@@ -14,10 +14,57 @@
 
 #include "hisdk_port.h"
 
-hisdkRet_t hirtPortOsStat(const char *filename, hirtStatType_t *stat)
+static hisdkRet_t getOpenMode(u32_t flags, int *mode)
 {
-    hirtFileHandle_t file = 0;
-    hirtDirHandle_t dir = 0;
+    switch( flags )
+    {
+        case HISDK_OPEN_READ:
+            *mode = O_RDONLY /*| O_LARGEFILE*/;
+            break;
+        case HISDK_OPEN_WRITE:
+        case HISDK_OPEN_CREATE | HISDK_OPEN_WRITE:
+            *mode = O_CREAT | O_WRONLY | O_TRUNC /*| O_LARGEFILE*/;
+            break;
+        case HISDK_OPEN_READ | HISDK_OPEN_WRITE:
+            *mode = O_RDWR /*| O_LARGEFILE*/;
+            break;
+        case HISDK_OPEN_CREATE | HISDK_OPEN_READ | HISDK_OPEN_WRITE:
+            *mode = O_CREAT | O_RDWR | O_TRUNC /*| O_LARGEFILE*/;
+            break;
+        case HISDK_OPEN_APPEND:
+        case HISDK_OPEN_CREATE | HISDK_OPEN_APPEND:
+        case HISDK_OPEN_WRITE | HISDK_OPEN_APPEND:
+        case HISDK_OPEN_CREATE | HISDK_OPEN_WRITE | HISDK_OPEN_APPEND:
+            *mode = O_CREAT | O_WRONLY | O_APPEND /*| O_LARGEFILE*/;
+            break;
+        case HISDK_OPEN_READ | HISDK_OPEN_APPEND:
+        case HISDK_OPEN_CREATE | HISDK_OPEN_READ | HISDK_OPEN_APPEND:
+        case HISDK_OPEN_READ | HISDK_OPEN_WRITE | HISDK_OPEN_APPEND:
+        case HISDK_OPEN_CREATE | HISDK_OPEN_READ | HISDK_OPEN_WRITE | HISDK_OPEN_APPEND:
+            *mode = O_CREAT | O_RDWR | O_APPEND /*| O_LARGEFILE*/;
+            break;
+        default:
+            return HISDK_RET_ERR_BADPARAMETER;
+    }
+
+    return HISDK_RET_SUCCESS;
+}
+
+void *hisdkAlloc(size_t size)
+{
+    return malloc(size);
+}
+
+void hisdkFree(void *ptr)
+{
+    if (ptr != NULL)
+        free(ptr);
+}
+
+hisdkRet_t hisdkPortOsStat(const char *filename, hisdkStatType_t *stat)
+{
+    hisdkFileHandle_t file = 0;
+    hisdkDirHandle_t dir = 0;
     hisdkRet_t err = HISDK_RET_SUCCESS;
 
     if (!filename || !stat) {
@@ -26,26 +73,26 @@ hisdkRet_t hirtPortOsStat(const char *filename, hirtStatType_t *stat)
     }
 
     stat->size = 0;
-    stat->type = HirtFileType_Unknown;
+    stat->type = HisdkFileType_Unknown;
 
-    if (hirtPortOsFopen(filename, HIRT_OPEN_READ, &file) == HISDK_RET_SUCCESS) {
-        err = hirtPortOsFstat(file, stat);
+    if (hisdkPortOsFopen(filename, HISDK_OPEN_READ, &file) == HISDK_RET_SUCCESS) {
+        err = hisdkPortOsFstat(file, stat);
         goto close_file;
     }
 
-    if (hirtPortOsOpenDir(filename, &dir) == HISDK_RET_SUCCESS) {
-        stat->type = HirtFileType_Directory;
+    if (hisdkPortOsOpenDir(filename, &dir) == HISDK_RET_SUCCESS) {
+        stat->type = HisdkFileType_Directory;
         stat->size = 0;
     }
 
-    hirtPortOsCloseDir(dir);
+    hisdkPortOsCloseDir(dir);
 close_file:
-    hirtPortOsFclose(file);
+    hisdkPortOsFclose(file);
 fail:
     return err;
 }
 
-hisdkRet_t hirtPortOsMkDir(char *dirname)
+hisdkRet_t hisdkPortOsMkDir(char *dirname)
 {
     int err;
 
@@ -56,7 +103,7 @@ hisdkRet_t hirtPortOsMkDir(char *dirname)
     return HISDK_RET_SUCCESS;
 }
 
-hisdkRet_t hirtPortOsRm(const char *filename)
+hisdkRet_t hisdkPortOsRm(const char *filename)
 {
     int err;
     if (!filename)
@@ -68,11 +115,11 @@ hisdkRet_t hirtPortOsRm(const char *filename)
     return HISDK_RET_SUCCESS;
 }
 
-hisdkRet_t hirtPortOsFopen(const char *path, hirtU32 flags,
-    hirtFileHandle_t *file)
+hisdkRet_t hisdkPortOsFopen(const char *path, u32_t flags,
+    hisdkFileHandle_t *file)
 {
     hisdkRet_t e = HISDK_RET_SUCCESS;
-    hirtFile_t *f = NULL;
+    hisdkFile_t *f = NULL;
     int fd = -1;
     int permissionFlags = (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
     int mode;
@@ -84,7 +131,7 @@ hisdkRet_t hirtPortOsFopen(const char *path, hirtU32 flags,
     if (e != HISDK_RET_SUCCESS)
         return HISDK_RET_ERR_BADPARAMETER;
 
-    f = hirtPortOsmalloc(sizeof(hirtFile_t));
+    f = malloc(sizeof(hisdkFile_t));
     if (!f)
         return HISDK_RET_ERR_INSUFFICIENTMEMORY;
 
@@ -99,11 +146,11 @@ hisdkRet_t hirtPortOsFopen(const char *path, hirtU32 flags,
     return HISDK_RET_SUCCESS;
 
 fail:
-    hirtPortOsfree(f);
+    free(f);
     return e;
 }
 
-void hirtPortOsFclose(hirtFileHandle_t stream)
+void hisdkPortOsFclose(hisdkFileHandle_t stream)
 {
     if (!stream)
         return;
@@ -111,11 +158,11 @@ void hirtPortOsFclose(hirtFileHandle_t stream)
     // TODO: what if close fails. Insert assertions??
     (void)close(stream->fd);
     stream->fd = -1;
-    hirtPortOsfree(stream);
+    free(stream);
 }
 
 // TODO: Should the FIFO device be considered?
-hisdkRet_t hirtPortOsFwrite(hirtFileHandle_t stream, const void *ptr, size_t size)
+hisdkRet_t hisdkPortOsFwrite(hisdkFileHandle_t stream, const void *ptr, size_t size)
 {
     ssize_t len;
     size_t s;
@@ -146,7 +193,7 @@ hisdkRet_t hirtPortOsFwrite(hirtFileHandle_t stream, const void *ptr, size_t siz
 }
 
 // TODO: Should the FIFO device be considered?
-hisdkRet_t hirtPortOsFread(hirtFileHandle_t stream, void *ptr,
+hisdkRet_t hisdkPortOsFread(hisdkFileHandle_t stream, void *ptr,
                 size_t size, size_t *bytes)
 {
     ssize_t len;
@@ -187,7 +234,7 @@ hisdkRet_t hirtPortOsFread(hirtFileHandle_t stream, void *ptr,
     return HISDK_RET_SUCCESS;
 }
 
-hisdkRet_t hirtPortOsFseek(hirtFileHandle_t file, i64_t offset, hirtSeekEnum whence)
+hisdkRet_t hisdkPortOsFseek(hisdkFileHandle_t file, i64_t offset, hisdkSeekEnum_t whence)
 {
     loff_t off;
     int seekMode;
@@ -196,28 +243,28 @@ hisdkRet_t hirtPortOsFseek(hirtFileHandle_t file, i64_t offset, hirtSeekEnum whe
         return HISDK_RET_ERR_BADPARAMETER;
 
     switch(whence) {
-    case HirtSeek_Set: seekMode = SEEK_SET; break;
-    case HirtSeek_Cur: seekMode = SEEK_CUR; break;
-    case HirtSeek_End: seekMode = SEEK_END; break;
+    case HisdkSeek_Set: seekMode = SEEK_SET; break;
+    case HisdkSeek_Cur: seekMode = SEEK_CUR; break;
+    case HisdkSeek_End: seekMode = SEEK_END; break;
     default:
         return HISDK_RET_ERR_BADPARAMETER;
     }
 
-    off = lseek64(file->fd, (loff_t)offset, seekMode);
+    off = lseek(file->fd, (loff_t)offset, seekMode);
     if (off < 0)
         return HISDK_RET_ERR_FILEOPERATIONFAILED;
     return HISDK_RET_SUCCESS;
 }
 
-hisdkRet_t hirtPortOsFstat(hirtFileHandle_t file, hirtStatType *stat)
+hisdkRet_t hisdkPortOsFstat(hisdkFileHandle_t file, hisdkStatType_t *stat)
 {
-    struct stat64 fs;
+    struct stat fs;
     int err;
 
     if (!stat || !file)
         return HISDK_RET_ERR_BADPARAMETER;
 
-    err = fstat64(file->fd, &fs);
+    err = fstat(file->fd, &fs);
     if (err != 0)
         return HISDK_RET_ERR_FILEOPERATIONFAILED;
 
@@ -225,38 +272,38 @@ hisdkRet_t hirtPortOsFstat(hirtFileHandle_t file, hirtStatType *stat)
     stat->mtime = (u64_t)fs.st_mtime;
 
     if( S_ISREG( fs.st_mode ) ) {
-        stat->type = HirtFileType_File;
+        stat->type = HisdkFileType_File;
     }
     else if( S_ISDIR( fs.st_mode ) ) {
-        stat->type = HirtFileType_Directory;
+        stat->type = HisdkFileType_Directory;
     }
     else if( S_ISFIFO( fs.st_mode ) ) {
-        stat->type = HirtFileType_Fifo;
+        stat->type = HisdkFileType_Fifo;
     }
     else if( S_ISCHR( fs.st_mode ) ) {
-        stat->type = HirtFileType_CharacterDevice;
+        stat->type = HisdkFileType_CharacterDevice;
     }
     else if( S_ISBLK( fs.st_mode ) ) {
-        stat->type = HirtFileType_BlockDevice;
+        stat->type = HisdkFileType_BlockDevice;
     }
     else {
-        stat->type = HirtFileType_Unknown;
+        stat->type = HisdkFileType_Unknown;
     }
 
     return HISDK_RET_SUCCESS;
 }
 
-u64_t hirtPortOsStatGetSize(hirtStatType_t *stat)
+u64_t hisdkPortOsStatGetSize(hisdkStatType_t *stat)
 {
     return stat->size;
 }
 
-hisdkRet_t hirtPortOsFgetc(hirtFileHandle_t stream, u8_t *c)
+hisdkRet_t hisdkPortOsFgetc(hisdkFileHandle_t stream, u8_t *c)
 {
-    return hirtPortOsFread(stream, c, 1, NULL);
+    return hisdkPortOsFread(stream, c, 1, NULL);
 }
 
-void hirtPortOsMemSet( void *s, u8_t c, size_t size )
+void hisdkPortOsMemSet( void *s, u8_t c, size_t size )
 {
     // s should not be NULL!! Assert if required
     if (!s)
@@ -265,13 +312,13 @@ void hirtPortOsMemSet( void *s, u8_t c, size_t size )
     (void)memset(s, (int)c, size);
 }
 
-hisdkRet_t hirtPortOsOpenDir(const char *path, hirtDirHandle_t *dirHandle)
+hisdkRet_t hisdkPortOsOpenDir(const char *path, hisdkDirHandle_t *dirHandle)
 {
-    hirtDir_t *d;
+    hisdkDir_t *d;
     if (!path || !dirHandle)
         return HISDK_RET_ERR_BADPARAMETER;
 
-    d = (hirtDir_t *)hirtPortOsmalloc(sizeof(hirtDir_t));
+    d = (hisdkDir_t *)malloc(sizeof(hisdkDir_t));
     if (!d)
         return HISDK_RET_ERR_INSUFFICIENTMEMORY;
 
@@ -283,7 +330,7 @@ hisdkRet_t hirtPortOsOpenDir(const char *path, hirtDirHandle_t *dirHandle)
     return HISDK_RET_SUCCESS;
 }
 
-hisdkRet_t hirtPortOsReadDir(hirtDirHandle_t dirHandle, char *name, size_t size)
+hisdkRet_t hisdkPortOsReadDir(hisdkDirHandle_t dirHandle, char *name, size_t size)
 {
     struct dirent *d;
 
@@ -303,7 +350,7 @@ hisdkRet_t hirtPortOsReadDir(hirtDirHandle_t dirHandle, char *name, size_t size)
     return HISDK_RET_SUCCESS;
 }
 
-void hirtPortOsCloseDir(hirtDirHandle_t dirHandle)
+void hisdkPortOsCloseDir(hisdkDirHandle_t dirHandle)
 {
     if (!dirHandle)
         return;
@@ -311,11 +358,11 @@ void hirtPortOsCloseDir(hirtDirHandle_t dirHandle)
     if (dirHandle->dir)
         (void) closedir(dirHandle->dir);
 
-    hirtPortOsfree(dirHandle);
+    free(dirHandle);
     return;
 }
 
-void hirtPortOsDebugPrintf(const char *format, ... )
+void hisdkPortOsDebugPrintf(const char *format, ... )
 {
     va_list ap;
 

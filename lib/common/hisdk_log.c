@@ -8,6 +8,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <pthread.h>
+
 #include "hisdk_log.h"
 
 /*存储日志的文件名*/
@@ -219,7 +220,7 @@ unsigned long hisdkLOGPrintLog(unsigned char ucType, unsigned char *pucLogInfo)
     }
     snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, "[%s] [%s] %s", ucTime, ucLogTypeStr, pucLogInfo);
 /*判断是否打印调试日志*/
-    if (PRINT_LOG_TO_TERM == g_ulPrintLogPlaceFlag)
+    if (HISDK_LOG_TO_TERM == g_ulPrintLogPlaceFlag)
     {
         printf("%s", ucLogInfo);
         return 0;
@@ -261,7 +262,7 @@ unsigned long hisdkLOGInit(const unsigned char *ucLogFileName, unsigned long ulF
         return -1;
     }
 /*判断是否将日志输出到日志文件*/
-    if ((PRINT_LOG_TO_FILE != g_ulPrintLogPlaceFlag) || (0 != g_ulLogInitFlag))
+    if ((HISDK_LOG_TO_FILE != g_ulPrintLogPlaceFlag) || (0 != g_ulLogInitFlag))
     {
         printf("g_ulPrintLogPlaceFlag = %ld g_ulLogInitFlag = %ld\n", g_ulPrintLogPlaceFlag, g_ulLogInitFlag);
         LOG_PRINT("print log to termination!!");
