@@ -148,4 +148,14 @@ hisdkRet_t himlMemcpyTensorToHost(
     return ret;
 }
 
+hisdkRet_t himlDumpTensor2File(const char *filename, himlCpuTensor_t *tensor_cpu)
+{
+    hisdkRet_t e = HISDK_RET_SUCCESS;
+
+    HISDK_LOG_INFO(LOG_SYSTEM, "%s", filename);
+
+fail:
+    return e;
+}
+
 

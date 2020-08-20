@@ -357,7 +357,7 @@ hisdkRet_t hirtInvokeKernel(const void *function, hirtDim3_t dim,
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hisdkRet_t hirtMallocHost(void **pPtr, size_t nBytes, hirtMemType_t type);
+hisdkRet_t hirtHostMalloc(void **pPtr, size_t nBytes, hirtMemType_t type);
 
 /**
  * @brief Free the memory space pointed by ptr, which must be
@@ -368,7 +368,7 @@ hisdkRet_t hirtMallocHost(void **pPtr, size_t nBytes, hirtMemType_t type);
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hisdkRet_t hirtFreeHost(void *ptr);
+hisdkRet_t hirtHostFree(void *ptr);
 
 /**
  * @brief Allocate memory on MLU device.
@@ -379,7 +379,7 @@ hisdkRet_t hirtFreeHost(void *ptr);
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hisdkRet_t hirtMalloc(void **pPtr, size_t nBytes);
+hisdkRet_t hirtDevMalloc(void **pPtr, size_t nBytes);
 
 /**
  * @brief Deallocate MLU device Memory.
@@ -389,7 +389,7 @@ hisdkRet_t hirtMalloc(void **pPtr, size_t nBytes);
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hisdkRet_t hirtFree(void *ptr);
+hisdkRet_t hirtDevFree(void *ptr);
 
 /**
  * @brief Copy data from src address to dst address. The copy direction

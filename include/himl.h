@@ -1,5 +1,6 @@
 #ifndef __HIML_H__
 #define __HIML_H__
+
 #include "hisdk.h"
 
 typedef enum

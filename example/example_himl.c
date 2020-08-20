@@ -89,8 +89,8 @@ int conv_test() {
 
   // no data order needed in creating himl tensor
   // prepare input himl tensor
-  himlTensor_t input_himl;
-  himlCreateTensor(&input_himl,
+  himlDevTensor_t input_himl;
+  himlCreateDevTensor(&input_himl,
           himl_TENSOR,
           himl_DATA_FLOAT16,
           ni,
@@ -211,10 +211,10 @@ int conv_test() {
   himlDestroyConvOpParam(&conv_param);
 
   // delete himl tensors
-  himlDestroyTensor(&input_himl);
-  himlDestroyTensor(&filter_himl);
-  himlDestroyTensor(&bias_himl);
-  himlDestroyTensor(&output_himl);
+  himlDestroyDevTensor(&input_himl);
+  himlDestroyDevTensor(&filter_himl);
+  himlDestroyDevTensor(&bias_himl);
+  himlDestroyDevTensor(&output_himl);
 
   // delete cpu tensors
   himlDestroyCpuTensor(&input_cpu);

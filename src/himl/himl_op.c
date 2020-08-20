@@ -11,7 +11,9 @@ hisdkRet_t himlCreateConvOp(
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     hirtKernelParamsBuffer_t *pKernelParams;
     const char kernel_symbal[] = "libhikl_op_conv";
-    
+
+    HISDK_LOG_INFO(LOG_DEBUG, "%s", "himlCreateConvOp()");
+
     /*construct the parambuf*/
     hirtAllocKernelParamsBuffer(hirtKernelParamsBuffer_t &pKernelParams);
     hirtKernelParamsBufferAddPlaceHolder(pKernelParams, sizeof(hirtKernelParamTable_t));
@@ -36,6 +38,9 @@ hisdkRet_t himlComputeConvOpForward(
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     hisdkRet_t e;
     hirtKernelBinBuffer_t *kernel_binbuf;
+
+    HISDK_LOG_INFO(LOG_DEBUG, "%s", "himlComputeConvOpForward()");
+
     /*alloc the kernelbin gmem and load the kernelbin into the gmembin*/
     
     e = hirtInvokeKernel(op->kernel_parambuf, type, op->kernel_parambuf, &kernel_binbuf, pQueue);

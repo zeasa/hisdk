@@ -1,4 +1,5 @@
-#include "libhirt_fifo.h"
+#include "hirt.h"
+#include "hirt_fifo.h"
 
 libhirt_fifo_t* libhirt_fifo_create(int item_num, int item_siz)
 {

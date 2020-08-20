@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "hisdk_config.h"
 #include "hisdk_log.h"
 #include "hisdk_error.h"
 

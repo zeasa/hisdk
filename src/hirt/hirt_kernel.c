@@ -1,5 +1,5 @@
-#include "libhirt.h"
-#include "libhirt_cqueue.h"
+#include "hirt.h"
+#include "hirt_cqueue.h"
 
 /*********************************************************************************
  * Execution control
@@ -33,7 +33,7 @@ hisdkRet_t hirtAllocKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams)
         goto freememhost;
     }
 
-    if(hirtMalloc(&pBuf->pbuf_dev, HIRT_PARAMBUF_MAXSIZE) != HISDK_RET_SUCCESS)
+    if(hirtDevMalloc(&pBuf->pbuf_dev, HIRT_PARAMBUF_MAXSIZE) != HISDK_RET_SUCCESS)
     {
         ret = HISDK_RET_ERR_INSUFFICIENTMEMORY;
         goto freememdev;
@@ -44,7 +44,7 @@ hisdkRet_t hirtAllocKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams)
 freememdev:
     if(pBuf->pbuf_dev != NULL)
     {
-        hirtFree(pBuf->pbuf_dev);
+        hirtDevFree(pBuf->pbuf_dev);
     }
 
 freememhost:
