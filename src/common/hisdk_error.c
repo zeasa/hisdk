@@ -51,6 +51,6 @@ void hisdkUtilsLogError(const char* tag, const char* path, hisdkRet_t e, const c
     snprintf(cur, msg + sizeof(msg) - cur, "%s, function %s(), line %d)", file, func, line);
 
     // Output the error.
-    NvDlaDebugPrintf("%s\n", msg);
+    hirtPortOsDebugPrintf("%s\n", msg);
 }
 #endif // defined(HISDK_UTILS_ERROR_TAG)

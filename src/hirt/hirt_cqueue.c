@@ -3,9 +3,9 @@
 #include "libhirt_cqueue.h"
 
 
-hirtRet_t libhirt_cmdqueue_create(hirtCmdQueue_t *ppQueue)
+hisdkRet_t libhirt_cmdqueue_create(hirtCmdQueue_t *ppQueue)
 {
-    hirtRet_t ret = HIRT_RET_SUCCESS;
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
     hirtCmdQueue_t *pQueue;
     pQueue = (hirtCmdQueue_t *)malloc(sizeof(hirtCmdQueue_t));
     pQueue->pfifo = libhirt_fifo_create(HIRT_CMDQUEUE_SIZMAX, sizeof(hirtCmdNode_t));
@@ -15,23 +15,23 @@ hirtRet_t libhirt_cmdqueue_create(hirtCmdQueue_t *ppQueue)
     return ret;
 }
 
-hirtRet_t libhirt_cmdqueue_destory(hirtCmdQueue_t *pQueue)
+hisdkRet_t libhirt_cmdqueue_destory(hirtCmdQueue_t *pQueue)
 {
     libhirt_fifo_destroy(pQueue->pfifo);
     free(pQueue);
 }
 
-hirtRet_t libhirt_cmdqueue_sync_put(hirtCmdQueue_t *pQueue, sem_t *pSem)
+hisdkRet_t libhirt_cmdqueue_sync_put(hirtCmdQueue_t *pQueue, sem_t *pSem)
 {
     hirtCmdNode_t node;
     node.type = CMDTYPE_SYNC;
     node.sem_cmdsync = pSem;
     libhirt_fifo_put(pQueue->pfifo, &node);
 
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
-hirtRet_t libhirt_cmdqueue_kernel_put(hirtCmdQueue_t *pQueue, hirtKernelParamsBuffer_t *pParams, 
+hisdkRet_t libhirt_cmdqueue_kernel_put(hirtCmdQueue_t *pQueue, hirtKernelParamsBuffer_t *pParams, 
     hirtKernelBinBuffer_t *pKernelBin, hirtTaskDim_t taskDim)
 {
     hirtCmdNode_t node;
@@ -42,15 +42,15 @@ hirtRet_t libhirt_cmdqueue_kernel_put(hirtCmdQueue_t *pQueue, hirtKernelParamsBu
 
     libhirt_fifo_put(pQueue->pfifo, &node);
 
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
-hirtRet_t libhirt_cmdqueue_get(hirtCmdQueue_t *pQueue, hirtCmdNode_t *pNode)
+hisdkRet_t libhirt_cmdqueue_get(hirtCmdQueue_t *pQueue, hirtCmdNode_t *pNode)
 {
     libhirt_fifo_get(pQueue->pfifo, (void *)pNode);
 }
 
-hirtRet_t hirtSyncQueue(hirtCmdQueue *pQueue)
+hisdkRet_t hirtSyncQueue(hirtCmdQueue *pQueue)
 {
     sem_t sem_sync;
 
@@ -60,5 +60,5 @@ hirtRet_t hirtSyncQueue(hirtCmdQueue *pQueue)
 
     sem_wait(&sem_sync);
 
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }

@@ -17,9 +17,9 @@
  *         otherwise the error code is returned.
  */
 __R_HOST
-hirtRet_t hirtMallocHost(void **pPtr, size_t nBytes, hirtMemType_t type)
+hisdkRet_t hirtMallocHost(void **pPtr, size_t nBytes, hirtMemType_t type)
 {
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 /**
@@ -31,9 +31,9 @@ hirtRet_t hirtMallocHost(void **pPtr, size_t nBytes, hirtMemType_t type)
  *         otherwise the error code is returned.
  */
 __R_HOST
-hirtRet_t hirtFreeHost(void *ptr)
+hisdkRet_t hirtFreeHost(void *ptr)
 {
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 /**
@@ -45,9 +45,9 @@ hirtRet_t hirtFreeHost(void *ptr)
  *         otherwise the error code is returned.
  */
 __R_HOST
-hirtRet_t hirtMalloc(void **pPtr, size_t nBytes)
+hisdkRet_t hirtMalloc(void **pPtr, size_t nBytes)
 {
-    return HIRT_RET_SUCCESS; 
+    return HISDK_RET_SUCCESS; 
 }
 
 /**
@@ -58,9 +58,9 @@ hirtRet_t hirtMalloc(void **pPtr, size_t nBytes)
  *         otherwise the error code is returned.
  */
 __R_HOST
-hirtRet_t hirtFree(void *ptr)
+hisdkRet_t hirtFree(void *ptr)
 {
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 /**
@@ -80,15 +80,15 @@ hirtRet_t hirtFree(void *ptr)
  *         otherwise the error code is returned.
  */
 __R_HOST
-hirtRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDir_t dir)
+hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDir_t dir)
 {
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 
-hirtRet_t libhirt_memmamager_create(hirtMemManager_t **ppMemManager)
+hisdkRet_t libhirt_memmamager_create(hirtMemManager_t **ppMemManager)
 {
-    hirtRet_t ret = HIRT_RET_SUCCESS;
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
     hirtMemManager_t *pMemManager;
 
     pMemManager = (hirtMemManager_t*)malloc(sizeof(hirtMemManager_t));
@@ -108,15 +108,15 @@ hirtRet_t libhirt_memmamager_create(hirtMemManager_t **ppMemManager)
     return ret;
 }
 
-hirtRet_t libhirt_memmamager_destroy(hirtMemManager_t *pMemManager)
+hisdkRet_t libhirt_memmamager_destroy(hirtMemManager_t *pMemManager)
 {
     free(pMemManager);
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
-hirtRet_t libhirt_memmamager_block_get(hirtMemManager_t *pMemManager, hirtGMemAddress_t *pAddr, int block_num)
+hisdkRet_t libhirt_memmamager_block_get(hirtMemManager_t *pMemManager, hirtGMemAddress_t *pAddr, int block_num)
 {
-    hirtRet_t ret = HIRT_RET_SUCCESS;
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
     int i;
 
     for(i=0;i<HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM; i++)
@@ -128,7 +128,7 @@ hirtRet_t libhirt_memmamager_block_get(hirtMemManager_t *pMemManager, hirtGMemAd
     }
     if(i == HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM)
     {
-        ret = HIRT_RET_ERR_NORES;
+        ret = HISDK_RET_ERR_NORES;
         goto end;
     }
 
@@ -165,16 +165,16 @@ hirtRet_t libhirt_memmamager_block_get(hirtMemManager_t *pMemManager, hirtGMemAd
 
     if( (j==HIRT_HIPU200_MEM_CH_NUM) && (k==HIRT_HIPU200_MEM_BLK_NUM) )
     {
-        ret = HIRT_RET_ERR_NORES;
+        ret = HISDK_RET_ERR_NORES;
     }
 
 end:
     return ret;
 }
 
-hirtRet_t libhirt_memmanager_block_put(hirtMemManager_t *pMemManager, hirtGMemAddress_t addr)
+hisdkRet_t libhirt_memmanager_block_put(hirtMemManager_t *pMemManager, hirtGMemAddress_t addr)
 {
-    hirtRet_t ret = HIRT_RET_SUCCESS;
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
     int i;
     
     for(i=0; i<HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM; i++)
@@ -194,7 +194,7 @@ hirtRet_t libhirt_memmanager_block_put(hirtMemManager_t *pMemManager, hirtGMemAd
 
     if(i == HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM)
     {
-        ret = HIRT_RET_ERR_NO_EXIST;
+        ret = HISDK_RET_ERR_NO_EXIST;
     }
 
     return ret;

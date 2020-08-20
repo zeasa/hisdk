@@ -164,7 +164,7 @@ typedef void (*hirtThreadFunction_t)(void *arg);
  * @return a pointer that points to a constant string.
  */
 extern __R_HOST const char *
-hirtGetErrorStr(hirtRet_t errCode);
+hirtGetErrorStr(hisdkRet_t errCode);
 
 /**
  * @brief Get the error code set by any runtime calls.
@@ -173,7 +173,7 @@ hirtGetErrorStr(hirtRet_t errCode);
  * @return error code of the last call of runtime functions.
  */
 extern __R_HOST
-hirtRet_t hirtGetLastErr(void);
+hisdkRet_t hirtGetLastErr(void);
 
 /*************************************************************************
  * Initialization and destroy
@@ -187,7 +187,7 @@ hirtRet_t hirtGetLastErr(void);
  * @return hirt_RET_SUCCESS if success, otherwise with the error code.
  */
 extern __R_HOST
-hirtRet_t hirtInit(unsigned int Flags);
+hisdkRet_t hirtInit(unsigned int Flags);
 
 /**
  * @brief Destroy everything that allocated by runtime API calls.
@@ -211,7 +211,7 @@ void hirtDestroy(void);
  * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtGetHardwareVersion(hirtHardwareVersion_t *ver);
+hisdkRet_t hirtGetHardwareVersion(hirtHardwareVersion_t *ver);
 
 /******************************************************************************
  * Device managment
@@ -228,7 +228,7 @@ hirtRet_t hirtGetHardwareVersion(hirtHardwareVersion_t *ver);
  */
 
 extern __R_HOST
-hirtRet_t hirtGetDeviceHandle(hirtDev_t *dev, int ordinal);
+hisdkRet_t hirtGetDeviceHandle(hirtDev_t *dev, int ordinal);
 
 /**
  * @brief Set the device handle for current thread execution context.
@@ -239,7 +239,7 @@ hirtRet_t hirtGetDeviceHandle(hirtDev_t *dev, int ordinal);
  * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtSetCurrentDevice(hirtDev_t dev);
+hisdkRet_t hirtSetCurrentDevice(hirtDev_t dev);
 
 /**
  * @brief Get the hirtDevice handle from current thread execution context.
@@ -250,7 +250,7 @@ hirtRet_t hirtSetCurrentDevice(hirtDev_t dev);
  * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtGetCurrentDevice(hirtDev_t *dev);
+hisdkRet_t hirtGetCurrentDevice(hirtDev_t *dev);
 
 /**
  * @brief Get capability of a device which is specified by device handle.
@@ -262,7 +262,7 @@ hirtRet_t hirtGetCurrentDevice(hirtDev_t *dev);
  * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtGetDeviceCapability(hirtCap_t *cap, hirtDev_t dev);
+hisdkRet_t hirtGetDeviceCapability(hirtCap_t *cap, hirtDev_t dev);
 
 /**
  * @brief Get the number of MLU devices in the system.
@@ -271,7 +271,7 @@ hirtRet_t hirtGetDeviceCapability(hirtCap_t *cap, hirtDev_t dev);
  * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtGetDeviceCount(unsigned *devnum);
+hisdkRet_t hirtGetDeviceCount(unsigned *devnum);
 
 /**
  * @brief Get the total memory size in MByte.
@@ -280,7 +280,7 @@ hirtRet_t hirtGetDeviceCount(unsigned *devnum);
  * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtGetDeviceMemorySize(unsigned long *sz);
+hisdkRet_t hirtGetDeviceMemorySize(unsigned long *sz);
 
 /*********************************************************************************
  * Execution control
@@ -293,7 +293,7 @@ hirtRet_t hirtGetDeviceMemorySize(unsigned long *sz);
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtGetKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams);
+hisdkRet_t hirtGetKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams);
 
 /**
  * @brief Add a parameter to a specific parameter buffer.
@@ -305,7 +305,7 @@ hirtRet_t hirtGetKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams);
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtKernelParamsBufferAddParam(hirtKernelParamsBuffer_t
+hisdkRet_t hirtKernelParamsBufferAddParam(hirtKernelParamsBuffer_t
       params, void *data, size_t nBytes);
 
 /**
@@ -316,7 +316,7 @@ hirtRet_t hirtKernelParamsBufferAddParam(hirtKernelParamsBuffer_t
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtDestroyKernelParamsBuffer(hirtKernelParamsBuffer_t params);
+hisdkRet_t hirtDestroyKernelParamsBuffer(hirtKernelParamsBuffer_t params);
 
 /**
  * @brief Invoke a kernel written in Bang with given params on MLU.
@@ -337,7 +337,7 @@ hirtRet_t hirtDestroyKernelParamsBuffer(hirtKernelParamsBuffer_t params);
  * Following nBytes ([function + 64, function + 64 + nBytes - 1]), MLU binary (binary format, not ascii), just memcpy it
  */
 extern __R_HOST
-hirtRet_t hirtInvokeKernel(const void *function, hirtDim3_t dim,
+hisdkRet_t hirtInvokeKernel(const void *function, hirtDim3_t dim,
       hirtKernelParamsBuffer_t params, hirtFunctionType_t c, hirtStream_t stream);
 
 /*********************************************************************************
@@ -357,7 +357,7 @@ hirtRet_t hirtInvokeKernel(const void *function, hirtDim3_t dim,
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtMallocHost(void **pPtr, size_t nBytes, hirtMemType_t type);
+hisdkRet_t hirtMallocHost(void **pPtr, size_t nBytes, hirtMemType_t type);
 
 /**
  * @brief Free the memory space pointed by ptr, which must be
@@ -368,7 +368,7 @@ hirtRet_t hirtMallocHost(void **pPtr, size_t nBytes, hirtMemType_t type);
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtFreeHost(void *ptr);
+hisdkRet_t hirtFreeHost(void *ptr);
 
 /**
  * @brief Allocate memory on MLU device.
@@ -379,7 +379,7 @@ hirtRet_t hirtFreeHost(void *ptr);
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtMalloc(void **pPtr, size_t nBytes);
+hisdkRet_t hirtMalloc(void **pPtr, size_t nBytes);
 
 /**
  * @brief Deallocate MLU device Memory.
@@ -389,7 +389,7 @@ hirtRet_t hirtMalloc(void **pPtr, size_t nBytes);
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtFree(void *ptr);
+hisdkRet_t hirtFree(void *ptr);
 
 /**
  * @brief Copy data from src address to dst address. The copy direction
@@ -408,7 +408,7 @@ hirtRet_t hirtFree(void *ptr);
  *         otherwise the error code is returned.
  */
 extern __R_HOST
-hirtRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDir_t dir);
+hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDir_t dir);
 
 
 

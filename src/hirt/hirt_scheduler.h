@@ -31,10 +31,10 @@ typedef struct hirtScheduler
     hirtThreadFunction_t m_threadfunc;
 } hirtScheduler_t;
 
-hirtRet_t libhirt_scoreboard_create(hirtScoreboard_t **ppScoreboard);
-hirtRet_t libhirt_scoreboard_destroy(hirtScoreboard_t *pScoreboard);
-hirtRet_t libhirt_scheduler_create(hirtScheduler_t **ppScheduler);
-hirtRet_t libhirt_scheduler_destroy(hirtScheduler_t *pScheduler);
+hisdkRet_t libhirt_scoreboard_create(hirtScoreboard_t **ppScoreboard);
+hisdkRet_t libhirt_scoreboard_destroy(hirtScoreboard_t *pScoreboard);
+hisdkRet_t libhirt_scheduler_create(hirtScheduler_t **ppScheduler);
+hisdkRet_t libhirt_scheduler_destroy(hirtScheduler_t *pScheduler);
 void*     libhirt_scheduler_thread(void *arg);
 
 #endif /*LIBHIRT_SCHEDULER_H__*/

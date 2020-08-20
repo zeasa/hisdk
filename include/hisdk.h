@@ -5,6 +5,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "hisdk_log.h"
+#include "hisdk_error.h"
+
 typedef uint64_t u64_t;
 typedef int64_t  i64_t;
 typedef uint64_t hirt_u64_t;

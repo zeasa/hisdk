@@ -1,10 +1,10 @@
 #include "libhirt.h"
 #include "libhirt_event.h"
 
-hirtRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler, 
+hisdkRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler, 
     hirtScoreboard_t *m_pScoreboard,pthread_mutex_t *m_pMutexScheduler)
 {
-    hirtRet_t ret = HIRT_RET_SUCCESS;
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
     hirtEventHandler_t *pHandler;
 
     pHandler = (hirtEventHandler_t*)malloc(sizeof(hirtEventHandler_t));
@@ -15,7 +15,7 @@ hirtRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler,
     pHandler.m_threadfunc = hirtEventHandlerThread;
     if(pthread_create(&pHandler.m_thread, NULL, hirtEventHandlerThread, (void*)pHandler) != 0)
     {
-        ret = HIRT_RET_ERR_CREATETHREAD;
+        ret = HISDK_RET_ERR_CREATETHREAD;
         goto err;
     }
 
@@ -25,7 +25,7 @@ err:
     free(pHandler);
 }
 
-hirtRet_t hirtEventHandlerDestroy(hirtEventHandler_t *pHandler)
+hisdkRet_t hirtEventHandlerDestroy(hirtEventHandler_t *pHandler)
 {
     //pthread_exit(NULL);
     free(pHandler);

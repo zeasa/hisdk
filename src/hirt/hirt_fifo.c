@@ -14,19 +14,19 @@ libhirt_fifo_t* libhirt_fifo_create(int item_num, int item_siz)
     return fifo;
 }
 
-hirtRet_t libhirt_fifo_destroy(libhirt_fifo_t* fifo)
+hisdkRet_t libhirt_fifo_destroy(libhirt_fifo_t* fifo)
 {
     sem_destroy(&fifo->sem_read);
     free(fifo->buf);
     free(fifo);
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
-hirtRet_t libhirt_fifo_put(libhirt_fifo_t* fifo, void* pdata)
+hisdkRet_t libhirt_fifo_put(libhirt_fifo_t* fifo, void* pdata)
 {
     if(fifo->is_full)
     {
-        return HIRT_RET_ERR_FIFOFULL;
+        return HISDK_RET_ERR_FIFOFULL;
     }
 
     memcpy(((char *)(fifo->buf) + fifo->pWrite * fifo->item_siz), pdata, fifo->item_siz);
@@ -40,16 +40,16 @@ hirtRet_t libhirt_fifo_put(libhirt_fifo_t* fifo, void* pdata)
         fifo->is_full = 1;
     }
 
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
-hirtRet_t libhirt_fifo_get(libhirt_fifo_t* fifo, void* pbuf)
+hisdkRet_t libhirt_fifo_get(libhirt_fifo_t* fifo, void* pbuf)
 {
     sem_wait(&fifo->sem_read);
     
     if( (fifo->pWrite == fifo->pRead) && (!fifo->is_full) )
     {
-        return HIRT_RET_ERR_FIFOEMPTY;
+        return HISDK_RET_ERR_FIFOEMPTY;
     }
 
     memcpy(pbuf, ((char *)(fifo->buf) + fifo->pRead * fifo->item_siz), fifo->item_siz);
@@ -60,7 +60,7 @@ hirtRet_t libhirt_fifo_get(libhirt_fifo_t* fifo, void* pbuf)
     }
     fifo->is_full = 0;
 
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 int libhirt_fifo_isfull(libhirt_fifo_t* fifo)

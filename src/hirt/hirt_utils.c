@@ -1,4 +1,4 @@
-#include "libhirt.h"
+#include "hirt.h"
 
 
 /************************************************************************
@@ -15,7 +15,7 @@
  * @return a pointer that points to a constant string.
  */
 __R_HOST
-const char *hirtGetErrorStr(hirtRet_t errCode)
+const char *hirtGetErrorStr(hisdkRet_t errCode)
 {
     return "hirtGetErrorStr";
 }
@@ -27,9 +27,9 @@ const char *hirtGetErrorStr(hirtRet_t errCode)
  * @return error code of the last call of runtime functions.
  */
 __R_HOST
-hirtRet_t hirtGetLastErr(void)
+hisdkRet_t hirtGetLastErr(void)
 {
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 /*************************************************************************
@@ -44,9 +44,9 @@ hirtRet_t hirtGetLastErr(void)
  * @return hirt_RET_SUCCESS if success, otherwise with the error code.
  */
 __R_HOST
-hirtRet_t hirtInit(unsigned int Flags)
+hisdkRet_t hirtInit(unsigned int Flags)
 {
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 /**

@@ -13,9 +13,9 @@ typedef struct hirtEventHandler
     pthread_mutex_t *m_pMutexScheduler;
 } hirtEventHandler_t;
 
-hirtRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler, 
+hisdkRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler, 
     hirtScoreboard_t *m_pScoreboard,pthread_mutex_t *m_pMutexScheduler);
-hirtRet_t hirtEventHandlerDestroy(hirtEventHandler_t *pHandler);
+hisdkRet_t hirtEventHandlerDestroy(hirtEventHandler_t *pHandler);
 void*     hirtEventHandlerThread(void* arg);
 
 #endif /*LIBHIRT_EVENT_H__*/

@@ -12,15 +12,15 @@
  *         otherwise the error code is returned.
  */
 __R_HOST
-hirtRet_t hirtAllocKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams)
+hisdkRet_t hirtAllocKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams)
 {
     hirtKernelParamsBuffer_t *pBuf = NULL;
-    hirtRet_t ret = HIRT_RET_SUCCESS;
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
 
     pBuf = (hirtKernelParamsBuffer_t *)malloc(sizeof(hirtKernelParamsBuffer_t);
     if(pBuf == NULL)
     {
-        ret = HIRT_RET_ERR_INSUFFICIENTMEMORY;
+        ret = HISDK_RET_ERR_INSUFFICIENTMEMORY;
         goto freememhost;
     }
     memset(pBuf, 0, sizeof(hirtKernelParamsBuffer_t));
@@ -29,13 +29,13 @@ hirtRet_t hirtAllocKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams)
     pBuf->pbuf_host = (void*)malloc(HIRT_PARAMBUF_MAXSIZE);
     if(pBuf->pbuf_host == NULL)
     {
-        ret = HIRT_RET_ERR_INSUFFICIENTMEMORY;
+        ret = HISDK_RET_ERR_INSUFFICIENTMEMORY;
         goto freememhost;
     }
 
-    if(hirtMalloc(&pBuf->pbuf_dev, HIRT_PARAMBUF_MAXSIZE) != HIRT_RET_SUCCESS)
+    if(hirtMalloc(&pBuf->pbuf_dev, HIRT_PARAMBUF_MAXSIZE) != HISDK_RET_SUCCESS)
     {
-        ret = HIRT_RET_ERR_INSUFFICIENTMEMORY;
+        ret = HISDK_RET_ERR_INSUFFICIENTMEMORY;
         goto freememdev;
     }
 
@@ -66,24 +66,24 @@ freememhost:
  *         otherwise the error code is returned.
  */
 __R_HOST
-hirtRet_t hirtKernelParamsBufferAddParam(hirtKernelParamsBuffer_t *params, 
+hisdkRet_t hirtKernelParamsBufferAddParam(hirtKernelParamsBuffer_t *params, 
       void *data, size_t nBytes)
 {
     if( (params->cur_param+nBytes) > params->max_param )
     {
-        return HIRT_RET_ERR_MEMCPY;
+        return HISDK_RET_ERR_MEMCPY;
     }
 
     memcpy((void*)(params->pbuf_host+params->cur_param), data, nBytes);
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 __R_HOST
-hirtRet_t hirtKernelParamsBufferAddPlaceHolder(hirtKernelParamsBuffer_t *params, 
+hisdkRet_t hirtKernelParamsBufferAddPlaceHolder(hirtKernelParamsBuffer_t *params, 
       size_t nBytes)
 {
     params->cur_param += nBytes;
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 /**
@@ -94,16 +94,16 @@ hirtRet_t hirtKernelParamsBufferAddPlaceHolder(hirtKernelParamsBuffer_t *params,
  *         otherwise the error code is returned.
  */
 __R_HOST
-hirtRet_t hirtDestroyKernelParamsBuffer(hirtKernelParamsBuffer_t params)
+hisdkRet_t hirtDestroyKernelParamsBuffer(hirtKernelParamsBuffer_t params)
 {
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 __R_HOST static
-hirtRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char *ppbuf, size_t *pSize)
+hisdkRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char *ppbuf, size_t *pSize)
 {
-    hirtRet_t ret = HIRT_RET_SUCCESS;
-    hirtRet_t rc;
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
+    hisdkRet_t rc;
     hirtFileHandle_t file;
     hirtStatType_t   finfo;
     size_t file_size;
@@ -112,28 +112,28 @@ hirtRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char *ppb
 
     if(strlen(kernel_filename) == 0)
     {
-        ret = HIRT_RET_ERR_FILEOPERATIONFAILED;
+        ret = HISDK_RET_ERR_FILEOPERATIONFAILED;
         goto fail;
     }
 
     rc = hirtPortOsFopen(kernel_filename, HIRT_OPEN_READ, &file);
-    if(rc != HIRT_RET_SUCCESS)
+    if(rc != HISDK_RET_SUCCESS)
     {
-        ret = HIRT_RET_ERR_FILENOTFOUND;
+        ret = HISDK_RET_ERR_FILENOTFOUND;
         goto fail;
     }
 
     rc = hirtPortOsFstat(file, &finfo);
-    if(rc != HIRT_RET_SUCCESS)
+    if(rc != HISDK_RET_SUCCESS)
     {
-        ret = HIRT_RET_ERR_FILEOPERATIONFAILED;
+        ret = HISDK_RET_ERR_FILEOPERATIONFAILED;
         goto fail;
     }
 
     file_size = hirtPortOsStatGetSize(&finfo);
     if(!file_size)
     {
-        ret = HIRT_RET_ERR_FILEOPERATIONFAILED;
+        ret = HISDK_RET_ERR_FILEOPERATIONFAILED;
     }
 
     pbuf = (unsigned char*)malloc(file_size);
@@ -141,10 +141,10 @@ hirtRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char *ppb
     hirtPortOsFseek(file, 0, HirtSeek_Set);
 
     rc = hirtPortOsFread(file, pbuf, file_size, &actually_read);
-    if(rc != HIRT_RET_SUCCESS)
+    if(rc != HISDK_RET_SUCCESS)
     {
         free(pbuf);
-        ret = HIRT_RET_ERR_FILEOPERATIONFAILED;
+        ret = HISDK_RET_ERR_FILEOPERATIONFAILED;
         goto fail;
     }
 
@@ -152,7 +152,7 @@ hirtRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char *ppb
     if(actually_read != file_size)
     {
         free(pbuf);
-        ret = HIRT_RET_ERR_FILEOPERATIONFAILED;
+        ret = HISDK_RET_ERR_FILEOPERATIONFAILED;
         goto fail;
     }
 
@@ -182,11 +182,11 @@ fail:
  * Following nBytes ([function + 64, function + 64 + nBytes - 1]), MLU binary (binary format, not ascii), just memcpy it
  */
 __R_HOST
-hirtRet_t hirtInvokeKernel(const hirtKernelFunction_t *function, hirtTaskDim_t dim,
+hisdkRet_t hirtInvokeKernel(const hirtKernelFunction_t *function, hirtTaskDim_t dim,
       hirtKernelParamsBuffer_t *pparams, hirtKernelBinBuffer_t **ppKernelBin, hirtCmdQueue_t *pqueue)
 {
-    hirtRet_t ret = HIRT_RET_SUCCESS;
-    hirtRet_t rc;
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
+    hisdkRet_t rc;
     char *filename;
     unsigned char* pbuf;
     size_t filesize;

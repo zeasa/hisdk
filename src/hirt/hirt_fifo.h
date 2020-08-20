@@ -19,9 +19,9 @@ typedef struct _libhirt_fifo
 } libhirt_fifo_t;
 
 libhirt_fifo_t *libhirt_fifo_create(int item_num, int item_siz);
-hirtRet_t libhirt_fifo_destroy(libhirt_fifo_t *fifo);
-hirtRet_t libhirt_fifo_put(libhirt_fifo_t *fifo, void *pdata);
-hirtRet_t libhirt_fifo_get(libhirt_fifo_t *fifo, void *pbuf);
+hisdkRet_t libhirt_fifo_destroy(libhirt_fifo_t *fifo);
+hisdkRet_t libhirt_fifo_put(libhirt_fifo_t *fifo, void *pdata);
+hisdkRet_t libhirt_fifo_get(libhirt_fifo_t *fifo, void *pbuf);
 int libhirt_fifo_isfull(libhirt_fifo_t *fifo);
 
 #endif /*LIBHIRT_FIFO_H__*/

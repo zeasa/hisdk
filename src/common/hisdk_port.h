@@ -71,21 +71,22 @@ extern "C" {
 /*
  * File and directory operations
  */
-hirtRet_t hirtPortOsStat(const char *filename, hirtStatType_t *stat);
-hirtRet_t hirtPortOsMkdir(char *dirname);
-hirtRet_t hirtPortOsRm(const char *filename);
-hirtRet_t hirtPortOsFopen(const char *path, u32_t flags, hirtFileHandle_t *file);
-void      hirtPortOsFclose(hirtFileHandle_t stream);
-hirtRet_t hirtPortOsFwrite(hirtFileHandle_t stream, const void *ptr, size_t size);
-hirtRet_t hirtPortOsFread(hirtFileHandle_t stream, void *ptr, size_t size, size_t *bytes);
-hirtRet_t hirtPortOsFseek(hirtFileHandle_t file, i64_t offset, hirtSeekEnum_t whence);
-hirtRet_t hirtPortOsFstat(hirtFileHandle_t file, hirtStatType_t *stat);
-i64_t     hirtPortOsStatGetSize(hirtStatType_t *stat);
-hirtRet_t hirtPortOsFgetc(hirtFileHandle_t stream, u8_t *c);
-void      hirtPortOsMemset(void *s, u8_t c, size_t size);
-hirtRet_t hirtPortOsOpenDir(const char *path, hirtDirHandle_t *dir);
-hirtRet_t hirtPortOsReadDir(hirtDirHandle_t dir, char *name, size_t size);
-void      hirtPortOsCloseDir(hirtDirHandle_t dir);
+hisdkRet_t hirtPortOsStat(const char *filename, hirtStatType_t *stat);
+hisdkRet_t hirtPortOsMkdir(char *dirname);
+hisdkRet_t hirtPortOsRm(const char *filename);
+hisdkRet_t hirtPortOsFopen(const char *path, u32_t flags, hirtFileHandle_t *file);
+void       hirtPortOsFclose(hirtFileHandle_t stream);
+hisdkRet_t hirtPortOsFwrite(hirtFileHandle_t stream, const void *ptr, size_t size);
+hisdkRet_t hirtPortOsFread(hirtFileHandle_t stream, void *ptr, size_t size, size_t *bytes);
+hisdkRet_t hirtPortOsFseek(hirtFileHandle_t file, i64_t offset, hirtSeekEnum_t whence);
+hisdkRet_t hirtPortOsFstat(hirtFileHandle_t file, hirtStatType_t *stat);
+i64_t      hirtPortOsStatGetSize(hirtStatType_t *stat);
+hisdkRet_t hirtPortOsFgetc(hirtFileHandle_t stream, u8_t *c);
+void       hirtPortOsMemset(void *s, u8_t c, size_t size);
+hisdkRet_t hirtPortOsOpenDir(const char *path, hirtDirHandle_t *dir);
+hisdkRet_t hirtPortOsReadDir(hirtDirHandle_t dir, char *name, size_t size);
+void       hirtPortOsCloseDir(hirtDirHandle_t dir);
+void       hirtPortOsDebugPrintf( const char *format, ... );
 
 #ifdef __cplusplus
 }

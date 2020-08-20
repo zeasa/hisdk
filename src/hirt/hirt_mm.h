@@ -27,10 +27,10 @@ typedef struct hirtMemManager
     hirtMemAllocRecord_t m_recordtbl[HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM];
 } hirtMemManager_t;
 
-hirtRet_t libhirt_memmamager_create(hirtMemManager_t **ppMemManager);
-hirtRet_t libhirt_memmamager_destroy(hirtMemManager_t *pMemManager);
-hirtRet_t libhirt_memmamager_block_get(hirtMemManager_t *pMemManager, hirtGMemAddress_t *pAddr, int block_num);
-hirtRet_t libhirt_memmanager_block_put(hirtMemManager_t *pMemManager, hirtGMemAddress_t addr);
+hisdkRet_t libhirt_memmamager_create(hirtMemManager_t **ppMemManager);
+hisdkRet_t libhirt_memmamager_destroy(hirtMemManager_t *pMemManager);
+hisdkRet_t libhirt_memmamager_block_get(hirtMemManager_t *pMemManager, hirtGMemAddress_t *pAddr, int block_num);
+hisdkRet_t libhirt_memmanager_block_put(hirtMemManager_t *pMemManager, hirtGMemAddress_t addr);
 
 #endif /*LIBHIRT_FIFO_H__*/
 

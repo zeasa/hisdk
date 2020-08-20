@@ -2,9 +2,9 @@
 #include "libhirt_scheduler.h"
 #include "libhirt_cqueue.h"
 
-hirtRet_t libhirt_scheduler_create(hirtScheduler_t **ppScheduler)
+hisdkRet_t libhirt_scheduler_create(hirtScheduler_t **ppScheduler)
 {
-    hirtRet_t ret = HIRT_RET_SUCCESS;
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
     hirtScheduler_t *pScheduler;
 
     pScheduler = (hirtScheduler_t*)malloc(sizeof(hirtScheduler_t));
@@ -14,7 +14,7 @@ hirtRet_t libhirt_scheduler_create(hirtScheduler_t **ppScheduler)
 
     if(pthread_create(&pScheduler.m_thread, NULL, libhirt_scheduler_thread, (void*)pScheduler) != 0)
     {
-        ret = HIRT_RET_ERR_CREATETHREAD;
+        ret = HISDK_RET_ERR_CREATETHREAD;
         goto err;
     }
 
@@ -24,12 +24,12 @@ err:
     return ret;
 }
 
-hirtRet_t libhirt_scheduler_destroy(hirtScheduler_t *pScheduler)
+hisdkRet_t libhirt_scheduler_destroy(hirtScheduler_t *pScheduler)
 {
     sem_destroy(&pScheduler->m_semEvent);
     free(pScheduler);
 
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
 void* libhirt_scheduler_thread(void* arg)
@@ -130,7 +130,7 @@ void* libhirt_scheduler_thread(void* arg)
     return NULL;
 }
 
-hirtRet_t libhirt_scoreboard_create(hirtScoreboard_t **ppScoreboard)
+hisdkRet_t libhirt_scoreboard_create(hirtScoreboard_t **ppScoreboard)
 {
     hirtScoreboard_t *pScoreboard;
     pScoreboard = (hirtScoreboard_t*)malloc(sizeof(hirtScoreboard_t));
@@ -143,14 +143,14 @@ hirtRet_t libhirt_scoreboard_create(hirtScoreboard_t **ppScoreboard)
     
     pthread_mutex_init(&pScoreboard->mutex, NULL);
 
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
 
-hirtRet_t libhirt_scoreboard_destroy(hirtScoreboard_t *pScoreboard)
+hisdkRet_t libhirt_scoreboard_destroy(hirtScoreboard_t *pScoreboard)
 {
     pthread_mutex_destroy(&pScoreboard->mutex);
 
     free(pScoreboard);
 
-    return HIRT_RET_SUCCESS;
+    return HISDK_RET_SUCCESS;
 }
