@@ -29,14 +29,18 @@ hisdkRet_t hirtFifoDestroy(hirtFifo_t* fifo)
     sem_destroy(&fifo->sem_read);
     free(fifo->buf);
     free(fifo);
+    
     return HISDK_RET_SUCCESS;
 }
 
 hisdkRet_t hirtFifoPut(hirtFifo_t* fifo, void* pdata)
 {
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
+    
     if(fifo->is_full)
     {
-        return HISDK_RET_ERR_FIFOFULL;
+        ret =  HISDK_RET_ERR_FIFOFULL;
+        goto fail;
     }
 
     memcpy(((char *)(fifo->buf) + fifo->pWrite * fifo->item_siz), pdata, fifo->item_siz);
@@ -50,7 +54,10 @@ hisdkRet_t hirtFifoPut(hirtFifo_t* fifo, void* pdata)
         fifo->is_full = 1;
     }
 
-    return HISDK_RET_SUCCESS;
+    return ret;
+    
+fail:
+    return ret;
 }
 
 hisdkRet_t hirtFifoGet(hirtFifo_t* fifo, void* pbuf)

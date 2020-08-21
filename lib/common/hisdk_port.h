@@ -54,19 +54,15 @@ typedef enum hisdkSeek
     HisdkSeek_End
 } hisdkSeekEnum_t;
 
-struct hisdkFileRec 
+typedef struct 
 {
     int fd;
-};
-typedef struct hisdkFileRec  hisdkFile_t;
-typedef struct hisdkFileRec* hisdkFileHandle_t;
+} hisdkFile_t;
 
-struct hisdkDirRec 
+typedef struct 
 {
     DIR *dir;
-};
-typedef struct hisdkDirRec   hisdkDir_t;
-typedef struct hisdkDirRec*  hisdkDirHandle_t;
+} hisdkDir_t;
 
 /*
  * File and directory operations
@@ -74,18 +70,18 @@ typedef struct hisdkDirRec*  hisdkDirHandle_t;
 hisdkRet_t hisdkPortOsStat(const char *filename, hisdkStatType_t *stat);
 hisdkRet_t hisdkPortOsMkdir(char *dirname);
 hisdkRet_t hisdkPortOsRm(const char *filename);
-hisdkRet_t hisdkPortOsFopen(const char *path, u32_t flags, hisdkFileHandle_t *file);
-void       hisdkPortOsFclose(hisdkFileHandle_t stream);
-hisdkRet_t hisdkPortOsFwrite(hisdkFileHandle_t stream, const void *ptr, size_t size);
-hisdkRet_t hisdkPortOsFread(hisdkFileHandle_t stream, void *ptr, size_t size, size_t *bytes);
-hisdkRet_t hisdkPortOsFseek(hisdkFileHandle_t file, i64_t offset, hisdkSeekEnum_t whence);
-hisdkRet_t hisdkPortOsFstat(hisdkFileHandle_t file, hisdkStatType_t *stat);
+hisdkRet_t hisdkPortOsFopen(const char *path, u32_t flags, hisdkFile_t * *file);
+void       hisdkPortOsFclose(hisdkFile_t *file);
+hisdkRet_t hisdkPortOsFwrite(hisdkFile_t *file, const void *ptr, size_t size);
+hisdkRet_t hisdkPortOsFread(hisdkFile_t *file, void *ptr, size_t size, size_t *bytes);
+hisdkRet_t hisdkPortOsFseek(hisdkFile_t *file, i64_t offset, hisdkSeekEnum_t whence);
+hisdkRet_t hisdkPortOsFstat(hisdkFile_t *file, hisdkStatType_t *stat);
 u64_t      hisdkPortOsStatGetSize(hisdkStatType_t *stat);
-hisdkRet_t hisdkPortOsFgetc(hisdkFileHandle_t stream, u8_t *c);
+hisdkRet_t hisdkPortOsFgetc(hisdkFile_t *file, u8_t *c);
 void       hisdkPortOsMemset(void *s, u8_t c, size_t size);
-hisdkRet_t hisdkPortOsOpenDir(const char *path, hisdkDirHandle_t *dir);
-hisdkRet_t hisdkPortOsReadDir(hisdkDirHandle_t dir, char *name, size_t size);
-void       hisdkPortOsCloseDir(hisdkDirHandle_t dir);
+hisdkRet_t hisdkPortOsOpenDir(const char *path, hisdkDir_t **dir);
+hisdkRet_t hisdkPortOsReadDir(hisdkDir_t *dir, char *name, size_t size);
+void       hisdkPortOsCloseDir(hisdkDir_t *dir);
 void       hisdkPortOsDebugPrintf( const char *format, ... );
 
 #ifdef __cplusplus

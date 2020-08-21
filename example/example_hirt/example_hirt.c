@@ -4,6 +4,7 @@
 #include "hirt.h"
 #include "hirt_device.h"
 #include "hirt_cqueue.h"
+#include "hirt_kernel.h"
 #include "hirt_scheduler.h"
 #include "hirt_utils.h"
 #include "hisdk_log.h"
@@ -28,7 +29,7 @@ int main(int argc, char *argv[])
     HISDK_LOG_INFO(LOG_SYSTEM, "program start...");
     
     hirtInit(0);
-    hirtDev_t dev;
+    hirtDev_t dev = 0;
     hirtGetDeviceHandle(&dev, 0);
     hirtSetCurrentDevice(dev);
 
@@ -37,10 +38,10 @@ int main(int argc, char *argv[])
     //a = (int)rand();
     //b = (int)rand();
 
-    hirtCmdQueue_t *pCmdQueue;
+    hirtCmdQueue_t *pCmdQueue = NULL;
     hirtCmdQueueCreate(&pCmdQueue);
 
-    hirtScheduler_t *pScheduler;
+    hirtScheduler_t *pScheduler = NULL;
     hirtSchedulerCreate(&pScheduler, pCmdQueue);
 
 #if 0
@@ -49,20 +50,19 @@ int main(int argc, char *argv[])
     hirtDevMalloc((void **)&k_b, sizeof(int));
     hirtMemcpy(k_a, &a, sizeof(int), HIRT_MEM_TRANS_DIR_HOST2DEV);
     hirtMemcpy(k_b, &b, sizeof(int), HIRT_MEM_TRANS_DIR_HOST2DEV);
-
-    hirtKernelParamsBuffer_t *pParams;
-    hirtGetKernelParamsBuffer(&pParams);
-    hirtKernelParamsBufferAddParams(pParams, &k_a, sizeof(int *));
-    //hirtKernelParamsBufferAddParams(pParams, &k_b, sizeof(int *));
+#endif
 
 
-    hirtInvokeKernel(&kernel0, 3, pParams, queue);
+    hirtKernelParamsBuffer_t *pParams = NULL;
+    hirtKernelParamsBufferCreate(&pParams);
+    //hirtKernelParamsBufferAddParam(pParams, &k_a, sizeof(int *));
+    hirtKernelBinBuffer_t *pkrnlBin = NULL;
+    hirtInvokeKernel("kernel.o", 1, pParams, &pkrnlBin, pCmdQueue);
+    hirtCmdQueueSync(pCmdQueue);
+    
+#if 0    
     hirtInvokeKernel(&kernel1, 3, pParams, queue);
     hirtInvokeKernel(&kernel2, 3, pParams, queue);
-    hirtCmdQueueSync(queue);
-    
-    hirtInvokeKernel(&kernel3, 3, pParams, queue);
-
     hirtMemcpy(&out, k_a, sizeof(int), HIRT_MEM_TRANS_DIR_DEV2HOST);
     hirtDevFree(k_a);
     hirtDevFree(k_b);

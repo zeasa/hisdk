@@ -8,16 +8,35 @@ hisdkRet_t hirtCmdQueueCreate(hirtCmdQueue_t **ppQueue)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     hisdkRet_t e;
-    hirtCmdQueue_t *pQueue;
+    hirtCmdQueue_t *pQueue = NULL;
     
     pQueue = (hirtCmdQueue_t *)malloc(sizeof(hirtCmdQueue_t));
+    if(pQueue == NULL)
+    {
+        ret = HISDK_RET_ERR_NOMEM;
+        goto fail;
+    }
     memset(pQueue, 0, sizeof(hirtCmdQueue_t));
     
     e = hirtFifoCreate(&pQueue->pfifo, HIRT_CMDQUEUE_SIZMAX, sizeof(hirtCmdNode_t));
-
-    *ppQueue = pQueue;
-
+    if(e != HISDK_RET_SUCCESS)
+    {
+        ret = HISDK_RET_ERR_NOMEM;
+        goto fail;
+    }
+        
     HISDK_LOG_INFO(LOG_SYSTEM, "hirtCmdQueueCreate done.");
+    *ppQueue = pQueue;
+    return ret;
+    
+fail:
+    if(pQueue != NULL)
+    {
+        free(pQueue);    
+    }
+    
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtCmdQueueCreate failed.");
+    *ppQueue = NULL;
     return ret;
 }
 
@@ -31,26 +50,53 @@ hisdkRet_t hirtCmdQueueDestroy(hirtCmdQueue_t *pQueue)
 
 hisdkRet_t hirtCmdQueueSyncPut(hirtCmdQueue_t *pQueue, sem_t *pSem)
 {
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
+    hisdkRet_t e;
     hirtCmdNode_t node;
+    
     node.type = CMDTYPE_SYNC;
     node.sem_cmdsync = pSem;
-    hirtFifoPut(pQueue->pfifo, &node);
+    
+    e = hirtFifoPut(pQueue->pfifo, &node);
+    if(e != HISDK_RET_SUCCESS)
+    {
+        ret = HISDK_RET_ERR_FIFOFULL;
+        goto fail;
+    }
 
-    return HISDK_RET_SUCCESS;
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtCmdQueueSyncPut done.");
+    return ret;
+    
+fail:
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtCmdQueueSyncPut failed.");
+    return ret;
 }
 
 hisdkRet_t hirtCmdQueueKernelPut(hirtCmdQueue_t *pQueue, hirtKernelParamsBuffer_t *pParams, 
     hirtKernelBinBuffer_t *pKernelBin, hirtTaskDim_t taskDim)
 {
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
+    hisdkRet_t e;
     hirtCmdNode_t node;
+    
     node.type = CMDTYPE_KERNEL;
     node.buf_kernel = pKernelBin;
     node.buf_param = pParams;
     node.dim = taskDim;
 
-    hirtFifoPut(pQueue->pfifo, &node);
+    e = hirtFifoPut(pQueue->pfifo, &node);
+    if(e != HISDK_RET_SUCCESS)
+    {
+        ret = HISDK_RET_ERR_FIFOFULL;
+        goto fail;
+    }
 
-    return HISDK_RET_SUCCESS;
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtCmdQueueKernelPut done.");
+    return ret;
+    
+fail:
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtCmdQueueKernelPut failed.");
+    return ret;
 }
 
 hisdkRet_t hirtCmdQueueNodeGet(hirtCmdQueue_t *pQueue, hirtCmdNode_t *pNode)

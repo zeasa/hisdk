@@ -6,17 +6,17 @@ extern "C" {
 #endif // __cplusplus
 
 __R_HOST
-hisdkRet_t hirtAllocKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams);
+hisdkRet_t hirtKernelParamsBufferCreate(hirtKernelParamsBuffer_t **ppParams);
 __R_HOST
-hisdkRet_t hirtKernelParamsBufferAddParam(hirtKernelParamsBuffer_t *params, 
+hisdkRet_t hirtKernelParamsBufferDestroy(hirtKernelParamsBuffer_t *pParams);
+__R_HOST
+hisdkRet_t hirtKernelParamsBufferAddParam(hirtKernelParamsBuffer_t *pParams, 
     void *data, size_t nBytes);
 __R_HOST
-hisdkRet_t hirtKernelParamsBufferAddPlaceHolder(hirtKernelParamsBuffer_t *params, size_t nBytes);
+hisdkRet_t hirtKernelParamsBufferAddPlaceHolder(hirtKernelParamsBuffer_t *pParams, size_t nBytes);
 __R_HOST
-hisdkRet_t hirtDestroyKernelParamsBuffer(hirtKernelParamsBuffer_t params);
-__R_HOST
-hisdkRet_t hirtInvokeKernel(const hirtKernelFunction_t *function, hirtTaskDim_t dim,
-    hirtKernelParamsBuffer_t *pparams, hirtKernelBinBuffer_t **pKernelBin, hirtCmdQueue_t *pqueue);
+hisdkRet_t hirtInvokeKernel(const char *function, hirtTaskDim_t dim,
+    hirtKernelParamsBuffer_t *pParams, hirtKernelBinBuffer_t **pKernelBin, hirtCmdQueue_t *pQueue);
 
 
 #ifdef __cplusplus

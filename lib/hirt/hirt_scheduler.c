@@ -12,8 +12,6 @@ hisdkRet_t hirtSchedulerCreate(hirtScheduler_t **ppScheduler, hirtCmdQueue_t * c
     hirtScheduler_t *pScheduler = NULL;
     hirtScoreboard_t *pScoreboard = NULL;
 
-    HISDK_LOG_INFO(LOG_SYSTEM, "%s", "hirtSchedulerCreate enter.");
-    
     if(pCmdQueue == NULL)
     {
         ret = HISDK_RET_ERR_BADPARAMETER;
@@ -37,7 +35,6 @@ hisdkRet_t hirtSchedulerCreate(hirtScheduler_t **ppScheduler, hirtCmdQueue_t * c
     }
     pScheduler->m_pScoreboard = pScoreboard;
 
-    HISDK_LOG_INFO(LOG_SYSTEM, "%s", "sem_init");
     if(sem_init(&pScheduler->m_semEvent, 0, 0) != 0)
     {
         ret = HISDK_RET_ERR_NORES;
@@ -106,6 +103,7 @@ void* hirtSchedulerThread(void* arg)
     int schedTbl[HIRT_HIPU200_CORENUMMAX];
     
     HISDK_LOG_INFO(LOG_SYSTEM, "hirtSchedulerThread thread entered arg=%p", arg);
+    
     while(1)
     {
         //block read the cmd queue
