@@ -9,6 +9,10 @@
 #include "hisdk_log.h"
 #include "hisdk_error.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef uint64_t u64_t;
 typedef int64_t  i64_t;
 typedef uint64_t hirt_u64_t;
@@ -42,5 +46,9 @@ typedef u64_t    hirt_size_t;
     exit(0);\
     }
 
+
+#ifdef __cplusplus
+}
+#endif
 #endif /*__HISDK_H__*/
 

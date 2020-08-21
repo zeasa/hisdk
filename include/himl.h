@@ -3,6 +3,10 @@
 
 #include "hisdk.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum
 {
     DATATYPE_INT8 = 0,
@@ -36,20 +40,16 @@ typedef struct
     u32_t dim;
     u32_t n;
     u32_t c;
-
-
     union
     {
         u32_t h;
         u32_t row;
     };
-
     union
     {
         u32_t w;
         u32_t col;
     };
-
 } shape_t;
 
 typedef struct
@@ -100,7 +100,9 @@ typedef struct
     hirtKernelParamsBuffer_t *kernel_parambuf;
 } himlBaseOp_t;
 
+
+#ifdef __cplusplus
+}
+#endif
 #endif /*__LIBHIRT_H__*/
-
-
 

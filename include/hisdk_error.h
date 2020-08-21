@@ -3,8 +3,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
 #include "hisdk.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 
 /**< Error codes */
 typedef enum
@@ -76,10 +80,6 @@ typedef enum
     HISDK_RET_ERR_UNKNOWN             = 999991, /**< Unknown error */
     HISDK_RET_ERR_MAX,                          /**< The last one */
 } hisdkRet_t; 
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
 
 const char* hisdkUtilsGetErrorString(hisdkRet_t e);
 

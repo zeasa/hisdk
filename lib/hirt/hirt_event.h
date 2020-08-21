@@ -2,8 +2,13 @@
 #define LIBHIRT_EVENT_H__
 
 #include <pthread.h>
+#include "hirt_scheduler.h"
 
-typedef struct hirtEventHandler
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+typedef struct
 {
     pthread_t m_thread;
     hirtThreadFunction_t m_threadfunc;
@@ -14,9 +19,12 @@ typedef struct hirtEventHandler
 } hirtEventHandler_t;
 
 hisdkRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler, 
-    hirtScoreboard_t *m_pScoreboard,pthread_mutex_t *m_pMutexScheduler);
+    hirtScoreboard_t *m_pScoreboard, pthread_mutex_t *m_pMutexScheduler);
 hisdkRet_t hirtEventHandlerDestroy(hirtEventHandler_t *pHandler);
 void*     hirtEventHandlerThread(void* arg);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /*LIBHIRT_EVENT_H__*/
 

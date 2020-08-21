@@ -3,11 +3,11 @@
 
 #include "hisdk.h"
 
-#define HIRT_DEVICE_NODE      "/dev/dri/renderD128"
-
-#if defined(__cplusplus)
+#ifdef __cplusplus
 extern "C" {
-#endif /*__cplusplus*/
+#endif // __cplusplus
+
+#define HIRT_DEVICE_NODE      "/dev/dri/renderD128"
 
 /**< Code will be compiled for running on Host */
 #ifndef __R_HOST
@@ -42,7 +42,7 @@ typedef struct {
 } hirtCap_t;
 
 /**< Data type and data order*/
-typedef enum hirtDataType {
+typedef enum {
   HIRT_INVALID = 0x0,
   HIRT_FLOAT16 = 0x12,
   HIRT_FLOAT32 = 0x13,
@@ -57,63 +57,42 @@ typedef enum hirtDataType {
   HIRT_BOOL    = 0x61,
 } hirtDataType_t;
 
-typedef enum hirtDimOrder {
+typedef enum {
   HIRT_NCHW = 0x0123,
   HIRT_NHWC = 0x0231,
 } hirtDimOrder_t;
 
 typedef int hirtTaskDim_t;
-
 typedef unsigned long hirtDev_t;
-
 typedef u64_t hirtGMemAddress_t;
+
 #define MAKE_DEVADDR(nodenoc, low32)    ((((u64_t)nodenoc) << 32) + low32)
 #define MAKE_DEVADDR_BLK(nodenoc, blk)  ((((u64_t)nodenoc) << 32) + blk*HIRT_HIPU200_MEM_BLK_SIZ)
 
 /**< Compiler */
 /**< hirt.h */
 
-#define HIRT_CMDQUEUE_SIZMAX            (1024)
-#define HIRT_PARAMBUF_MAXSIZE           (1024)
-#define HIRT_HIPU200_CORENUMMAX         (13)
-
-#define HIRT_HIPU200_MEM_CH_NUM         (2)
-#define HIRT_HIPU200_MEM_CH_SIZ         (4096*1024*1024)
-#define HIRT_HIPU200_MEM_BLK_SIZ        (64*1024*1024)
-#define HIRT_HIPU200_MEM_BLK_NUM        (HIRT_HIPU200_MEM_CH_SIZ/HIRT_HIPU200_MEM_BLK_SIZ)
-
-#define HIRT_HIPU200_MEM_CH0_NOCADDR    (0)
-#define HIRT_HIPU200_MEM_CH1_NOCADDR    (1)
-
-const int HIRT_HIPU200_MEM_CH_NOCADDR_TBL[HIRT_HIPU200_MEM_CH_NUM] = 
-{
-    HIRT_HIPU200_MEM_CH0_NOCADDR,
-    HIRT_HIPU200_MEM_CH1_NOCADDR
-};
-
 /**< hirt_internal.h */
-typedef struct hirtKernelParamsBuffer {
+typedef struct {
   void *pbuf_host;
   void *pbuf_dev;
   unsigned int max_param;
   unsigned int cur_param;
 } hirtKernelParamsBuffer_t;
 
-typedef struct hirtKernelBinBuffer
-{
+typedef struct {
   void *pbuf_host;
   void *pbuf_dev;
   unsigned int size;
 } hirtKernelBinBuffer_t;
 
-typedef struct hirtKernelFunction {
+typedef struct {
   u64_t function_start;
   u64_t function_end;
   u64_t function_size;
 } hirtKernelFunction_t;
 
-typedef struct hirtKernelGramAllocInfo
-{
+typedef struct {
   hirtGMemAddress_t base;
   size_t size;
 } hirtKernelGMemAllocInfo_t;
@@ -150,269 +129,7 @@ typedef struct
 
 typedef void (*hirtThreadFunction_t)(void *arg);
 
-/************************************************************************
- * Error handling
- ************************************************************************/
-/**
- * @brief Return string pointer that describes
- *     the error code passed in the argument errCode.
- *
- * The function returns a read only string that is corresponding
- * to the argument @p errcode.
- *
- * @param  errCode[in] the error code was returned by previous function call.
- * @return a pointer that points to a constant string.
- */
-extern __R_HOST const char *
-hirtGetErrorStr(hisdkRet_t errCode);
-
-/**
- * @brief Get the error code set by any runtime calls.
- *     Its value is meaningful only when the return value indicating an error.
- *
- * @return error code of the last call of runtime functions.
- */
-extern __R_HOST
-hisdkRet_t hirtGetLastErr(void);
-
-/*************************************************************************
- * Initialization and destroy
- *************************************************************************/
-/**
- * @brief Initialize runtime environment in current process space.
- *
- * Initializes this API must be called before any other runtime API calls.
- *
- * @param  Flags[in] reserved for further use, pass 0 as well.
- * @return hirt_RET_SUCCESS if success, otherwise with the error code.
- */
-extern __R_HOST
-hisdkRet_t hirtInit(unsigned int Flags);
-
-/**
- * @brief Destroy everything that allocated by runtime API calls.
- *
- * This API should be called after any other runtime API calls.
- *
- * @return void (None).
- */
-extern __R_HOST
-void hirtDestroy(void);
-
-/******************************************************************************
- * Version and revision
- ******************************************************************************/
-/**
- * @brief Return the version of the MLU hardware.
- *
- * Higher version usually offers more features provided by this library.
- *
- * @param  ver[out] pointer to retrieve the version.
- * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtGetHardwareVersion(hirtHardwareVersion_t *ver);
-
-/******************************************************************************
- * Device managment
- ******************************************************************************/
-/**
- * @brief Get the device handle by a given device ordinal.
- *
- *  The function returns the device handle given a specific device ordinal.
- *
- * @param  dev[out] pointer to retrieve the device handle.
- * @param  ordinal[in] the device ordinal to get the device handle.
- * @note   the ordinal should be in the range [0~hirtGetDeviceCount() - 1].
- * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
- */
-
-extern __R_HOST
-hisdkRet_t hirtGetDeviceHandle(hirtDev_t *dev, int ordinal);
-
-/**
- * @brief Set the device handle for current thread execution context.
- *
- *  It implies that any subsequent runtime API calls are for this device.
- *
- * @param  dev[in] the device handle.
- * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtSetCurrentDevice(hirtDev_t dev);
-
-/**
- * @brief Get the hirtDevice handle from current thread execution context.
- *
- * The handle has been set by calling hirtSetCurrentDevice().
- *
- * @param  dev[out] pointer to retrieve the device handle.
- * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtGetCurrentDevice(hirtDev_t *dev);
-
-/**
- * @brief Get capability of a device which is specified by device handle.
- *
- *  The function returns the device capabilities.
- *
- * @param  cap[out] pointer to retrieve the device capability.
- * @param  dev[in] the device handle to get the device capability.
- * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtGetDeviceCapability(hirtCap_t *cap, hirtDev_t dev);
-
-/**
- * @brief Get the number of MLU devices in the system.
- *
- * @param  devnum[out] pointer to retrieve the number of devices.
- * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtGetDeviceCount(unsigned *devnum);
-
-/**
- * @brief Get the total memory size in MByte.
- *
- * @param  sz[out] pointer to retrieve the memory amount on device.
- * @return hirt_RET_SUCCESS if success, otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtGetDeviceMemorySize(unsigned long *sz);
-
-/*********************************************************************************
- * Execution control
- *********************************************************************************/
-/**
- * @brief Get a parameter buffer for hirtInvokeKernel.
- *
- * @param params[in] pointer to a param buffer
- * @return hirt_RET_SUCCESS if success,
- *         otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtGetKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams);
-
-/**
- * @brief Add a parameter to a specific parameter buffer.
- *
- * @param params[in] destination parameter buffer
- * @param data[in] pointer to host memory
- * @param nBytes[in] size in bytes
- * @return hirt_RET_SUCCESS if success,
- *         otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtKernelParamsBufferAddParam(hirtKernelParamsBuffer_t
-      params, void *data, size_t nBytes);
-
-/**
- * @brief Destroy a parameter buffer returned by hirtGetKernelParamsBuffer.
- *
- * @param params[in] pointer to a param buffer
- * @return hirt_RET_SUCCESS if success,
- *         otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtDestroyKernelParamsBuffer(hirtKernelParamsBuffer_t params);
-
-/**
- * @brief Invoke a kernel written in Bang with given params on MLU.
- *
- * @param function[in] point to the MLU function.
- * @param dim[in]      how many grid dimentions.
- * @param params[in]   point to arguments.
- * @param c[in]        function type. @see hirtFunctionType_t.
- * @param stream[in]   stream associated to the function call.
- * @return hirt_RET_SUCCESS if success,
- *         otherwise the error code is returned.
- *
- * Notes: Layout of function
- * [nBytes, MLU Binary]
- * First 4 bytes ([function, function+ 3]), an unsigned int (nBytes) represents total bytes of MLU binary
- * Following 4 bytes ([function + 4, function +7]), an unsigned int represents core version (defined in hirt_interal.h)
- * Following 56 bytes ([function + 8, function +63]), empty, left for future extension
- * Following nBytes ([function + 64, function + 64 + nBytes - 1]), MLU binary (binary format, not ascii), just memcpy it
- */
-extern __R_HOST
-hisdkRet_t hirtInvokeKernel(const void *function, hirtDim3_t dim,
-      hirtKernelParamsBuffer_t params, hirtFunctionType_t c, hirtStream_t stream);
-
-/*********************************************************************************
- * Memory management
- *********************************************************************************/
-/**
- * @brief Allocate nByte bytes and place a pointer to pointer
- *        in pPtr to the allocated host memory. If nBytes is 0, then
- *        hirtMallocHost returns either NULL, or a unique pointer value
- *        that can later be passed to hirtFreeHost.
- *
- * @param pPtr[out]  a pointer to pointer for retrieving allocated host memory.
- * @param nBytes[in] number bytes of memory to be allocated.
- * @param type[in]   memory type to be allocated,
- *                   @see hirt_HOST_MEMORY_TYPE_LOCK and hirt_HOST_MEMORY_TYPE_MAPPED.
- * @return hirt_RET_SUCCESS if success,
- *         otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtHostMalloc(void **pPtr, size_t nBytes, hirtMemType_t type);
-
-/**
- * @brief Free the memory space pointed by ptr, which must be
- *        returned by a previous call of hirtMallocHost.
- *
- * @param ptr[in]  point to the address of memory to be free.
- * @return hirt_RET_SUCCESS if success,
- *         otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtHostFree(void *ptr);
-
-/**
- * @brief Allocate memory on MLU device.
- *
- * @param pPtr[out] a pointer to pointer for retrieving allocated device memory.
- * @param nBytes[in] allocate size.
- * @return hirt_RET_SUCCESS if success,
- *         otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtDevMalloc(void **pPtr, size_t nBytes);
-
-/**
- * @brief Deallocate MLU device Memory.
- *
- * @param ptr[in] point to the memory to be free.
- * @return hirt_RET_SUCCESS if success,
- *         otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtDevFree(void *ptr);
-
-/**
- * @brief Copy data from src address to dst address. The copy direction
- *        is specified by input parameter dir. The copy operation is
- *        always performed on current device which is set by hirtSetCurrentDevice.
- *
- * @param dest[in] destination address.
- * @param src[in] source address.
- * @param nBytes[in] number of bytes to be copied.
- * @param dir[in] direction of transfer.
- *                @see  hirt_MEM_TRANS_DIR_HOST2DEV,
- *                      hirt_MEM_TRANS_DIR_DEV2DEV,
- *                      hirt_MEM_TRANS_DIR_DEV2HOST,
- *                      hirt_MEM_TRANS_DIR_HOST2HOST,
- * @return hirt_RET_SUCCESS if success,
- *         otherwise the error code is returned.
- */
-extern __R_HOST
-hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDir_t dir);
-
-
-
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 #endif /*__LIBHIRT_H__*/

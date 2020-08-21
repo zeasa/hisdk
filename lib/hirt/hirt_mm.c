@@ -1,4 +1,13 @@
-#include "libhirt.h"
+#include <stdlib.h>
+#include "hirt.h"
+#include "hirt_mm.h"
+
+
+const int HIRT_HIPU200_MEM_CH_NOCADDR_TBL[HIRT_HIPU200_MEM_CH_NUM] = 
+{
+    HIRT_HIPU200_MEM_CH0_NOCADDR,
+    HIRT_HIPU200_MEM_CH1_NOCADDR
+};
 
 /*********************************************************************************
  * Memory management
@@ -17,7 +26,7 @@
  *         otherwise the error code is returned.
  */
 __R_HOST
-hisdkRet_t hirtHostMalloc(void **pPtr, size_t nBytes, hirtMemType_t type)
+hisdkRet_t hirtHostMalloc(void **pPtr, size_t nBytes/*, hirtMemType_t type*/)
 {
     return HISDK_RET_SUCCESS;
 }
@@ -86,7 +95,7 @@ hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDi
 }
 
 
-hisdkRet_t libhirt_memmamager_create(hirtMemManager_t **ppMemManager)
+hisdkRet_t hirtMemManagerCreate(hirtMemManager_t **ppMemManager)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     hirtMemManager_t *pMemManager;
@@ -100,7 +109,7 @@ hisdkRet_t libhirt_memmamager_create(hirtMemManager_t **ppMemManager)
         {
             pMemManager->m_blocktbl[i][j].m_mbstatus = MB_FREE;
             pMemManager->m_blocktbl[i][j].m_mbbase = 
-                MAKE_DEVADDRESS(HIRT_HIPU200_MEM_CH_NOCADDR_TBL[i], HIRT_HIPU200_MEM_BLK_SIZ);
+                MAKE_DEVADDR(HIRT_HIPU200_MEM_CH_NOCADDR_TBL[i], HIRT_HIPU200_MEM_BLK_SIZ);
             pMemManager->m_recordtbl[i*HIRT_HIPU200_MEM_BLK_NUM+j].m_blocknum = 0;
         }
     }
@@ -108,16 +117,16 @@ hisdkRet_t libhirt_memmamager_create(hirtMemManager_t **ppMemManager)
     return ret;
 }
 
-hisdkRet_t libhirt_memmamager_destroy(hirtMemManager_t *pMemManager)
+hisdkRet_t hirtMemManagerDestroy(hirtMemManager_t *pMemManager)
 {
     free(pMemManager);
     return HISDK_RET_SUCCESS;
 }
 
-hisdkRet_t libhirt_memmamager_block_get(hirtMemManager_t *pMemManager, hirtGMemAddress_t *pAddr, int block_num)
+hisdkRet_t hirtMemManagerBlkGet(hirtMemManager_t *pMemManager, hirtGMemAddress_t *pAddr, int block_num)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
-    int i;
+    int i, j, k;
 
     for(i=0;i<HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM; i++)
     {
@@ -132,9 +141,9 @@ hisdkRet_t libhirt_memmamager_block_get(hirtMemManager_t *pMemManager, hirtGMemA
         goto end;
     }
 
-    for(int j=0; j<HIRT_HIPU200_MEM_CH_NUM; j++)
+    for(j=0; j<HIRT_HIPU200_MEM_CH_NUM; j++)
     {
-        for(int k=0; k<HIRT_HIPU200_MEM_BLK_NUM; k++)
+        for(k=0; k<HIRT_HIPU200_MEM_BLK_NUM; k++)
         {
             int cnt=1;
             if(pMemManager->m_blocktbl[j][k].m_mbstatus == MB_FREE)
@@ -172,7 +181,7 @@ end:
     return ret;
 }
 
-hisdkRet_t libhirt_memmanager_block_put(hirtMemManager_t *pMemManager, hirtGMemAddress_t addr)
+hisdkRet_t hirtMemManagerBlkPut(hirtMemManager_t *pMemManager, hirtGMemAddress_t addr)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     int i;
@@ -184,7 +193,7 @@ hisdkRet_t libhirt_memmanager_block_put(hirtMemManager_t *pMemManager, hirtGMemA
         {
             for(int j=0; j<pMemManager->m_recordtbl[i].m_blocknum; j++)
             {
-                pMemManager->m_blocktbl[pMemManager->m_recordtbl[i].m_ch][pMemManager->m_recordtbl[i].m_beginBlk+j] = MB_FREE;
+                pMemManager->m_blocktbl[pMemManager->m_recordtbl[i].m_ch][pMemManager->m_recordtbl[i].m_beginBlk+j].m_mbstatus = MB_FREE;
             }
             pMemManager->m_recordtbl[i].m_blocknum = 0;
             
@@ -199,3 +208,4 @@ hisdkRet_t libhirt_memmanager_block_put(hirtMemManager_t *pMemManager, hirtGMemA
 
     return ret;
 }
+

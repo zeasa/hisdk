@@ -1,8 +1,13 @@
 #ifndef _HISDK_LOG_H__
 #define _HISDK_LOG_H__
 
+#include <stdio.h>
 #include <string.h>
 #include "hisdk.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*通用字符串存储大小定义*/
 #define STR_COMM_SIZE               128
@@ -56,7 +61,6 @@ extern unsigned long g_ulPrintLogPlaceFlag;
 extern unsigned long g_ulPrintDebugLogFlag;
 unsigned long hisdkLOGPrintLog(unsigned char ucType, unsigned char *pucLogInfo);
 
-
 /*日志打印宏定义*/
 #define HISDK_LOG_INFO(type, fmt, ...) do{\
 	if(HISDK_LOG_TO_TERM == g_ulPrintLogPlaceFlag) \
@@ -66,13 +70,13 @@ unsigned long hisdkLOGPrintLog(unsigned char ucType, unsigned char *pucLogInfo);
 			break;\
 		}\
     	unsigned char ucLogInfo[STR_MAX_SIZE] = {0}; \
-		snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, fmt"  [%s] [line:%d] [%s]\n", ##__VA_ARGS__, __FILENAME__, __LINE__, __FUNCTION__); \
+		snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, fmt" [%s][l:%d][%s()]\n", ##__VA_ARGS__, __FILENAME__, __LINE__, __FUNCTION__); \
 		hisdkLOGPrintLog(type, ucLogInfo); \
 	} \
 	else \
 	{ \
 		unsigned char ucLogInfo[STR_MAX_SIZE] = {0}; \
-		snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, fmt"  [%s] [line:%d] [%s]\n", ##__VA_ARGS__, __FILENAME__, __LINE__, __FUNCTION__); \
+		snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, fmt" [%s][l:%d][%s()]\n", ##__VA_ARGS__, __FILENAME__, __LINE__, __FUNCTION__); \
 		hisdkLOGPrintLog(type, ucLogInfo); \
 	} \
     }while(0)
@@ -85,5 +89,9 @@ extern void          hisdkLOGSetPrintLogPlaceFlag(unsigned long flag);
 extern unsigned long hisdkLOGInit(const unsigned char *ucLogFileName, unsigned long ulFileSize);
 extern void          hisdkLOGDestroy(void);
 
+
+#ifdef __cplusplus
+}
+#endif
 #endif //_HISDK_LOG_H__
 

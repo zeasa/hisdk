@@ -1,39 +1,48 @@
+#ifndef _HIRT_CMDQUEUE_H__
+#define _HIRT_CMDQUEUE_H__
 
-#ifndef LIBHIRT_CMDQUEUE_H__
-#define LIBHIRT_CMDQUEUE_H__
+#include <semaphore.h>
+#include <pthread.h>
+#include "hirt.h"
+#include "hirt_fifo.h"
 
-#include <pthread>
-#include "libhirt.h"
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
-typedef enum hirtCmdType
+typedef enum
 {
     CMDTYPE_KERNEL = 0,
     CMDTYPE_SYNC,
     CMDTYPE_NOTIFIER
 } hirtCmdType_t;
 
-typedef struct hirtCmdNode
+typedef struct
 {
     hirtCmdType_t type;
     hirtTaskDim_t dim;
     
-    hirtKernelParamsBuffer_t buf_param;
-    hirtKernelBinBuffer_t buf_kernel;
+    hirtKernelParamsBuffer_t *buf_param;
+    hirtKernelBinBuffer_t    *buf_kernel;
 
     sem_t *sem_cmdsync;
 } hirtCmdNode_t;
 
-typedef struct hirtCmdQueue
+typedef struct
 {
-    libhirt_fifo_t *pfifo;
+    hirtFifo_t *pfifo;
 } hirtCmdQueue_t;
 
-hisdkRet_t libhirt_cmdqueue_create(hirtCmdQueue_t **ppQueue);
-hisdkRet_t libhirt_cmdqueue_destory(hirtCmdQueue_t *pQueue);
-hisdkRet_t libhirt_cmdqueue_sync_put(hirtCmdQueue_t *pQueue, sem_t *pSem);
-hisdkRet_t libhirt_cmdqueue_kernel_put(hirtCmdQueue_t *pQueue, hirtKernelParamsBuffer_t *pParams, hirtKernelBinBuffer_t *pKernelBin);
-hisdkRet_t libhirt_cmdqueue_get(hirtCmdQueue_t *pQueue, hirtCmdNode_t *pNode);
-hisdkRet_t hirtSyncQueue(hirtCmdQueue *pQueue);
+hisdkRet_t hirtCmdQueueCreate(hirtCmdQueue_t **ppQueue);
+hisdkRet_t hirtCmdQueueDestroy(hirtCmdQueue_t *pQueue);
+hisdkRet_t hirtCmdQueueSyncPut(hirtCmdQueue_t *pQueue, sem_t *pSem);
+hisdkRet_t hirtCmdQueueKernelPut(hirtCmdQueue_t *pQueue, hirtKernelParamsBuffer_t *pParams, 
+    hirtKernelBinBuffer_t *pKernelBin, hirtTaskDim_t taskDim);
+hisdkRet_t hirtCmdQueueNodeGet(hirtCmdQueue_t *pQueue, hirtCmdNode_t *pNode);
+hisdkRet_t hirtCmdQueueSync(hirtCmdQueue_t *pQueue);
 
+#ifdef __cplusplus
+}
+#endif
+#endif /*_HIRT_CMDQUEUE_H__*/
 
-#endif /*LIBHIRT_CMDQUEUE_H__*/

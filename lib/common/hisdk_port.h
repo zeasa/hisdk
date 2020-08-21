@@ -3,8 +3,11 @@
 
 #include <stddef.h>
 #include <dirent.h>
-
 #include "hisdk.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define HISDK_OPEN_WRITE     (0x1)
 #define HISDK_OPEN_READ      (0x2)
@@ -65,10 +68,6 @@ struct hisdkDirRec
 typedef struct hisdkDirRec   hisdkDir_t;
 typedef struct hisdkDirRec*  hisdkDirHandle_t;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*
  * File and directory operations
  */
@@ -92,5 +91,4 @@ void       hisdkPortOsDebugPrintf( const char *format, ... );
 #ifdef __cplusplus
 }
 #endif
-
 #endif /*_HISDK_PORT_H__*/

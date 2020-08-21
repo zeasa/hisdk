@@ -1,21 +1,30 @@
+#include <stdlib.h>
 #include "hirt.h"
 #include "hirt_fifo.h"
 
-libhirt_fifo_t* libhirt_fifo_create(int item_num, int item_siz)
+hisdkRet_t hirtFifoCreate(hirtFifo_t **ppFifo, int item_num, int item_siz)
 {
-    libhirt_fifo_t *fifo = (libhirt_fifo_t *)malloc(sizeof(libhirt_fifo_t));
-    fifo->item_num = item_num;
-    fifo->item_siz = item_siz;
-    fifo->pWrite = 0;
-    fifo->pRead = 0;
-    fifo->is_full = 0;
-    fifo->buf = (void *)malloc(item_num * item_siz);
-    sem_init(&fifo->sem_read, 0, 0);
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
+    hirtFifo_t *pFifo;
 
-    return fifo;
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtFifoCreate : item_num=%d,item_siz=%d", item_num, item_siz);
+    
+    pFifo = (hirtFifo_t *)malloc(sizeof(hirtFifo_t));
+    pFifo->item_num = item_num;
+    pFifo->item_siz = item_siz;
+    pFifo->pWrite = 0;
+    pFifo->pRead = 0;
+    pFifo->is_full = 0;
+    pFifo->buf = (void *)malloc(item_num * item_siz);
+    sem_init(&pFifo->sem_read, 0, 0);
+
+    *ppFifo = pFifo;
+    
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtFifoCreate done.");
+    return ret;
 }
 
-hisdkRet_t libhirt_fifo_destroy(libhirt_fifo_t* fifo)
+hisdkRet_t hirtFifoDestroy(hirtFifo_t* fifo)
 {
     sem_destroy(&fifo->sem_read);
     free(fifo->buf);
@@ -23,7 +32,7 @@ hisdkRet_t libhirt_fifo_destroy(libhirt_fifo_t* fifo)
     return HISDK_RET_SUCCESS;
 }
 
-hisdkRet_t libhirt_fifo_put(libhirt_fifo_t* fifo, void* pdata)
+hisdkRet_t hirtFifoPut(hirtFifo_t* fifo, void* pdata)
 {
     if(fifo->is_full)
     {
@@ -44,7 +53,7 @@ hisdkRet_t libhirt_fifo_put(libhirt_fifo_t* fifo, void* pdata)
     return HISDK_RET_SUCCESS;
 }
 
-hisdkRet_t libhirt_fifo_get(libhirt_fifo_t* fifo, void* pbuf)
+hisdkRet_t hirtFifoGet(hirtFifo_t* fifo, void* pbuf)
 {
     sem_wait(&fifo->sem_read);
     
@@ -64,7 +73,7 @@ hisdkRet_t libhirt_fifo_get(libhirt_fifo_t* fifo, void* pbuf)
     return HISDK_RET_SUCCESS;
 }
 
-int libhirt_fifo_isfull(libhirt_fifo_t* fifo)
+int hirtFifoIsFull(hirtFifo_t* fifo)
 {
     return fifo->is_full;
 }

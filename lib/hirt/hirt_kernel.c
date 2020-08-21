@@ -1,4 +1,7 @@
+#include <stdlib.h>
 #include "hirt.h"
+#include "hirt_mm.h"
+#include "hisdk_port.h"
 #include "hirt_cqueue.h"
 
 /*********************************************************************************
@@ -17,7 +20,7 @@ hisdkRet_t hirtAllocKernelParamsBuffer(hirtKernelParamsBuffer_t **pParams)
     hirtKernelParamsBuffer_t *pBuf = NULL;
     hisdkRet_t ret = HISDK_RET_SUCCESS;
 
-    pBuf = (hirtKernelParamsBuffer_t *)malloc(sizeof(hirtKernelParamsBuffer_t);
+    pBuf = (hirtKernelParamsBuffer_t *)malloc(sizeof(hirtKernelParamsBuffer_t));
     if(pBuf == NULL)
     {
         ret = HISDK_RET_ERR_INSUFFICIENTMEMORY;
@@ -100,12 +103,12 @@ hisdkRet_t hirtDestroyKernelParamsBuffer(hirtKernelParamsBuffer_t params)
 }
 
 __R_HOST static
-hisdkRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char *ppbuf, size_t *pSize)
+hisdkRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char **ppbuf, size_t *pSize)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     hisdkRet_t rc;
-    hirtFileHandle_t file;
-    hirtStatType_t   finfo;
+    hisdkFileHandle_t file;
+    hisdkStatType_t   finfo;
     size_t file_size;
     unsigned char *pbuf;
     size_t actually_read = 0;
@@ -116,21 +119,21 @@ hisdkRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char *pp
         goto fail;
     }
 
-    rc = hirtPortOsFopen(kernel_filename, HIRT_OPEN_READ, &file);
+    rc = hisdkPortOsFopen(kernel_filename, HISDK_OPEN_READ, &file);
     if(rc != HISDK_RET_SUCCESS)
     {
         ret = HISDK_RET_ERR_FILENOTFOUND;
         goto fail;
     }
 
-    rc = hirtPortOsFstat(file, &finfo);
+    rc = hisdkPortOsFstat(file, &finfo);
     if(rc != HISDK_RET_SUCCESS)
     {
         ret = HISDK_RET_ERR_FILEOPERATIONFAILED;
         goto fail;
     }
 
-    file_size = hirtPortOsStatGetSize(&finfo);
+    file_size = hisdkPortOsStatGetSize(&finfo);
     if(!file_size)
     {
         ret = HISDK_RET_ERR_FILEOPERATIONFAILED;
@@ -138,9 +141,9 @@ hisdkRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char *pp
 
     pbuf = (unsigned char*)malloc(file_size);
 
-    hirtPortOsFseek(file, 0, HirtSeek_Set);
+    hisdkPortOsFseek(file, 0, HisdkSeek_Set);
 
-    rc = hirtPortOsFread(file, pbuf, file_size, &actually_read);
+    rc = hisdkPortOsFread(file, pbuf, file_size, &actually_read);
     if(rc != HISDK_RET_SUCCESS)
     {
         free(pbuf);
@@ -148,7 +151,7 @@ hisdkRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char *pp
         goto fail;
     }
 
-    hirtPortOsFclose(file);
+    hisdkPortOsFclose(file);
     if(actually_read != file_size)
     {
         free(pbuf);
@@ -182,12 +185,11 @@ fail:
  * Following nBytes ([function + 64, function + 64 + nBytes - 1]), MLU binary (binary format, not ascii), just memcpy it
  */
 __R_HOST
-hisdkRet_t hirtInvokeKernel(const hirtKernelFunction_t *function, hirtTaskDim_t dim,
+hisdkRet_t hirtInvokeKernel(const char* function, hirtTaskDim_t dim,
       hirtKernelParamsBuffer_t *pparams, hirtKernelBinBuffer_t **ppKernelBin, hirtCmdQueue_t *pqueue)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     hisdkRet_t rc;
-    char *filename;
     unsigned char* pbuf;
     size_t filesize;
     hirtKernelBinBuffer_t *pKernel;
@@ -199,15 +201,15 @@ hisdkRet_t hirtInvokeKernel(const hirtKernelFunction_t *function, hirtTaskDim_t 
     *ppKernelBin = pKernel;
 
     //get kernelfile size
-    hirtLoadKernelFromFile(filename, &pbuf, &filesize);
+    hirtLoadKernelFromFile(function, &pbuf, &filesize);
     //malloc kernel gdram in device memory
     pKernel->size = filesize;
-    hirtMalloc(&pKernel->pbuf_dev, pKernel->size);
+    hirtDevMalloc(&pKernel->pbuf_dev, pKernel->size);
     pKernel->pbuf_host = pbuf;
     //fill some param in parambuf(dim)
 
-    //libhirt_cmdqueue_kernel_put
-    libhirt_cmdqueue_kernel_put(pqueue, pparams, pKernel, dim);
+    //hirtCmdQueueKernelPut
+    hirtCmdQueueKernelPut(pqueue, pparams, pKernel, dim);
 
     return ret;
 }

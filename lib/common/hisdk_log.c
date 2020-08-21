@@ -11,14 +11,17 @@
 
 #include "hisdk_log.h"
 
-/*存储日志的文件名*/
-static unsigned char g_ucLogFileName[MAX_LOG_FILE_NUM][STR_COMM_SIZE] = { { 0 } };
-/*指明是g_ucLogFileName中的哪个文件*/
-static unsigned char g_ucLogFileNo = 0;
+
 /*输出日志位置标记,0-输出到终端,1-输出到日志文件*/
 unsigned long g_ulPrintLogPlaceFlag = 0;
 /*是否打印调试日志标记,0-不打印调试日志,1-打印调试日志*/
 unsigned long g_ulPrintDebugLogFlag = 0;
+
+/*存储日志的文件名*/
+static unsigned char g_ucLogFileName[MAX_LOG_FILE_NUM][STR_COMM_SIZE] = { { 0 } };
+/*指明是g_ucLogFileName中的哪个文件*/
+static unsigned char g_ucLogFileNo = 0;
+
 /*日志文件大小*/
 static unsigned long g_ulLogFileSize = 0;
 /*日志文件句柄*/
@@ -218,7 +221,7 @@ unsigned long hisdkLOGPrintLog(unsigned char ucType, unsigned char *pucLogInfo)
     {
         return -1;
     }
-    snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, "[%s] [%s] %s", ucTime, ucLogTypeStr, pucLogInfo);
+    snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, "[%s][%s] %s", ucTime, ucLogTypeStr, pucLogInfo);
 /*判断是否打印调试日志*/
     if (HISDK_LOG_TO_TERM == g_ulPrintLogPlaceFlag)
     {

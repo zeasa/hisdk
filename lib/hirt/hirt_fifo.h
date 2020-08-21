@@ -1,12 +1,15 @@
 #ifndef LIBHIRT_FIFO_H__
 #define LIBHIRT_FIFO_H__
 
-#include <queue>
-#include <pthread>
+#include <pthread.h>
 #include <semaphore.h>
-#include "libhirt.h"
+#include "hirt.h"
 
-typedef struct _libhirt_fifo
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+typedef struct
 {
     int   pWrite;
     int   pRead;
@@ -16,13 +19,16 @@ typedef struct _libhirt_fifo
     void  *buf;
     sem_t sem_read;
     //  sem_t sem_write;
-} libhirt_fifo_t;
+} hirtFifo_t;
 
-libhirt_fifo_t *libhirt_fifo_create(int item_num, int item_siz);
-hisdkRet_t libhirt_fifo_destroy(libhirt_fifo_t *fifo);
-hisdkRet_t libhirt_fifo_put(libhirt_fifo_t *fifo, void *pdata);
-hisdkRet_t libhirt_fifo_get(libhirt_fifo_t *fifo, void *pbuf);
-int libhirt_fifo_isfull(libhirt_fifo_t *fifo);
+hisdkRet_t  hirtFifoCreate(hirtFifo_t **ppFifo, int item_num, int item_siz);
+hisdkRet_t  hirtFifoDestroy(hirtFifo_t *fifo);
+hisdkRet_t  hirtFifoPut(hirtFifo_t *fifo, void *pdata);
+hisdkRet_t  hirtFifoGet(hirtFifo_t *fifo, void *pbuf);
+int         hirtFifoIsFull(hirtFifo_t *fifo);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /*LIBHIRT_FIFO_H__*/
 

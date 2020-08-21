@@ -1,37 +1,45 @@
+#include <stdlib.h>
 #include <semaphore.h>
-#include "libhirt_fifo.h"
-#include "libhirt_cqueue.h"
+#include "hirt_fifo.h"
+#include "hirt_cqueue.h"
 
 
-hisdkRet_t libhirt_cmdqueue_create(hirtCmdQueue_t *ppQueue)
+hisdkRet_t hirtCmdQueueCreate(hirtCmdQueue_t **ppQueue)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
+    hisdkRet_t e;
     hirtCmdQueue_t *pQueue;
+    
     pQueue = (hirtCmdQueue_t *)malloc(sizeof(hirtCmdQueue_t));
-    pQueue->pfifo = libhirt_fifo_create(HIRT_CMDQUEUE_SIZMAX, sizeof(hirtCmdNode_t));
+    memset(pQueue, 0, sizeof(hirtCmdQueue_t));
+    
+    e = hirtFifoCreate(&pQueue->pfifo, HIRT_CMDQUEUE_SIZMAX, sizeof(hirtCmdNode_t));
 
     *ppQueue = pQueue;
 
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtCmdQueueCreate done.");
     return ret;
 }
 
-hisdkRet_t libhirt_cmdqueue_destory(hirtCmdQueue_t *pQueue)
+hisdkRet_t hirtCmdQueueDestroy(hirtCmdQueue_t *pQueue)
 {
-    libhirt_fifo_destroy(pQueue->pfifo);
+    hirtFifoDestroy(pQueue->pfifo);
+
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtCmdQueueDestroy done.");
     free(pQueue);
 }
 
-hisdkRet_t libhirt_cmdqueue_sync_put(hirtCmdQueue_t *pQueue, sem_t *pSem)
+hisdkRet_t hirtCmdQueueSyncPut(hirtCmdQueue_t *pQueue, sem_t *pSem)
 {
     hirtCmdNode_t node;
     node.type = CMDTYPE_SYNC;
     node.sem_cmdsync = pSem;
-    libhirt_fifo_put(pQueue->pfifo, &node);
+    hirtFifoPut(pQueue->pfifo, &node);
 
     return HISDK_RET_SUCCESS;
 }
 
-hisdkRet_t libhirt_cmdqueue_kernel_put(hirtCmdQueue_t *pQueue, hirtKernelParamsBuffer_t *pParams, 
+hisdkRet_t hirtCmdQueueKernelPut(hirtCmdQueue_t *pQueue, hirtKernelParamsBuffer_t *pParams, 
     hirtKernelBinBuffer_t *pKernelBin, hirtTaskDim_t taskDim)
 {
     hirtCmdNode_t node;
@@ -40,23 +48,23 @@ hisdkRet_t libhirt_cmdqueue_kernel_put(hirtCmdQueue_t *pQueue, hirtKernelParamsB
     node.buf_param = pParams;
     node.dim = taskDim;
 
-    libhirt_fifo_put(pQueue->pfifo, &node);
+    hirtFifoPut(pQueue->pfifo, &node);
 
     return HISDK_RET_SUCCESS;
 }
 
-hisdkRet_t libhirt_cmdqueue_get(hirtCmdQueue_t *pQueue, hirtCmdNode_t *pNode)
+hisdkRet_t hirtCmdQueueNodeGet(hirtCmdQueue_t *pQueue, hirtCmdNode_t *pNode)
 {
-    libhirt_fifo_get(pQueue->pfifo, (void *)pNode);
+    hirtFifoGet(pQueue->pfifo, (void *)pNode);
 }
 
-hisdkRet_t hirtSyncQueue(hirtCmdQueue *pQueue)
+hisdkRet_t hirtCmdQueueSync(hirtCmdQueue_t *pQueue)
 {
     sem_t sem_sync;
 
     sem_init(&sem_sync, 0, 0);
 
-    libhirt_cmdqueue_sync_put(pQueue, &sem_sync);
+    hirtCmdQueueSyncPut(pQueue, &sem_sync);
 
     sem_wait(&sem_sync);
 

@@ -1,5 +1,6 @@
-#include "libhirt.h"
-#include "libhirt_event.h"
+#include <stdlib.h>
+#include "hirt.h"
+#include "hirt_event.h"
 
 hisdkRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler, 
     hirtScoreboard_t *m_pScoreboard,pthread_mutex_t *m_pMutexScheduler)
@@ -12,8 +13,8 @@ hisdkRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler,
     pHandler->m_pScoreboard = m_pScoreboard;
     pHandler->m_pMutexScheduler = m_pMutexScheduler;
 
-    pHandler.m_threadfunc = hirtEventHandlerThread;
-    if(pthread_create(&pHandler.m_thread, NULL, hirtEventHandlerThread, (void*)pHandler) != 0)
+    pHandler->m_threadfunc = (hirtThreadFunction_t)hirtEventHandlerThread;
+    if(pthread_create(&pHandler->m_thread, NULL, hirtEventHandlerThread, (void*)pHandler) != 0)
     {
         ret = HISDK_RET_ERR_CREATETHREAD;
         goto err;
@@ -40,7 +41,7 @@ void* hirtEventHandlerThread(void* arg)
         //pend reading event kfifo
 
         //update scoreboard
-        pthread_mutex_lock(&pHandler->m_pScoreboard.m_mutex);
+        pthread_mutex_lock(&pHandler->m_pScoreboard->m_mutex);
         //int freecnt = 0;
         //for(int i=0; i<HIRT_HIPU200_CORENUMMAX; i++)
         //{
@@ -50,10 +51,10 @@ void* hirtEventHandlerThread(void* arg)
         //        freecnt++;
         //    }
         //}
-        pthread_mutex_unlock(&pHandler->m_pScoreboard.m_mutex);
+        pthread_mutex_unlock(&pHandler->m_pScoreboard->m_mutex);
 
         //send semaphore to scheduler thread
-        sem_post(&pHandler->m_pScoreboard.m_mutex);
+        //sem_post(&pHandler->m_pScoreboard->m_mutex);
     }
 }
 
