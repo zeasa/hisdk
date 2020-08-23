@@ -18,6 +18,7 @@ struct arg_end  *end;
 
 int main(int argc, char *argv[])
 {
+    hisdkRet_t e = HISDK_RET_SUCCESS;
     void *argtable[] = {
         help    = arg_lit0("h", "help",    "display this help and exit"),
         version = arg_lit0("v", "version", "display version info and exit"),
@@ -27,7 +28,7 @@ int main(int argc, char *argv[])
     };
 
     HISDK_LOG_INFO(LOG_SYSTEM, "program start...");
-    
+
     hirtInit(0);
     hirtDev_t dev = 0;
     hirtGetDeviceHandle(&dev, 0);
@@ -76,4 +77,9 @@ int main(int argc, char *argv[])
     
     HISDK_LOG_INFO(LOG_SYSTEM, "program end...");
     return 0;
+#if 0
+fail:
+    HISDK_LOG_INFO(LOG_SYSTEM, "program err...");
+    return 0;
+#endif
 }

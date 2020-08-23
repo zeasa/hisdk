@@ -19,25 +19,25 @@ int conv_test() {
   const int dilation_h = 1, dilation_w = 1;
   const int pad_h = 2, pad_w = 2;
 
-  float *input_cpu_data = (float*)malloc(ni * ci * hi * wi * sizeof(float));
+  float *input_cpu_data = (float*)hisdkAlloc(ni * ci * hi * wi * sizeof(float));
   for (int index = 0; index < ni * ci * hi * wi; ++index) 
   {
       input_cpu_data[index] = ((rand_r(&seed) % 100 / 100.0) - 0.5) / 8;
   }
 
-  float *filter_cpu_data = (float*)malloc(co * ci * kh * kw * sizeof(float));
+  float *filter_cpu_data = (float*)hisdkAlloc(co * ci * kh * kw * sizeof(float));
   for (int index = 0; index < co * ci * kh * kw; ++index) 
   {
       filter_cpu_data[index] = ((rand_r(&seed) % 100 / 100.0) - 0.5) / 8;
   }
-  float *output_cpu_data = (float*)malloc(no * co * ho * wo * sizeof(float));
-  float *cpu_result = (float*)malloc(no * co * ho * wo * sizeof(float));
+  float *output_cpu_data = (float*)hisdkAlloc(no * co * ho * wo * sizeof(float));
+  float *cpu_result = (float*)hisdkAlloc(no * co * ho * wo * sizeof(float));
   for (int index = 0; index < no * co * ho * wo; ++index) 
   {
       output_cpu_data[index] = 0.0;
   }
 
-  float *bias_cpu_data = (float*)malloc(co * sizeof(float));
+  float *bias_cpu_data = (float*)hisdkAlloc(co * sizeof(float));
   for (int index = 0; index < co; ++index) 
   {
       bias_cpu_data[index] = (rand_r(&seed) % 100 / 100.0) * 128;
@@ -159,7 +159,7 @@ int conv_test() {
   // compile op
   himlCompileBaseOp(conv_op, himl_C10, 1);
 
-  // malloc himl tensor
+  // hisdkAlloc himl tensor
   void *input_himl_data = himlMallocBuffer(
           input_himl);
   void *output_himl_data = himlMallocBuffer(
@@ -224,11 +224,11 @@ int conv_test() {
   himlDestroyBaseOp(&conv_op);
 
   //  delete pointers (including data pointers)
-  free(input_cpu_data);
-  free(filter_cpu_data);
-  free(bias_cpu_data);
-  free(output_cpu_data);
-  free(cpu_result);
+  hisdkFree(input_cpu_data);
+  hisdkFree(filter_cpu_data);
+  hisdkFree(bias_cpu_data);
+  hisdkFree(output_cpu_data);
+  hisdkFree(cpu_result);
 
   return 0;
 }

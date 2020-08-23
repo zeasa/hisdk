@@ -1,5 +1,4 @@
-#include "hirt.h"
-#include "hisdk_log.h"
+#include "hirt_utils.h"
 
 /************************************************************************
  * Error handling
@@ -41,7 +40,7 @@ hisdkRet_t hirtGetLastErr(void)
  * Initializes this API must be called before any other runtime API calls.
  *
  * @param  Flags[in] reserved for further use, pass 0 as well.
- * @return hirt_RET_SUCCESS if success, otherwise with the error code.
+ * @return HISDK_RET_SUCCESS if success, otherwise with the error code.
  */
 __R_HOST
 hisdkRet_t hirtInit(unsigned int Flags)

@@ -1,5 +1,5 @@
-#include "hirt.h"
 #include "hirt_device.h"
+
 
 static hirtDev_t hirtCurrentDev_g = 0;
 

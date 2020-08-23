@@ -61,6 +61,11 @@ void hisdkFree(void *ptr)
         free(ptr);
 }
 
+void *hisdkMemset(void *str, int c, size_t n)
+{
+    return memset(str, c, n);
+}
+
 hisdkRet_t hisdkPortOsStat(const char *filename, hisdkStatType_t *stat)
 {
     hisdkFile_t *file = 0;
@@ -131,7 +136,7 @@ hisdkRet_t hisdkPortOsFopen(const char *path, u32_t flags,
     if (e != HISDK_RET_SUCCESS)
         return HISDK_RET_ERR_BADPARAMETER;
 
-    f = malloc(sizeof(hisdkFile_t));
+    f = hisdkAlloc(sizeof(hisdkFile_t));
     if (!f)
         return HISDK_RET_ERR_INSUFFICIENTMEMORY;
 
@@ -146,7 +151,7 @@ hisdkRet_t hisdkPortOsFopen(const char *path, u32_t flags,
     return HISDK_RET_SUCCESS;
 
 fail:
-    free(f);
+    hisdkFree(f);
     return e;
 }
 
@@ -158,7 +163,7 @@ void hisdkPortOsFclose(hisdkFile_t *file)
     // TODO: what if close fails. Insert assertions??
     (void)close(file->fd);
     file->fd = -1;
-    free(file);
+    hisdkFree(file);
 }
 
 // TODO: Should the FIFO device be considered?
@@ -311,7 +316,7 @@ void hisdkPortOsMemSet( void *s, u8_t c, size_t size )
     if (!s)
         return;
 
-    (void)memset(s, (int)c, size);
+    (void)hisdkMemset(s, (int)c, size);
 }
 
 hisdkRet_t hisdkPortOsOpenDir(const char *path, hisdkDir_t **dir)
@@ -320,7 +325,7 @@ hisdkRet_t hisdkPortOsOpenDir(const char *path, hisdkDir_t **dir)
     if (!path || !dir)
         return HISDK_RET_ERR_BADPARAMETER;
 
-    d = (hisdkDir_t *)malloc(sizeof(hisdkDir_t));
+    d = (hisdkDir_t *)hisdkAlloc(sizeof(hisdkDir_t));
     if (!d)
         return HISDK_RET_ERR_INSUFFICIENTMEMORY;
 
@@ -360,7 +365,7 @@ void hisdkPortOsCloseDir(hisdkDir_t *dir)
     if (dir->dir)
         (void) closedir(dir->dir);
 
-    free(dir);
+    hisdkFree(dir);
     return;
 }
 

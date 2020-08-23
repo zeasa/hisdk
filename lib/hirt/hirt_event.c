@@ -1,6 +1,5 @@
-#include <stdlib.h>
-#include "hirt.h"
 #include "hirt_event.h"
+
 
 hisdkRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler, 
     hirtScoreboard_t *m_pScoreboard,pthread_mutex_t *m_pMutexScheduler)
@@ -8,7 +7,7 @@ hisdkRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler,
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     hirtEventHandler_t *pHandler;
 
-    pHandler = (hirtEventHandler_t*)malloc(sizeof(hirtEventHandler_t));
+    pHandler = (hirtEventHandler_t*)hisdkAlloc(sizeof(hirtEventHandler_t));
     *ppHandler = pHandler;
     pHandler->m_pScoreboard = m_pScoreboard;
     pHandler->m_pMutexScheduler = m_pMutexScheduler;
@@ -23,13 +22,13 @@ hisdkRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler,
     return ret;
     
 err:
-    free(pHandler);
+    hisdkFree(pHandler);
 }
 
 hisdkRet_t hirtEventHandlerDestroy(hirtEventHandler_t *pHandler)
 {
     //pthread_exit(NULL);
-    free(pHandler);
+    hisdkFree(pHandler);
 }
 
 void* hirtEventHandlerThread(void* arg)

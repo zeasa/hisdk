@@ -221,7 +221,7 @@ unsigned long hisdkLOGPrintLog(unsigned char ucType, unsigned char *pucLogInfo)
     {
         return -1;
     }
-    snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, "[%s][%s] %s", ucTime, ucLogTypeStr, pucLogInfo);
+    snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, "[%s][%-6s] %s", ucTime, ucLogTypeStr, pucLogInfo);
 /*判断是否打印调试日志*/
     if (HISDK_LOG_TO_TERM == g_ulPrintLogPlaceFlag)
     {

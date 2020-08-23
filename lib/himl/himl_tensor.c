@@ -18,7 +18,7 @@ hisdkRet_t himlCreateCpuTensor(himlCpuTensor_t** ppCpu_tensor,
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     himlCpuTensor_t *pCpu_Tensor;
 
-    pCpu_Tensor = (himlCpuTensor_t*)malloc(sizeof(himlCpuTensor_t));
+    pCpu_Tensor = (himlCpuTensor_t*)hisdkAlloc(sizeof(himlCpuTensor_t));
     *ppCpu_tensor = pCpu_Tensor;
 
     pCpu_Tensor->tensor_type = tensor_type;
@@ -40,9 +40,9 @@ hisdkRet_t himlDestroyCpuTensor(himlCpuTensor_t* pCpu_tensor)
 
     if(pCpu_tensor->haddr != 0)
     {
-        free(pCpu_tensor->haddr);
+        hisdkFree(pCpu_tensor->haddr);
     }
-    free(pCpu_tensor);
+    hisdkFree(pCpu_tensor);
 
     return ret;
 }
@@ -59,7 +59,7 @@ hisdkRet_t himlCreateDevTensor(himlDevTensor_t** ppDev_tensor,
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     himlDevTensor_t *pDev_Tensor;
 
-    pDev_Tensor = (himlDevTensor_t*)malloc(sizeof(himlDevTensor_t));
+    pDev_Tensor = (himlDevTensor_t*)hisdkAlloc(sizeof(himlDevTensor_t));
     *ppDev_tensor = pDev_Tensor;
 
     pDev_Tensor->tensor_type = tensor_type;
@@ -81,7 +81,7 @@ hisdkRet_t himlDestroyDevTensor(himlDevTensor_t* pDev_tensor)
 
     hirtFree(pDev_tensor->gmemaddr);
     
-    free(pDev_tensor);
+    hisdkFree(pDev_tensor);
 
     return ret;
 }
@@ -93,7 +93,7 @@ u32_t himlCalcShapeBufsize(shape_t *pShape)
            pShape->h * pShape->w;
 }
 
-// malloc himl tensor
+// hisdkAlloc himl tensor
 hisdkRet_t himlMallocBuffer(himlDevTensor_t *tensor_himl)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;

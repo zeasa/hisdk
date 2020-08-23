@@ -1,7 +1,11 @@
 #ifndef __LIBHIRT_H__
 #define __LIBHIRT_H__
 
-#include "hisdk.h"
+#include "hisdk_type.h"
+#include "hisdk_config.h"
+#include "hisdk_port.h"
+#include "hisdk_log.h"
+#include "hisdk_error.h"
 
 #ifdef __cplusplus
 extern "C" {

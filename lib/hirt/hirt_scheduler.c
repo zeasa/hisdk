@@ -1,9 +1,5 @@
-#include <stdlib.h>
-#include "hirt.h"
-#include "hirt_mm.h"
-#include "hirt_cqueue.h"
 #include "hirt_scheduler.h"
-#include "hirt_cqueue.h"
+#include "hirt_mm.h"
 
 hisdkRet_t hirtSchedulerCreate(hirtScheduler_t **ppScheduler, hirtCmdQueue_t * const pCmdQueue)
 {
@@ -18,13 +14,13 @@ hisdkRet_t hirtSchedulerCreate(hirtScheduler_t **ppScheduler, hirtCmdQueue_t * c
         goto fail;
     }
 
-    pScheduler = (hirtScheduler_t*)malloc(sizeof(hirtScheduler_t));
+    pScheduler = (hirtScheduler_t*)hisdkAlloc(sizeof(hirtScheduler_t));
     if(pScheduler == NULL)
     {
         ret = HISDK_RET_ERR_NOMEM;
         goto fail;
     }
-    memset(pScheduler, 0 ,sizeof(hirtScheduler_t));
+    hisdkMemset(pScheduler, 0 ,sizeof(hirtScheduler_t));
     pScheduler->m_pQueue = pCmdQueue;
     
     e = hirtScoreboardCreate(&pScoreboard);
@@ -65,7 +61,7 @@ fail:
 
     if(pScheduler != NULL)
     {
-        free(pScheduler);
+        hisdkFree(pScheduler);
     }
     *ppScheduler = NULL;
     
@@ -86,7 +82,7 @@ hisdkRet_t hirtSchedulerDestroy(hirtScheduler_t *pScheduler)
 
     if(pScheduler != NULL)
     {
-        free(pScheduler);
+        hisdkFree(pScheduler);
     }
     
     HISDK_LOG_INFO(LOG_SYSTEM, "%s", "hirtSchedulerDestroy done.");
@@ -196,7 +192,7 @@ void* hirtSchedulerThread(void* arg)
 hisdkRet_t hirtScoreboardCreate(hirtScoreboard_t **ppScoreboard)
 {
     hirtScoreboard_t *pScoreboard;
-    pScoreboard = (hirtScoreboard_t*)malloc(sizeof(hirtScoreboard_t));
+    pScoreboard = (hirtScoreboard_t*)hisdkAlloc(sizeof(hirtScoreboard_t));
     *ppScoreboard = pScoreboard;
 
     for(int i=0; i<HIRT_HIPU200_CORENUMMAX; i++)
@@ -213,7 +209,7 @@ hisdkRet_t hirtScoreboardDestroy(hirtScoreboard_t *pScoreboard)
 {
     pthread_mutex_destroy(&pScoreboard->m_mutex);
 
-    free(pScoreboard);
+    hisdkFree(pScoreboard);
 
     return HISDK_RET_SUCCESS;
 }

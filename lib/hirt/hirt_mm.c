@@ -1,5 +1,3 @@
-#include <stdlib.h>
-#include "hirt.h"
 #include "hirt_mm.h"
 
 
@@ -35,7 +33,7 @@ hisdkRet_t hirtHostMalloc(void **pPtr, size_t nBytes/*, hirtMemType_t type*/)
  * @brief Free the memory space pointed by ptr, which must be
  *        returned by a previous call of hirtMallocHost.
  *
- * @param ptr[in]  point to the address of memory to be free.
+ * @param ptr[in]  point to the address of memory to be hisdkFree.
  * @return hirt_RET_SUCCESS if success,
  *         otherwise the error code is returned.
  */
@@ -62,7 +60,7 @@ hisdkRet_t hirtDevMalloc(void **pPtr, size_t nBytes)
 /**
  * @brief Deallocate MLU device Memory.
  *
- * @param ptr[in] point to the memory to be free.
+ * @param ptr[in] point to the memory to be hisdkFree.
  * @return hirt_RET_SUCCESS if success,
  *         otherwise the error code is returned.
  */
@@ -100,7 +98,7 @@ hisdkRet_t hirtMemManagerCreate(hirtMemManager_t **ppMemManager)
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     hirtMemManager_t *pMemManager;
 
-    pMemManager = (hirtMemManager_t*)malloc(sizeof(hirtMemManager_t));
+    pMemManager = (hirtMemManager_t*)hisdkAlloc(sizeof(hirtMemManager_t));
     *ppMemManager = pMemManager;
 
     for(int i=0; i<HIRT_HIPU200_MEM_CH_NUM; i++)
@@ -119,7 +117,7 @@ hisdkRet_t hirtMemManagerCreate(hirtMemManager_t **ppMemManager)
 
 hisdkRet_t hirtMemManagerDestroy(hirtMemManager_t *pMemManager)
 {
-    free(pMemManager);
+    hisdkFree(pMemManager);
     return HISDK_RET_SUCCESS;
 }
 

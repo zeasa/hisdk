@@ -12,7 +12,7 @@ hisdkRet_t himlCreateConvOpParam(himlConvOpParam_t **ppParam,
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     himlConvOpParam_t *pParam;
 
-    pParam = (himlConvOpParam_t*)malloc(sizeof(himlConvOpParam_t));
+    pParam = (himlConvOpParam_t*)hisdkAlloc(sizeof(himlConvOpParam_t));
     *ppParam = pParam;
 
     pParam->stride_h = stride_h;
@@ -27,7 +27,7 @@ hisdkRet_t himlDestroyConvOpParam(himlConvOpParam_t *pParam)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
 
-    free(pParam);
+    hisdkFree(pParam);
 
     return ret;
 }

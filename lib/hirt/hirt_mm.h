@@ -1,6 +1,8 @@
 #ifndef LIBHIRT_MM_H__
 #define LIBHIRT_MM_H__
 
+#include "hirt.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus

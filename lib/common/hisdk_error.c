@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-
 #include "hisdk_error.h"
 #include "hisdk_port.h"
 

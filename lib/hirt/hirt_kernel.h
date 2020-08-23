@@ -1,6 +1,10 @@
 #ifndef LIBHIRT_KERNEL_H__
 #define LIBHIRT_KERNEL_H__
 
+#include "hirt.h"
+#include "hirt_cqueue.h"
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus

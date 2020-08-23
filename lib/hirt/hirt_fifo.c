@@ -1,6 +1,5 @@
-#include <stdlib.h>
-#include "hirt.h"
 #include "hirt_fifo.h"
+
 
 hisdkRet_t hirtFifoCreate(hirtFifo_t **ppFifo, int item_num, int item_siz)
 {
@@ -9,13 +8,13 @@ hisdkRet_t hirtFifoCreate(hirtFifo_t **ppFifo, int item_num, int item_siz)
 
     HISDK_LOG_INFO(LOG_SYSTEM, "hirtFifoCreate : item_num=%d,item_siz=%d", item_num, item_siz);
     
-    pFifo = (hirtFifo_t *)malloc(sizeof(hirtFifo_t));
+    pFifo = (hirtFifo_t *)hisdkAlloc(sizeof(hirtFifo_t));
     pFifo->item_num = item_num;
     pFifo->item_siz = item_siz;
     pFifo->pWrite = 0;
     pFifo->pRead = 0;
     pFifo->is_full = 0;
-    pFifo->buf = (void *)malloc(item_num * item_siz);
+    pFifo->buf = (void *)hisdkAlloc(item_num * item_siz);
     sem_init(&pFifo->sem_read, 0, 0);
 
     *ppFifo = pFifo;
@@ -27,8 +26,8 @@ hisdkRet_t hirtFifoCreate(hirtFifo_t **ppFifo, int item_num, int item_siz)
 hisdkRet_t hirtFifoDestroy(hirtFifo_t* fifo)
 {
     sem_destroy(&fifo->sem_read);
-    free(fifo->buf);
-    free(fifo);
+    hisdkFree(fifo->buf);
+    hisdkFree(fifo);
     
     return HISDK_RET_SUCCESS;
 }

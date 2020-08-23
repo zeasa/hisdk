@@ -1,8 +1,6 @@
-#include <stdlib.h>
-#include "hirt.h"
+#include "hirt_kernel.h"
 #include "hirt_mm.h"
-#include "hisdk_port.h"
-#include "hirt_cqueue.h"
+
 
 /*********************************************************************************
  * Execution control
@@ -20,22 +18,22 @@ hisdkRet_t hirtKernelParamsBufferCreate(hirtKernelParamsBuffer_t **ppParams)
     hirtKernelParamsBuffer_t *pBuf = NULL;
     hisdkRet_t ret = HISDK_RET_SUCCESS;
 
-    pBuf = (hirtKernelParamsBuffer_t *)malloc(sizeof(hirtKernelParamsBuffer_t));
+    pBuf = (hirtKernelParamsBuffer_t *)hisdkAlloc(sizeof(hirtKernelParamsBuffer_t));
     if(pBuf == NULL)
     {
         ret = HISDK_RET_ERR_INSUFFICIENTMEMORY;
         goto fail;
     }
-    memset(pBuf, 0, sizeof(hirtKernelParamsBuffer_t));
+    hisdkMemset(pBuf, 0, sizeof(hirtKernelParamsBuffer_t));
     pBuf->max_param = HIRT_PARAMBUF_MAXSIZE;
 
-    pBuf->pbuf_host = (void*)malloc(pBuf->max_param);
+    pBuf->pbuf_host = (void*)hisdkAlloc(pBuf->max_param);
     if(pBuf->pbuf_host == NULL)
     {
         ret = HISDK_RET_ERR_INSUFFICIENTMEMORY;
         goto fail;
     }
-    memset(pBuf->pbuf_host, 0, pBuf->max_param);
+    hisdkMemset(pBuf->pbuf_host, 0, pBuf->max_param);
     
     if(hirtDevMalloc(&pBuf->pbuf_dev, HIRT_PARAMBUF_MAXSIZE) != HISDK_RET_SUCCESS)
     {
@@ -54,12 +52,12 @@ fail:
 
     if(pBuf->pbuf_host != NULL)
     {
-        free(pBuf->pbuf_host);
+        hisdkFree(pBuf->pbuf_host);
     }
     
     if(pBuf != NULL)
     {
-        free(pBuf);
+        hisdkFree(pBuf);
     }
     
     *ppParams = NULL;
@@ -137,7 +135,7 @@ hisdkRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char **p
         ret = HISDK_RET_ERR_FILEOPERATIONFAILED;
     }
 
-    pbuf = (unsigned char*)malloc(file_size);
+    pbuf = (unsigned char*)hisdkAlloc(file_size);
     if(pbuf == NULL)
     {
         ret = HISDK_RET_ERR_NOMEM;
@@ -169,7 +167,7 @@ hisdkRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char **p
 fail:
     if(pbuf != NULL)
     {
-        free(pbuf);
+        hisdkFree(pbuf);
     }
 
     if(file != NULL)
@@ -213,13 +211,13 @@ hisdkRet_t hirtInvokeKernel(const char* function, hirtTaskDim_t dim,
     void *pKernelGdramPtr;
 
     //alloc kernelbin struct
-    pKernelBin = (hirtKernelBinBuffer_t *)malloc(sizeof(hirtKernelBinBuffer_t));
+    pKernelBin = (hirtKernelBinBuffer_t *)hisdkAlloc(sizeof(hirtKernelBinBuffer_t));
     if(pKernelBin == NULL)
     {
         ret = HISDK_RET_ERR_NOMEM;
         goto fail;
     }
-    memset(pKernelBin, 0, sizeof(hirtKernelBinBuffer_t));
+    hisdkMemset(pKernelBin, 0, sizeof(hirtKernelBinBuffer_t));
 
     //get kernelfile size
     rc = hirtLoadKernelFromFile(function, &pbuf, &filesize);
@@ -229,7 +227,7 @@ hisdkRet_t hirtInvokeKernel(const char* function, hirtTaskDim_t dim,
         goto fail;
     }
     
-    //malloc kernel gdram in device memory
+    //hisdkAlloc kernel gdram in device memory
     pKernelBin->size = filesize;
     rc = hirtDevMalloc(&pKernelBin->pbuf_dev, pKernelBin->size);
     if(rc != HISDK_RET_SUCCESS)
@@ -255,7 +253,7 @@ fail:
     
     if(pKernelBin != NULL)
     {
-        free(pKernelBin);
+        hisdkFree(pKernelBin);
     }
 
     HISDK_LOG_INFO(LOG_SYSTEM, "hirtInvokeKernel failed.");

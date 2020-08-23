@@ -2,6 +2,7 @@
 #define LIBHIRT_EVENT_H__
 
 #include <pthread.h>
+#include "hirt.h"
 #include "hirt_scheduler.h"
 
 #ifdef __cplusplus

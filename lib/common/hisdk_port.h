@@ -1,9 +1,10 @@
 #ifndef _HISDK_PORT_H__
 #define _HISDK_PORT_H__
 
+#include <stdlib.h>
 #include <stddef.h>
 #include <dirent.h>
-#include "hisdk.h"
+#include "hisdk_type.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,6 +65,10 @@ typedef struct
     DIR *dir;
 } hisdkDir_t;
 
+
+void      *hisdkAlloc(size_t size);
+void       hisdkFree(void *ptr);
+void      *hisdkMemset(void *str, int c, size_t n);
 /*
  * File and directory operations
  */

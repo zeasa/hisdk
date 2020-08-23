@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "hisdk.h"
+#include "hisdk_type.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,13 +70,13 @@ unsigned long hisdkLOGPrintLog(unsigned char ucType, unsigned char *pucLogInfo);
 			break;\
 		}\
     	unsigned char ucLogInfo[STR_MAX_SIZE] = {0}; \
-		snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, fmt" [%s][l:%d][%s()]\n", ##__VA_ARGS__, __FILENAME__, __LINE__, __FUNCTION__); \
+		snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, fmt" [%s.%d][%s()]\n", ##__VA_ARGS__, __FILENAME__, __LINE__, __FUNCTION__); \
 		hisdkLOGPrintLog(type, ucLogInfo); \
 	} \
 	else \
 	{ \
 		unsigned char ucLogInfo[STR_MAX_SIZE] = {0}; \
-		snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, fmt" [%s][l:%d][%s()]\n", ##__VA_ARGS__, __FILENAME__, __LINE__, __FUNCTION__); \
+		snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, fmt" [%s.%d][%s()]\n", ##__VA_ARGS__, __FILENAME__, __LINE__, __FUNCTION__); \
 		hisdkLOGPrintLog(type, ucLogInfo); \
 	} \
     }while(0)
