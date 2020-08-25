@@ -66,6 +66,11 @@ void *hisdkMemset(void *str, int c, size_t n)
     return memset(str, c, n);
 }
 
+void *hisdkMemcpy(void *destin, void *source, size_t n)
+{
+    return memcpy(destin, source, n);
+}
+
 hisdkRet_t hisdkPortOsStat(const char *filename, hisdkStatType_t *stat)
 {
     hisdkFile_t *file = 0;

@@ -6,8 +6,8 @@ hisdkRet_t himlCreateConvOpParam(himlConvOpParam_t **ppParam,
                 int stride_w,
                 int dilation_h,
                 int dilation_w,
-                int pad_h = 0,
-                int pad_w = 0)
+                int pad_h,
+                int pad_w)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     himlConvOpParam_t *pParam;
@@ -25,10 +25,10 @@ hisdkRet_t himlCreateConvOpParam(himlConvOpParam_t **ppParam,
 
 hisdkRet_t himlDestroyConvOpParam(himlConvOpParam_t *pParam)
 {
-    hisdkRet_t ret = HISDK_RET_SUCCESS;
+    hisdkRet_t e = HISDK_RET_SUCCESS;
 
     hisdkFree(pParam);
 
-    return ret;
+    return e;
 }
 

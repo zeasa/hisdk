@@ -43,9 +43,9 @@ hisdkRet_t hirtHostMalloc(void **pPtr, size_t nBytes/*, hirtMemType_t type*/);
 __R_HOST
 hisdkRet_t hirtHostFree(void *ptr);
 __R_HOST
-hisdkRet_t hirtDevMalloc(void **pPtr, size_t nBytes);
+hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes);
 __R_HOST
-hisdkRet_t hirtDevFree(void *ptr);
+hisdkRet_t hirtGpuFree(hirtGMemAddress_t devAddr);
 __R_HOST
 hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDir_t dir);
 

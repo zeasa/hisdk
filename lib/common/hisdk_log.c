@@ -83,8 +83,13 @@ unsigned long hisdkLOGPrintLogTime(unsigned char *ucTime, unsigned long ulBufLen
     }
     gettimeofday(&stTmMsec, NULL);
     pstTmSec = localtime(&stTmMsec.tv_sec);
+#if 0
     snprintf((char *)ucTime, ulBufLen - 1, "%04d-%02d-%02d %02d:%02d:%02d %03ldms",
              pstTmSec->tm_year + 1900, pstTmSec->tm_mon + 1, pstTmSec->tm_mday, pstTmSec->tm_hour,
+             pstTmSec->tm_min, pstTmSec->tm_sec, stTmMsec.tv_usec / 1000);
+#endif
+    snprintf((char *)ucTime, ulBufLen - 1, "%02d/%02d %02d:%02d:%02d.%03ld",
+             pstTmSec->tm_mon + 1, pstTmSec->tm_mday, pstTmSec->tm_hour,
              pstTmSec->tm_min, pstTmSec->tm_sec, stTmMsec.tv_usec / 1000);
 
     return 0;
@@ -111,32 +116,32 @@ unsigned long hisdkLOGLogTypeToStr(unsigned char ucType, unsigned char *pucTypeS
     {
     case LOG_DEBUG:
     {
-        strncpy((char *)pucTypeString, "DEBUG", ulBufLen);
+        strncpy((char *)pucTypeString, "DBG", ulBufLen);
         break;
     }
     case LOG_ERROR:
     {
-        strncpy((char *)pucTypeString, "ERROR", ulBufLen);
+        strncpy((char *)pucTypeString, "ERR", ulBufLen);
         break;
     }
     case LOG_WARNING:
     {
-        strncpy((char *)pucTypeString, "WARNING", ulBufLen);
+        strncpy((char *)pucTypeString, "WAR", ulBufLen);
         break;
     }
     case LOG_ACTION:
     {
-        strncpy((char *)pucTypeString, "ACTION", ulBufLen);
+        strncpy((char *)pucTypeString, "ACT", ulBufLen);
         break;
     }
     case LOG_SYSTEM:
     {
-        strncpy((char *)pucTypeString, "SYSTEM", ulBufLen);
+        strncpy((char *)pucTypeString, "SYS", ulBufLen);
         break;
     }
     default:
     {
-        strncpy((char *)pucTypeString, "UNKNOWN", ulBufLen);
+        strncpy((char *)pucTypeString, "UKN", ulBufLen);
         break;
     }
     }
@@ -159,13 +164,13 @@ unsigned long hisdkLOGOpenLogFile(void)
 /*判断文件是否已经打开*/
     if (NULL != pFile)
     {
-        LOG_PRINT("[ACTION] file opened!");
+        LOG_PRINT("[ACT] file opened!");
         return 0;
     }
 /*判断文件名是否有定义*/
     if (NULL == path)
     {
-        LOG_PRINT("[ERROR] file name is NULL.");
+        LOG_PRINT("[ERR] file name is NULL.");
         return -1;
     }
 
@@ -175,7 +180,7 @@ unsigned long hisdkLOGOpenLogFile(void)
         /*获取文件大小*/
         if (0 > (len = get_file_size(path)))
         {
-            LOG_PRINT("[ERROR] get file size failed!");
+            LOG_PRINT("[ERR] get file size failed!");
             return -1;
         }
     }
@@ -185,10 +190,10 @@ unsigned long hisdkLOGOpenLogFile(void)
     pFile = fopen(path, flag);
     if (NULL == pFile)
     {
-        LOG_PRINT("[ERROR] open file failed!");
+        LOG_PRINT("[ERR] open file failed!");
         return -1;
     }
-    LOG_PRINT("[DEBUG] open file name = %s", path);
+    LOG_PRINT("[DBG] open file name = %s", path);
     return 0;
 }
 
@@ -221,7 +226,7 @@ unsigned long hisdkLOGPrintLog(unsigned char ucType, unsigned char *pucLogInfo)
     {
         return -1;
     }
-    snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, "[%s][%-6s] %s", ucTime, ucLogTypeStr, pucLogInfo);
+    snprintf((char *)ucLogInfo, sizeof(ucLogInfo) - 1, "[%s][%s] %s", ucTime, ucLogTypeStr, pucLogInfo);
 /*判断是否打印调试日志*/
     if (HISDK_LOG_TO_TERM == g_ulPrintLogPlaceFlag)
     {

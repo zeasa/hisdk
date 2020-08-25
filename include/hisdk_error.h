@@ -74,12 +74,22 @@ void hisdkUtilsLogError(const char* tag, const char* path, hisdkRet_t e, const c
 
 /**
  * Simply report an error.
+ * HISDK_UTILS_LOG_ERROR((_err), __FILE__, __FUNCTION__, __LINE__, false, 0);
+ * HISDK_UTILS_LOG_ERROR((_err), __FILE__, __FUNCTION__, __LINE__, false, (_format));
  */
 #define REPORT_ERROR(...) HISDK_UTILS_VA_SELECT(REPORT_ERROR_IMPL, __VA_ARGS__)
 #define REPORT_ERROR_IMPL_1(_err) \
-    do { HISDK_UTILS_LOG_ERROR((_err), __FILE__, __FUNCTION__, __LINE__, false, 0); } while (0)
+    do { \
+        e = (_err); \
+        HISDK_LOG_INFO(LOG_ERROR, "err=%d ", e); \
+        goto fail; \
+    } while (0)
 #define REPORT_ERROR_IMPL_2(_err, _format) \
-    do { HISDK_UTILS_LOG_ERROR((_err), __FILE__, __FUNCTION__, __LINE__, false, (_format)); } while (0)
+    do { \
+        e = (_err); \
+        HISDK_LOG_INFO(LOG_ERROR, "err=%d "_format, e); \
+        goto fail; \
+    } while (0)
 #define REPORT_ERROR_IMPL_3(_err, _format, ...) REPORT_ERROR_IMPL_N((_err), (_format), __VA_ARGS__)
 #define REPORT_ERROR_IMPL_4(_err, _format, ...) REPORT_ERROR_IMPL_N((_err), (_format), __VA_ARGS__)
 #define REPORT_ERROR_IMPL_5(_err, _format, ...) REPORT_ERROR_IMPL_N((_err), (_format), __VA_ARGS__)

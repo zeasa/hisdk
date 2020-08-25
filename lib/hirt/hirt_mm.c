@@ -52,7 +52,7 @@ hisdkRet_t hirtHostFree(void *ptr)
  *         otherwise the error code is returned.
  */
 __R_HOST
-hisdkRet_t hirtDevMalloc(void **pPtr, size_t nBytes)
+hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes)
 {
     return HISDK_RET_SUCCESS; 
 }
@@ -65,7 +65,7 @@ hisdkRet_t hirtDevMalloc(void **pPtr, size_t nBytes)
  *         otherwise the error code is returned.
  */
 __R_HOST
-hisdkRet_t hirtDevFree(void *ptr)
+hisdkRet_t hirtGpuFree(hirtGMemAddress_t devAddr)
 {
     return HISDK_RET_SUCCESS;
 }
@@ -89,7 +89,28 @@ hisdkRet_t hirtDevFree(void *ptr)
 __R_HOST
 hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDir_t dir)
 {
-    return HISDK_RET_SUCCESS;
+    hisdkRet_t e = HISDK_RET_SUCCESS;
+    
+    if(nBytes == 0)
+    {
+        HISDK_ERR_RPTFAIL(HISDK_RET_ERR_BADPARAMETER, "hirtMemcpy size == 0.");
+    }
+
+    if(dir == HIRT_MEM_TRANS_DIR_HOST2GPU)
+    {
+        
+    }
+    else if(dir == HIRT_MEM_TRANS_DIR_GPU2HOST)
+    {
+        
+    }
+    else
+    {
+        HISDK_ERR_RPTFAIL(HISDK_RET_ERR_BADPARAMETER, "hirtMemcpy dir err.");
+    }
+
+fail:
+    return e;
 }
 
 

@@ -25,9 +25,9 @@ extern "C" {
 
 /**< Direction of data transmission */
 typedef enum {
-  HIRT_MEM_TRANS_DIR_HOST2DEV = 0,   /**< Host to Device*/
-  HIRT_MEM_TRANS_DIR_DEV2DEV,        /**< Device to Device */
-  HIRT_MEM_TRANS_DIR_DEV2HOST,       /**< Device to Host */
+  HIRT_MEM_TRANS_DIR_HOST2GPU = 0,   /**< Host to Device*/
+  HIRT_MEM_TRANS_DIR_GPU2GPU,        /**< Device to Device */
+  HIRT_MEM_TRANS_DIR_GPU2HOST,       /**< Device to Host */
   HIRT_MEM_TRANS_DIR_HOST2HOST,      /**< Host to Host */
 } hirtMemTransDir_t;
 
@@ -69,6 +69,12 @@ typedef enum {
 typedef int hirtTaskDim_t;
 typedef unsigned long hirtDev_t;
 typedef u64_t hirtGMemAddress_t;
+typedef struct
+{
+    u8_t x_pos;
+    u8_t y_pos;
+    u32_t inner_addr;
+} hirtNocAddress_t;
 
 #define MAKE_DEVADDR(nodenoc, low32)    ((((u64_t)nodenoc) << 32) + low32)
 #define MAKE_DEVADDR_BLK(nodenoc, blk)  ((((u64_t)nodenoc) << 32) + blk*HIRT_HIPU200_MEM_BLK_SIZ)
@@ -78,15 +84,15 @@ typedef u64_t hirtGMemAddress_t;
 
 /**< hirt_internal.h */
 typedef struct {
-  void *pbuf_host;
-  void *pbuf_dev;
+  void              *pbuf_host;
+  hirtGMemAddress_t pbuf_gpu;
   unsigned int max_param;
   unsigned int cur_param;
 } hirtKernelParamsBuffer_t;
 
 typedef struct {
   void *pbuf_host;
-  void *pbuf_dev;
+  hirtGMemAddress_t pbuf_gpu;
   unsigned int size;
 } hirtKernelBinBuffer_t;
 

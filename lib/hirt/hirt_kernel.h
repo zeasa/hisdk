@@ -19,9 +19,9 @@ hisdkRet_t hirtKernelParamsBufferAddParam(hirtKernelParamsBuffer_t *pParams,
 __R_HOST
 hisdkRet_t hirtKernelParamsBufferAddPlaceHolder(hirtKernelParamsBuffer_t *pParams, size_t nBytes);
 __R_HOST
-hisdkRet_t hirtInvokeKernel(const char *function, hirtTaskDim_t dim,
-    hirtKernelParamsBuffer_t *pParams, hirtKernelBinBuffer_t **pKernelBin, hirtCmdQueue_t *pQueue);
-
+hisdkRet_t hirtInvokeKernel(const char* function, 
+      hirtKernelParamsBuffer_t *pParams, hirtKernelBinBuffer_t **ppKernelBin, 
+      hirtTaskDim_t dim, hirtCmdQueue_t *pQueue);
 
 #ifdef __cplusplus
 }

@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 2.6)
 # project
 project(hisdk)
 set(HISDK_ROOT_PATH ${CMAKE_CURRENT_LIST_DIR})
+set(LIB_INSTALL_PATH install/lib)
+set(BIN_INSTALL_PATH install/bin)
 
 ########################################
 # language

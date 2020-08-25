@@ -35,7 +35,7 @@ hisdkRet_t hirtKernelParamsBufferCreate(hirtKernelParamsBuffer_t **ppParams)
     }
     hisdkMemset(pBuf->pbuf_host, 0, pBuf->max_param);
     
-    if(hirtDevMalloc(&pBuf->pbuf_dev, HIRT_PARAMBUF_MAXSIZE) != HISDK_RET_SUCCESS)
+    if(hirtGpuMalloc(&pBuf->pbuf_gpu, HIRT_PARAMBUF_MAXSIZE) != HISDK_RET_SUCCESS)
     {
         ret = HISDK_RET_ERR_INSUFFICIENTMEMORY;
         goto fail;
@@ -45,9 +45,9 @@ hisdkRet_t hirtKernelParamsBufferCreate(hirtKernelParamsBuffer_t **ppParams)
     return ret;
 
 fail:
-    if(pBuf->pbuf_dev != NULL)
+    if(pBuf->pbuf_gpu != 0)
     {
-        hirtDevFree(pBuf->pbuf_dev);
+        hirtGpuFree(pBuf->pbuf_gpu);
     }
 
     if(pBuf->pbuf_host != NULL)
@@ -199,8 +199,9 @@ fail:
  * Following nBytes ([function + 64, function + 64 + nBytes - 1]), MLU binary (binary format, not ascii), just memcpy it
  */
 __R_HOST
-hisdkRet_t hirtInvokeKernel(const char* function, hirtTaskDim_t dim,
-      hirtKernelParamsBuffer_t *pParams, hirtKernelBinBuffer_t **ppKernelBin, hirtCmdQueue_t *pQueue)
+hisdkRet_t hirtInvokeKernel(const char* function, 
+      hirtKernelParamsBuffer_t *pParams, hirtKernelBinBuffer_t **ppKernelBin, 
+      hirtTaskDim_t dim, hirtCmdQueue_t *pQueue)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     hisdkRet_t rc;
@@ -229,7 +230,7 @@ hisdkRet_t hirtInvokeKernel(const char* function, hirtTaskDim_t dim,
     
     //hisdkAlloc kernel gdram in device memory
     pKernelBin->size = filesize;
-    rc = hirtDevMalloc(&pKernelBin->pbuf_dev, pKernelBin->size);
+    rc = hirtGpuMalloc(&pKernelBin->pbuf_gpu, pKernelBin->size);
     if(rc != HISDK_RET_SUCCESS)
     {
         ret = HISDK_RET_ERR_NODEV;
@@ -246,9 +247,9 @@ hisdkRet_t hirtInvokeKernel(const char* function, hirtTaskDim_t dim,
     return ret;
     
 fail:
-    if(pKernelBin->pbuf_dev != NULL)
+    if(pKernelBin->pbuf_gpu != 0)
     {
-        hirtDevFree(pKernelBin->pbuf_dev);
+        hirtGpuFree(pKernelBin->pbuf_gpu);
     }
     
     if(pKernelBin != NULL)

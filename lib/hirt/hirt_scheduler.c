@@ -146,9 +146,9 @@ void* hirtSchedulerThread(void* arg)
             pthread_mutex_unlock(&pScoreboard->m_mutex);
 
             //read kernel and download the kernel into gdram
-            hirtMemcpy(node.buf_kernel->pbuf_dev, node.buf_kernel->pbuf_host, node.buf_kernel->size, HIRT_MEM_TRANS_DIR_HOST2DEV);
+            hirtMemcpy((void*)&node.buf_kernel->pbuf_gpu, node.buf_kernel->pbuf_host, node.buf_kernel->size, HIRT_MEM_TRANS_DIR_HOST2GPU);
             //copy kernel param from host to device;
-            hirtMemcpy(node.buf_param->pbuf_dev, node.buf_param->pbuf_host, node.buf_param->max_param, HIRT_MEM_TRANS_DIR_HOST2DEV);
+            hirtMemcpy((void*)&node.buf_param->pbuf_gpu, node.buf_param->pbuf_host, node.buf_param->max_param, HIRT_MEM_TRANS_DIR_HOST2GPU);
 
             //config the hipu csr reg <set mmap, set pc>
 

@@ -2,6 +2,7 @@
 #define LIBHIRT_EVENT_H__
 
 #include <pthread.h>
+#include <semaphore.h>
 #include "hirt.h"
 #include "hirt_scheduler.h"
 
@@ -16,13 +17,12 @@ typedef struct
     void* m_pArg;
 
     hirtScoreboard_t *m_pScoreboard;
-    pthread_mutex_t *m_pMutexScheduler;
+    sem_t *m_pSemScheduler;
 } hirtEventHandler_t;
 
-hisdkRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler, 
-    hirtScoreboard_t *m_pScoreboard, pthread_mutex_t *m_pMutexScheduler);
+hisdkRet_t hirtEventHandlerCreate(hirtEventHandler_t **ppHandler, hirtScheduler_t *pScheduler);
 hisdkRet_t hirtEventHandlerDestroy(hirtEventHandler_t *pHandler);
-void*     hirtEventHandlerThread(void* arg);
+void*      hirtEventHandlerThread(void* arg);
 
 #ifdef __cplusplus
 }

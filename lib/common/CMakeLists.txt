@@ -7,3 +7,8 @@ aux_source_directory(./argtable3 DIR_LIBCOMMON_ARGTABLE3_SRCS)
 # generate library
 add_library(common ${DIR_LIBCOMMON_SRCS} ${DIR_LIBCOMMON_ARGTABLE3_SRCS})
 
+########################################
+# install
+install(TARGETS common
+    ARCHIVE DESTINATION ${LIB_INSTALL_PATH}
+)

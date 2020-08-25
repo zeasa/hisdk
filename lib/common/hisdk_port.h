@@ -69,6 +69,7 @@ typedef struct
 void      *hisdkAlloc(size_t size);
 void       hisdkFree(void *ptr);
 void      *hisdkMemset(void *str, int c, size_t n);
+void      *hisdkMemcpy(void *destin, void *source, size_t n);
 /*
  * File and directory operations
  */

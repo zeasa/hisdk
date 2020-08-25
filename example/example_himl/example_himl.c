@@ -1,234 +1,250 @@
+
+
 /* test for primitive operator */
 /*
  * define tensors: input, weight, bias and output
  * op name : conv
- * input size:     ni x ci x hi x wi
+ * input size:	   ni x ci x hi x wi
  * weight size:    co x ci x kh x kw
- * bias size:      1 x co x 1 x 1
+ * bias size:	   1 x co x 1 x 1
  * output size:    no x co x ho x wo
 */
-#include <iostream>
-#include "tests.h"
+#include "himl.h"
 
-int conv_test() {
-  unsigned int seed = time(0);
-  // prepare data for conv
-  const int ni = 1, ci = 64, hi = 32, wi = 32;
-  const int no = 1, co = 64, ho = 32, wo = 32;
-  const int kh = 3, kw = 3, stride_h = 1, stride_w = 1;
-  const int dilation_h = 1, dilation_w = 1;
-  const int pad_h = 2, pad_w = 2;
+int main(int argc, char *argv[])
+{
+    HISDK_LOG_INFO(LOG_SYSTEM, "example_himl program start...");
+    
+	unsigned int seed = time(0);
 
-  float *input_cpu_data = (float*)hisdkAlloc(ni * ci * hi * wi * sizeof(float));
-  for (int index = 0; index < ni * ci * hi * wi; ++index) 
-  {
-      input_cpu_data[index] = ((rand_r(&seed) % 100 / 100.0) - 0.5) / 8;
-  }
+	// prepare data for conv
+	const int ni = 1, ci = 64, hi = 32, wi = 32;
+	const int no = 1, co = 64, ho = 32, wo = 32;
+	const int kh = 3, kw = 3, stride_h = 1, stride_w = 1;
+	const int dilation_h = 1, dilation_w = 1;
+	const int pad_h = 2, pad_w = 2;
 
-  float *filter_cpu_data = (float*)hisdkAlloc(co * ci * kh * kw * sizeof(float));
-  for (int index = 0; index < co * ci * kh * kw; ++index) 
-  {
-      filter_cpu_data[index] = ((rand_r(&seed) % 100 / 100.0) - 0.5) / 8;
-  }
-  float *output_cpu_data = (float*)hisdkAlloc(no * co * ho * wo * sizeof(float));
-  float *cpu_result = (float*)hisdkAlloc(no * co * ho * wo * sizeof(float));
-  for (int index = 0; index < no * co * ho * wo; ++index) 
-  {
-      output_cpu_data[index] = 0.0;
-  }
+	float * inputDataCpu =(float *)hisdkAlloc(ni * ci * hi * wi * sizeof(float));
+	for(int index = 0; index < ni * ci * hi * wi; ++index)
+	{
+		inputDataCpu[index] =((rand_r(&seed) % 100 / 100.0) - 0.5) / 8;
+	}
 
-  float *bias_cpu_data = (float*)hisdkAlloc(co * sizeof(float));
-  for (int index = 0; index < co; ++index) 
-  {
-      bias_cpu_data[index] = (rand_r(&seed) % 100 / 100.0) * 128;
-  }
+	float * weightDataCpu =(float *)hisdkAlloc(co * ci * kh * kw * sizeof(float));
+	for(int index = 0; index < co * ci * kh * kw; ++index)
+	{
+		weightDataCpu[index] =((rand_r(&seed) % 100 / 100.0) - 0.5) / 8;
+	}
+	
+	float * biasDataCpu =(float *)hisdkAlloc(co * sizeof(float));
+	for(int index = 0; index < co; ++index)
+	{
+		biasDataCpu[index] =(rand_r(&seed) % 100 / 100.0) * 128;
+	}
 
-  // prepare input cpu tensor
-  himlCpuTensor_t input_cpu;
-  himlCreateCpuTensor(&input_cpu,
-          himl_TENSOR,
-          himl_DATA_FLOAT32,
-          himl_NCHW,
-          ni,
-          ci,
-          hi,
-          wi);
+	float * outputDataCpu =(float *)hisdkAlloc(no * co * ho * wo * sizeof(float));
+	float * resultCpu     =(float *)hisdkAlloc(no * co * ho * wo * sizeof(float));
+	for(int index = 0; index < no * co * ho * wo; ++index)
+	{
+		outputDataCpu[index] = 0.0;
+	}
 
-  // prepare weight cpu tensor
-  himlCpuTensor_t filter_cpu;
-  himlCreateCpuTensor(&filter_cpu,
-          himl_FILTER,
-          himl_DATA_FLOAT32,
-          himl_NCHW,
-          co,
-          ci,
-          kh,
-          kw);
+	// prepare input cpu tensor
+	himlCpuTensor_t *pTensorInputCpu;
+	himlCreateCpuTensor(&pTensorInputCpu, 
+		TS_TYPE_TENSOR, 
+		DATATYPE_FP32, 
+		TS_FORMAT_NCHW, 
+		ni, 
+		ci, 
+		hi, 
+		wi);
 
-  // prepare bias cpu tensor
-  himlCpuTensor_t bias_cpu;
-  himlCreateCpuTensor(&bias_cpu,
-          himl_CONST,
-          himl_DATA_FLOAT32,
-          himl_NCHW,
-          1,
-          co,
-          1,
-          1);
+	// prepare weight cpu tensor
+	himlCpuTensor_t *pTensorWeightCpu;
+	himlCreateCpuTensor(&pTensorWeightCpu, 
+		TS_TYPE_WEIGHT, 
+		DATATYPE_FP32, 
+		TS_FORMAT_NCHW, 
+		co, 
+		ci, 
+		kh, 
+		kw);
 
-  // prepare output cpu tensor
-  himlCpuTensor_t output_cpu;
-  himlCreateCpuTensor(&output_cpu,
-          himl_TENSOR,
-          himl_DATA_FLOAT32,
-          himl_NCHW,
-          no,
-          co,
-          ho,
-          wo);
+	// prepare bias cpu tensor
+	himlCpuTensor_t *pTensorBiasCpu;
+	himlCreateCpuTensor(&pTensorBiasCpu, 
+		TS_TYPE_BIAS, 
+		DATATYPE_FP32, 
+		TS_FORMAT_NCHW, 
+		1, 
+		co, 
+		1, 
+		1);
 
-  // no data order needed in creating himl tensor
-  // prepare input himl tensor
-  himlDevTensor_t input_himl;
-  himlCreateDevTensor(&input_himl,
-          himl_TENSOR,
-          himl_DATA_FLOAT16,
-          ni,
-          ci,
-          hi,
-          wi);
+	// prepare output cpu tensor
+	himlCpuTensor_t *pTensorOutputCpu;
+	himlCreateCpuTensor(&pTensorOutputCpu, 
+		TS_TYPE_TENSOR, 
+		DATATYPE_FP32, 
+		TS_FORMAT_NCHW, 
+		no, 
+		co, 
+		ho, 
+		wo);
 
-  // prepare filter himl tensor
-  himlTensor_t filter_himl;
-  himlCreateTensor(&filter_himl,
-          himl_FILTER,
-          himl_DATA_FLOAT16,
-          co,
-          ci,
-          kh,
-          kw);
+	// no data order needed in creating himl tensor
+	// prepare input himl tensor
+	himlGpuTensor_t *pTensorInputGpu;
+	himlCreateGpuTensor(&pTensorInputGpu, 
+		TS_TYPE_TENSOR, 
+		DATATYPE_FP16, 
+		ni, 
+		ci, 
+		hi, 
+		wi);
 
-  // prepare bias himl tensor
-  himlTensor_t bias_himl;
-  himlCreateTensor(&bias_himl,
-          himl_CONST,
-          himl_DATA_FLOAT16,
-          1,
-          co,
-          1,
-          1);
+	// prepare weight himl tensor
+	himlGpuTensor_t *pTensorWeightGpu;
+	himlCreateGpuTensor(&pTensorWeightGpu, 
+		TS_TYPE_WEIGHT, 
+		DATATYPE_FP16, 
+		co, 
+		ci, 
+		kh, 
+		kw);
 
-  // prepare output himl tensor
-  himlTensor_t output_himl;
-  himlCreateTensor(&output_himl,
-          himl_TENSOR,
-          himl_DATA_FLOAT16,
-          no,
-          co,
-          ho,
-          wo);
+	// prepare bias himl tensor
+	himlGpuTensor_t *pTensorBiasGpu;
+	himlCreateGpuTensor(&pTensorBiasGpu, 
+		TS_TYPE_BIAS, 
+		DATATYPE_FP16, 
+		1, 
+		co, 
+		1, 
+		1);
 
-  // bind cpu filter, bias to himltensor
-  himlBindConstData(filter_himl,
-                    filter_cpu,
-                    filter_cpu_data);
-  himlBindConstData(bias_himl,
-                    bias_cpu,
-                    bias_cpu_data);
-  //  prepare conv param
-  himlConvOpParam_t conv_param;
-  himlCreateConvOpParam(&conv_param,
-          stride_h,
-          stride_w,
-          dilation_h,
-          dilation_w,
-          pad_h,
-          pad_w);
+	// prepare output himl tensor
+	himlGpuTensor_t *pTensorOutputGpu;
+	himlCreateGpuTensor(&pTensorOutputGpu, 
+		TS_TYPE_TENSOR, 
+		DATATYPE_FP16, 
+		no, 
+		co, 
+		ho, 
+		wo);
 
-  // setup conv operator
-  himlBaseOp_t conv_op;
-  himlCreateConvOp(&conv_op,
-          conv_param,
-          input_himl,
-          output_himl,
-          filter_himl,
-          bias_himl);
-  // setup and check op runnable
-  himlCheckBaseOpRunnable(conv_op, himl_C10);
+	// setup and check op runnable
+	//himlCheckBaseOpRunnable(conv_op, himl_C10);
 
-  // compile op
-  himlCompileBaseOp(conv_op, himl_C10, 1);
+	// compile op
+	//himlCompileBaseOp(conv_op, himl_C10, 1);
 
-  // hisdkAlloc himl tensor
-  void *input_himl_data = himlMallocBuffer(
-          input_himl);
-  void *output_himl_data = himlMallocBuffer(
-          output_himl);
+	// hisdkAlloc himl tensor
+	hirtGMemAddress_t gmemInputGpu  = himlMallocBuffer(pTensorInputGpu);
+	hirtGMemAddress_t gmemOutputGpu = himlMallocBuffer(pTensorOutputGpu);
+	hirtGMemAddress_t gmemWeightGpu = himlMallocBuffer(pTensorWeightGpu);
+	hirtGMemAddress_t gmemBiasGpu   = himlMallocBuffer(pTensorBiasGpu);
 
-  // copy input to himl tensor
-  himlMemcpyTensorToDevice(
-          input_cpu,
-          input_cpu_data,
-          input_himl,
-          input_himl_data);
+	// copy weight to himl tensor
+	himlMemcpyTensorToDevice(
+	    pTensorWeightCpu, 
+		weightDataCpu, 
+		pTensorWeightGpu, 
+		gmemWeightGpu);
+	// copy bias to himl tensor
+	himlMemcpyTensorToDevice(
+	    pTensorBiasCpu, 
+		biasDataCpu, 
+		pTensorBiasGpu, 
+		gmemBiasGpu);
 
-  /* create stream and func_type and llc */
-  cnrtFunctionType_t func_type = CNRT_FUNC_TYPE_BLOCK;
-  cnrtStream_t stream;
-  cnrtCreateStream(&stream);
+	// copy input to himl tensor
+	himlMemcpyTensorToDevice(
+	    pTensorInputCpu, 
+		inputDataCpu, 
+		pTensorInputGpu, 
+		gmemInputGpu);
 
-  // compute conv op
-  himlComputeConvOpForward(conv_op,
-          input_himl_data,
-          output_himl_data,
-          func_type,
-          stream
-          );
+	//	prepare conv param
+	himlConvOpParam_t *pParamConv;
+	himlCreateConvOpParam(&pParamConv, 
+		stride_h, 
+		stride_w, 
+		dilation_h, 
+		dilation_w, 
+		pad_h, 
+		pad_w);
 
-  // copy output to cpu tensor
-  cnrtSyncStream(stream);
-  cnrtDestroyStream(stream);
+	// setup conv operator
+	himlBaseOp_t conv_op;
+	himlCreateConvOp(&conv_op, 
+		pParamConv, 
+		pTensorInputGpu, 
+		pTensorOutputGpu, 
+		pTensorWeightGpu, 
+		pTensorBiasGpu);
 
-  himlMemcpyTensorToHost(
-          output_himl,
-          output_himl_data,
-          output_cpu,
-          output_cpu_data);
-  himlDumpTensor2File("mlu_output", output_cpu, himl_TENSOR, output_cpu_data, false);
+	/* create stream and func_type and llc */
+	//cnrtFunctionType_t func_type = CNRT_FUNC_TYPE_BLOCK;
+	hirtCmdQueue_t *pCmdQueue;
+    hirtCmdQueueCreate(&pCmdQueue);
 
-  himlCpuComputeConvOpForward(conv_param,
-          input_cpu,
-          input_cpu_data,
-          filter_cpu,
-          filter_cpu_data,
-          output_cpu,
-          cpu_result,
-          bias_cpu,
-          bias_cpu_data);
-  himlDumpTensor2File("cpu_output", output_cpu, himl_TENSOR, cpu_result, false);
+	// compute conv op
+	himlComputeConvOpForward(
+	    &conv_op, 
+		gmemInputGpu, 
+		gmemOutputGpu, 
+		1, 
+		pCmdQueue);
 
-  // delete conv param
-  himlDestroyConvOpParam(&conv_param);
+	// copy output to cpu tensor
+	hirtCmdQueueSync(pCmdQueue);
+	
+	hirtCmdQueueDestroy(pCmdQueue);
 
-  // delete himl tensors
-  himlDestroyDevTensor(&input_himl);
-  himlDestroyDevTensor(&filter_himl);
-  himlDestroyDevTensor(&bias_himl);
-  himlDestroyDevTensor(&output_himl);
+	himlMemcpyTensorToHost(
+	    pTensorOutputGpu, 
+		gmemOutputGpu, 
+		pTensorOutputCpu, 
+		outputDataCpu);
+	//himlDumpTensor2File("mlu_output", pTensorOutputCpu, himl_TENSOR, outputDataCpu, false);
+/*
+	himlCpuComputeConvOpForward(pParamConv, 
+		pTensorInputCpu, 
+		inputDataCpu, 
+		pTensorWeightCpu, 
+		weightDataCpu, 
+		pTensorOutputCpu, 
+		resultCpu, 
+		pTensorBiasCpu, 
+		biasDataCpu);
+*/
+	//himlDumpTensor2File("cpu_output", pTensorOutputCpu, himl_TENSOR, resultCpu, false);
 
-  // delete cpu tensors
-  himlDestroyCpuTensor(&input_cpu);
-  himlDestroyCpuTensor(&filter_cpu);
-  himlDestroyCpuTensor(&bias_cpu);
-  himlDestroyCpuTensor(&output_cpu);
-  himlDestroyBaseOp(&conv_op);
+	// delete conv param
+	himlDestroyConvOpParam(pParamConv);
 
-  //  delete pointers (including data pointers)
-  hisdkFree(input_cpu_data);
-  hisdkFree(filter_cpu_data);
-  hisdkFree(bias_cpu_data);
-  hisdkFree(output_cpu_data);
-  hisdkFree(cpu_result);
+	// delete himl tensors
+	himlDestroyGpuTensor(pTensorInputGpu);
+	himlDestroyGpuTensor(pTensorWeightGpu);
+	himlDestroyGpuTensor(pTensorBiasGpu);
+	himlDestroyGpuTensor(pTensorOutputGpu);
+	// delete cpu tensors
+	himlDestroyCpuTensor(pTensorInputCpu);
+	himlDestroyCpuTensor(pTensorWeightCpu);
+	himlDestroyCpuTensor(pTensorBiasCpu);
+	himlDestroyCpuTensor(pTensorOutputCpu);
+	//himlDestroyBaseOp(&conv_op);
 
-  return 0;
+	//	delete pointers(including data pointers)
+	hisdkFree(inputDataCpu);
+	hisdkFree(weightDataCpu);
+	hisdkFree(biasDataCpu);
+	hisdkFree(outputDataCpu);
+	hisdkFree(resultCpu);
+
+    HISDK_LOG_INFO(LOG_SYSTEM, "example_himl program end...");
+	return 0;
 }
+
