@@ -24,6 +24,7 @@ set(HISDK_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_SOURCE_DIR}/lib/common
 	${CMAKE_CURRENT_SOURCE_DIR}/lib/hirt
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/himl
 	${CMAKE_CURRENT_SOURCE_DIR}/lib/common/argtable3
 )
 include_directories(${HISDK_INCLUDE_DIRS})

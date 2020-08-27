@@ -1,0 +1,146 @@
+//
+// Copyright (c) 2017-2019, NVIDIA CORPORATION. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+//  * Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//  * Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+//  * Neither the name of NVIDIA CORPORATION nor the names of its
+//    contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+// PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+// EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+// OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
+namespace hisdk.hmodel;
+
+// note: by def'n
+// byte, ubyte, bool   : 8b
+// short, ushort       : 16b
+// int, uint, float    : 32b
+// long, ulong, double : 64b
+
+//
+// think of : class #s
+// 'NONE' can be used for raw data (images, weights, etc)
+//
+enum Interface : uint { NONE = 0, GPU = 1, CPU = 2 }
+
+//
+// fits DLA firmware interface version, but intent is to be generic
+//
+struct Version {
+    main      : ubyte;
+    sub       : ubyte;
+    sub_minor : ubyte;
+}
+
+enum HModelVersionMain     : ubyte { VAL = 0 }
+enum HModelVersionSub      : ubyte { VAL = 7 }
+enum HModelVersionSubMinor : ubyte { VAL = 0 }
+
+//
+// blobs typically are signed with info re: their use.
+// e.g.: a blob which contains firmware binary code
+// should set 'interface' to 'DLA_IF' and 'version'
+// should be set to the DLA firmware version being
+// targetted.
+//
+table Blob 
+{
+    name        : string;
+    size        : ulong;
+    interface   : Interface;   // e.g.: dla1 (firmware)
+    type        : uint;        // e.g.: dla1-op-desc, dla1-surf-desc
+    version     : Version;     // e.g.: firmware version
+    data        : [ubyte];
+}
+
+//
+// HOST := aka 'DRAM'
+// GMEM := DLA Internal GMEM if present
+//
+enum MemoryDomain  : uint  { GMEM = 0, MRAB = 1 }
+
+//
+// ALLOC := allocate the region
+// SET   := after alloc, set content from 'content_name'
+// INPUT := entry is a re-bindable top-level input
+// OUTPUT := entry is a re-bindable top-level output
+//
+enum MemoryFlags : uint { NONE = 0, ALLOC = 1, SET = 2, INPUT = 4, OUTPUT = 8 }
+
+//
+// id             := referenced by address list entries below
+// domain         := location/type
+// flags          := see above, below
+// size           := bytes
+// alignment      := 0 if n/a, # of bytes otherwise.
+// contents       := if 'SET' is specified, the names used to lookup data to fill the region
+// offsets        := if 'SET' is specified, the associated offsets to place content within the region
+// bind_id        := iff (input|output|debug) specified, the associated bind api id
+// tensor_desc_id := iff (input|output|debug) specified, the tensor desc id
+//
+table MemoryListEntry 
+{
+    id       : uint;
+    domain   : MemoryDomain;
+    flags    : MemoryFlags;
+    size     : ulong;
+    alignment: uint;
+    blob_id  : uint;
+}
+
+//
+// id        := 0..n-1
+// interface := the interface to use (dla)
+// instance  := -1 (unspecified), 0, 1, ... for which available interface instance to use
+// address_list := array of AddressListEntry ids -> ... -> memory ids which must be present
+// pre_actions  := array of EventListEntry ids
+// post_actions := array of EventLIstEntry ids
+//
+table TaskListEntry 
+{
+    id           : uint;
+    interface    : Interface;
+    address_list : [uint];
+}
+
+//
+// id := 0..n-1
+// mem_id := MemoryListEntry id
+// offset := offset from beginning of associated memory object
+// size   := size beginning from offset (clipped to associated memory object)
+//
+table AddressListEntry 
+{
+    id     : uint;
+    mem_id : uint;
+    offset : ulong;
+    size   : ulong;
+}
+
+table HModel 
+{
+      version      : Version ( required );
+      task_list    : [TaskListEntry];
+      address_list : [AddressListEntry];
+      memory_list  : [MemoryListEntry];
+      blobs        : [Blob];
+}
+
+root_type HModel;
