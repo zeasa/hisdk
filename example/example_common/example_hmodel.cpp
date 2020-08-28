@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "hisdk_log.h"
 #include "argtable3.h"
 #include "hmodel.h"
 
@@ -19,6 +18,7 @@ int test_func1()
 
 int main(int argc, char *argv[])
 {
+    hisdkRet_t e = HISDK_RET_SUCCESS;
     void *argtable[] = {
         help    = arg_lit0("h", "help",    "display this help and exit"),
         version = arg_lit0("v", "version", "display version info and exit"),
@@ -37,9 +37,7 @@ int main(int argc, char *argv[])
     if (arg_nullcheck(argtable) != 0)
     {
         /* NULL entries were detected, some allocations must have failed */
-        printf("%s: insufficient memory\n", progname);
-        exitcode=1;
-        goto fail;
+        HISDK_ERR_RPTFAIL(HISDK_RET_ERR_NOMEM, "%s: insufficient memory.", progname);
     }
 
     /* set any command line default values prior to parsing */
@@ -52,9 +50,7 @@ int main(int argc, char *argv[])
     {
         /* Display the error details contained in the arg_end struct.*/
         arg_print_errors(stdout, end, progname);
-        printf("Try '%s --help' for more information.\n", progname);
-        exitcode = 1;
-        goto fail;
+        HISDK_ERR_RPTFAIL(HISDK_RET_ERR_BADPARAMETER, "Try '%s --help' for more information.", progname);
     }
 
     /* special case: '--help' takes precedence over error reporting */
@@ -65,7 +61,6 @@ int main(int argc, char *argv[])
         printf("List information about the FILE(s) "
                "(the current directory by default).\n\n");
         arg_print_glossary(stdout, argtable, "  %-25s %s\n");
-        exitcode = 0;
         goto fail;
     }
     
@@ -74,14 +69,13 @@ int main(int argc, char *argv[])
     {
         printf("'%s' example program for the \"argtable\" command line argument parser.\n",progname);
         printf("September 2003, Stewart Heitmann\n");
-        exitcode = 0;
         goto fail;
     }
         
     /* test hmodel serialization */
     if (outfile->count > 0)
     {
-        HISDK_LOG_INFO(LOG_SYSTEM, "hmodel serialization, model file = %s...", outfile->filename[0]);
+        HISDK_LOG_INFO(LOG_SYSTEM, "hmodel serialization, file = %s...", outfile->filename[0]);
         modelfile_name = outfile->filename[0];
         
 
@@ -108,14 +102,18 @@ int main(int argc, char *argv[])
 
         u64_t bufsize;
         model.getSerializedDataSize(&bufsize);
-        u8_t *buf = new u8_t[bufsize];
+        u8_t *buf = new(std::nothrow) u8_t[bufsize];
+        if(buf == NULL)
+        {
+            HISDK_ERR_RPTFAIL(HISDK_RET_ERR_NOMEM, "%s: insufficient memory.", progname);
+        }
         model.getSerializedData(buf);
         
-        hisdkPortOsFopen(modelfile_name.c_str(), HISDK_OPEN_WRITE, &file);
-        hisdkPortOsFwrite(file, buf, bufsize);
+        HISDK_ERR_FCALLFAIL( hisdkPortOsFopen(modelfile_name.c_str(), HISDK_OPEN_WRITE, &file) );
+        HISDK_ERR_FCALLFAIL( hisdkPortOsFwrite(file, buf, bufsize) );
         hisdkPortOsFclose(file);
 
-        HISDK_LOG_INFO(LOG_SYSTEM, "hmodel serialization, model size = %lu...", bufsize);
+        HISDK_LOG_INFO(LOG_SYSTEM, "hmodel serialization, size = %lu...", bufsize);
         if(buf != NULL)
             delete(buf);
     }
@@ -124,16 +122,24 @@ int main(int argc, char *argv[])
         /* test hmodel deserialization */
         if(infiles->count > 0)
         {
-            HISDK_LOG_INFO(LOG_SYSTEM, "hmodel deserialization, model file = %s...", infiles->filename[0]);
+            HISDK_LOG_INFO(LOG_SYSTEM, "hmodel deserialization, file = %s...", infiles->filename[0]);
             modelfile_name = infiles->filename[0];
 
-            hisdkPortOsFopen(modelfile_name.c_str(), HISDK_OPEN_READ, &file);
-            hisdkPortOsFstat(file, &finfo);
+            HISDK_ERR_FCALLFAIL( hisdkPortOsFopen(modelfile_name.c_str(), HISDK_OPEN_READ, &file) );
+            HISDK_ERR_FCALLFAIL( hisdkPortOsFstat(file, &finfo) );
             size_t file_size = hisdkPortOsStatGetSize(&finfo);
-            u8_t *buf = new u8_t[file_size];
-            hisdkPortOsFseek(file, 0, HisdkSeek_Set);
+            if(file_size == 0)
+            {
+                HISDK_ERR_RPTFAIL(HISDK_RET_ERR_FILEREADFAILED, "hmodel size==0.");
+            }
+            u8_t *buf = new(std::nothrow) u8_t[file_size];
+            if(buf == NULL)
+            {
+                HISDK_ERR_RPTFAIL(HISDK_RET_ERR_NOMEM, "%s: insufficient memory.", progname);
+            }
+            HISDK_ERR_FCALLFAIL( hisdkPortOsFseek(file, 0, HisdkSeek_Set) );
             size_t actually_read = 0;
-            hisdkPortOsFread(file, buf, file_size, &actually_read);
+            HISDK_ERR_FCALLFAIL( hisdkPortOsFread(file, buf, file_size, &actually_read) );
             hisdkPortOsFclose(file);
 
             hModel model;
@@ -155,5 +161,5 @@ int main(int argc, char *argv[])
 fail:
     /* deallocate each non-null entry in argtable[] */
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
-    return exitcode;
+    return (e != HISDK_RET_SUCCESS);
 }

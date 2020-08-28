@@ -12,6 +12,8 @@
 #include "hirt_mm.h"
 #include "hirt_kernel.h"
 
+#include "hmodel.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -92,6 +94,13 @@ typedef struct
     u32_t pad_h;
 } himlConvOpParam_t;
 
+using namespace hisdk;
+typedef struct
+{
+    u32_t id;
+    hModel *phModel;
+} himlModel_t;
+
 #define KERNEL_SYMBAL_NAME_MAX	(128)
 typedef struct
 {
@@ -167,6 +176,7 @@ hisdkRet_t himlMemcpyTensorToHost(
     
 hisdkRet_t himlDumpTensor2File(const char *filename, himlCpuTensor_t *tensor_cpu);
 
+hisdkRet_t himlLoadModel(himlModel_t **ppModel, const char* fname);
 
 #ifdef __cplusplus
 }

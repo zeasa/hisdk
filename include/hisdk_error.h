@@ -137,7 +137,7 @@ void hisdkUtilsLogError(const char* tag, const char* path, hisdkRet_t e, const c
 #define REPORT_ERROR_FAIL_IMPL_2(_err, _format) \
     do { \
         e = (_err); \
-        HISDK_LOG_INFO(LOG_ERROR, "err=%d "_format, e); \
+        HISDK_LOG_INFO(LOG_ERROR, "err=%d " _format, e); \
         goto fail; \
     } while (0)
 #define REPORT_ERROR_FAIL_IMPL_3(_err, _format, ...) REPORT_ERROR_FAIL_IMPL_N((_err), (_format), __VA_ARGS__)
@@ -208,7 +208,7 @@ void hisdkUtilsLogError(const char* tag, const char* path, hisdkRet_t e, const c
         e = (_err); \
         if (e != HISDK_RET_SUCCESS) \
         { \
-            HISDK_LOG_INFO(LOG_ERROR, "err=%d "_format, e); \
+            HISDK_LOG_INFO(LOG_ERROR, "err=%d " _format, e); \
             goto fail; \
         } \
     } while (0)

@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     };
 
     int exitcode = 0;
-    char progname[] = "example_hisdk_log";
+    char progname[] = "example_hisdklog";
     int nerrors;
 
     /* verify the argtable[] entries were allocated sucessfully */

@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 	    &conv_op, 
 		gmemInputGpu, 
 		gmemOutputGpu, 
-		1, 
+		FUNCTYPE_C1, 
 		pCmdQueue);
 
 	// copy output to cpu tensor

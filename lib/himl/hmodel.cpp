@@ -229,7 +229,11 @@ fail:
 bool hModel::deserializeFrom(u8_t *flatbuf)
 {
     const hisdk::hmodel::HModel *model = hisdk::hmodel::GetHModel(flatbuf);
-
+    if(model == NULL)
+    {
+        return false;
+    }
+    
     const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::TaskListEntry>>    *task_list    = model->task_list();
     const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::MemoryListEntry>>  *memory_list  = model->memory_list();
     const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::AddressListEntry>> *address_list = model->address_list();
