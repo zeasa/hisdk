@@ -7,6 +7,8 @@
 #include "hisdk_log.h"
 #include "hisdk_error.h"
 
+#include "hmodel.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -125,6 +127,13 @@ typedef struct
     hirtKernelParamMemory_t   memory_info;
 }hirtKernelParamTable_t;
 
+using namespace hisdk;
+typedef struct
+{
+    u32_t id;
+    hModel *phModel;
+} himlModel_t;
+
 //typedef struct hirtKernelTaskParam
 //{
 //  int task_parallelism;
@@ -138,6 +147,8 @@ typedef struct
 //} hirtKernelTaskParam_t;
 
 typedef void (*hirtThreadFunction_t)(void *arg);
+
+hisdkRet_t hirtLoadModel(himlModel_t **ppModel, const char* fname);
 
 #ifdef __cplusplus
 }

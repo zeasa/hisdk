@@ -1,9 +1,9 @@
-#include "himl.h"
+#include "hirt.h"
 #include "hmodel.h"
 
 using namespace hisdk;
 
-hisdkRet_t himlLoadModel(himlModel_t **ppModel, const char* fname)
+hisdkRet_t hirtLoadModel(himlModel_t **ppModel, const char* fname)
 {
     hisdkRet_t e = HISDK_RET_SUCCESS;
     himlModel_t *pModel = NULL;
@@ -14,10 +14,6 @@ hisdkRet_t himlLoadModel(himlModel_t **ppModel, const char* fname)
     size_t actually_read = 0;
     hModel *phModel = new hModel();
 
-    const std::vector<AddressListEntry> * addresslist;
-    const std::vector<MemoryListEntry>  * memorylist;
-    const std::vector<TaskListEntry>    * tasklist;
-   
     pModel = (himlModel_t *)hisdkAlloc(sizeof(himlModel_t));
     if(pModel == NULL)
     {

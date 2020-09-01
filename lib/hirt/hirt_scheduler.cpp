@@ -97,7 +97,8 @@ void* hirtSchedulerThread(void* arg)
     hirtCmdNode_t node;
     hirtTaskDim_t dim;
     int schedTbl[HIRT_HIPU200_CORENUMMAX];
-    
+    int freecnt = 0;
+
     HISDK_LOG_INFO(LOG_SYSTEM, "hirtSchedulerThread thread entered arg=%p", arg);
     
     while(1)
@@ -138,7 +139,6 @@ void* hirtSchedulerThread(void* arg)
 
             //update scoreboard
             pthread_mutex_lock(&pScoreboard->m_mutex);
-            int freecnt = 0;
             for(int i=0; i<dim; i++)
             {
                 pScoreboard->m_coreinfo[schedTbl[i]].m_status == HIPUCORE_FREE;

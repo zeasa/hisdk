@@ -4,7 +4,7 @@ add_executable(example_hisdklog example_hisdklog.c)
 target_link_libraries(example_hisdklog common m)
 
 add_executable(example_hmodel example_hmodel.cpp)
-target_link_libraries(example_hmodel himl common m)
+target_link_libraries(example_hmodel hirt common m)
 
 ########################################
 # install
