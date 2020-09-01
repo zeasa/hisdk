@@ -151,11 +151,12 @@ bool hModel::serialize()
     for ( size_t mi = 0, MI = mMemoryListEntries.size(); mi != MI; ++mi) 
     {
         const MemoryListEntry & mle = mMemoryListEntries[mi];
+        flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> contents = mFbb.CreateVectorOfStrings(mle.contents);
+        flatbuffers::Offset<flatbuffers::Vector<uint64_t>> offsets = mFbb.CreateVector<uint64_t>(mle.offsets);
 
         hisdk::hmodel::MemoryListEntryBuilder mleb(mFbb);
         mleb.add_size(mle.size);
         mleb.add_alignment(mle.alignment);
-        mleb.add_blob_id(mle.blob_id);
         mleb.add_flags( (hisdk::hmodel::MemoryFlags) mle.flags);
         mleb.add_id(mle.id);
         mleb.add_domain((hisdk::hmodel::MemoryDomain) mle.domain);
@@ -267,8 +268,21 @@ bool hModel::deserializeFrom(u8_t *flatbuf)
         mle.alignment = li->alignment();
         mle.flags = li->flags();
         mle.domain = li->domain();
-        mle.blob_id = li->blob_id();
         
+        if ( li->contents() ) {
+            flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String> >::const_iterator mli = li->contents()->begin();
+            for (; mli != li->contents()->end(); ++mli) {
+                mle.contents.push_back(mli->str());
+            }
+        }
+
+        if ( li->offsets() ) {
+            flatbuffers::Vector<uint64_t>::const_iterator mli = li->offsets()->begin();
+            for (; mli != li->offsets()->end(); ++mli) {
+                mle.offsets.push_back(*mli);
+            }
+        }
+
         mMemoryListEntries.push_back(mle);
     }
 

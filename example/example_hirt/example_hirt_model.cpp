@@ -4,6 +4,7 @@
 #include "hirt.h"
 #include "argtable3.h"
 #include "hmodel.h"
+#include "hirt_model.h"
 
 struct arg_lit *help;
 struct arg_lit *version;
@@ -40,11 +41,12 @@ int main(int argc, char *argv[])
 	const int kh = 3, kw = 3, stride_h = 1, stride_w = 1;
 	const int dilation_h = 1, dilation_w = 1;
 	const int pad_h = 2, pad_w = 2;
-	himlModel_t *pmodel;
-    const std::vector<AddressListEntry> * addresslist;
-    const std::vector<MemoryListEntry>  * memorylist;
-    const std::vector<TaskListEntry>    * tasklist;
-    std::vector<MemoryListEntry>::const_iterator it_mem;
+	//hirtModelCtx_t *pmodel;
+    //const std::vector<AddressListEntry> * addresslist;
+    //const std::vector<MemoryListEntry>  * memorylist;
+    //const std::vector<TaskListEntry>    * tasklist;
+    //std::vector<MemoryListEntry>::const_iterator it_mem;
+    hirtModelCtx *pModel;
 
     HISDK_LOG_INFO(LOG_SYSTEM, "example_himl_model program start...");
     
@@ -88,6 +90,11 @@ int main(int argc, char *argv[])
         HISDK_LOG_INFO(LOG_SYSTEM, "parameter error, program exit...");
     }
 
+    pModel = new hirtModelCtx();
+    pModel->loadModel(infiles->filename[0]);
+    pModel->loadModelMemory();
+    
+#if 0
     HISDK_ERR_FCALLFAIL( hirtLoadModel(&pmodel, infiles->filename[0]) );
 
     addresslist = &pmodel->phModel->getAddressListEntries();
@@ -100,7 +107,7 @@ int main(int argc, char *argv[])
 		cout << it_mem->id << endl;
     }
 
-#if 0
+
 	float * inputDataCpu;
 	inputDataCpu = (float *)hisdkAlloc(ni * ci * hi * wi * sizeof(float));
 	for(int index = 0; index < ni * ci * hi * wi; ++index)

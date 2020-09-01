@@ -92,13 +92,24 @@ struct MemoryListEntry
     static inline u32_t  flags_input()  { return MemoryFlags_INPUT;  }
     static inline u32_t  flags_output() { return MemoryFlags_OUTPUT; }
     static inline u32_t  flags_debug()  { return MemoryFlags_DEBUG;  }
-    u32_t blob_id;  // valid iff flag_{input|output|debug}()  is set
+    std::vector<std::string> contents;  // symbolic reference to content blob
+    std::vector<uint64_t>    offsets;   // associated offset for contents
 
-    MemoryListEntry() : id(0), size(0), alignment(0), domain(0), flags(0), blob_id(0) { }
+    MemoryListEntry() : id(0), size(0), alignment(0), domain(0), flags(0),
+                        contents(), offsets() { }
     MemoryListEntry(const MemoryListEntry &o) : id(o.id), size(o.size), alignment(o.alignment), domain(o.domain), flags(o.flags),
-                                                blob_id(o.blob_id) { }
-    MemoryListEntry(u32_t i, u64_t s, u32_t a, u32_t d, u32_t f) :
-        id(i), size(s), alignment(a), domain(d), flags(f), blob_id(0) { }
+                                                contents(o.contents),
+                                                offsets(o.offsets) { }
+    MemoryListEntry(u32_t i, u64_t s, u32_t a, u32_t d, u32_t f, std::string sym = std::string(), u64_t o = 0) :
+        id(i), size(s), alignment(a), domain(d), flags(f)
+    {
+        if ( sym.size() )
+        {
+            contents.push_back(sym);
+            offsets.push_back(o);
+        }
+    }
+
 };
 
 struct TaskListEntry

@@ -363,7 +363,8 @@ struct MemoryListEntry FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_FLAGS = 8,
     VT_SIZE = 10,
     VT_ALIGNMENT = 12,
-    VT_BLOB_ID = 14
+    VT_CONTENTS = 14,
+    VT_OFFSETS = 16
   };
   uint32_t id() const {
     return GetField<uint32_t>(VT_ID, 0);
@@ -380,8 +381,11 @@ struct MemoryListEntry FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   uint32_t alignment() const {
     return GetField<uint32_t>(VT_ALIGNMENT, 0);
   }
-  uint32_t blob_id() const {
-    return GetField<uint32_t>(VT_BLOB_ID, 0);
+  const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *contents() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_CONTENTS);
+  }
+  const flatbuffers::Vector<uint64_t> *offsets() const {
+    return GetPointer<const flatbuffers::Vector<uint64_t> *>(VT_OFFSETS);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -390,7 +394,11 @@ struct MemoryListEntry FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint32_t>(verifier, VT_FLAGS) &&
            VerifyField<uint64_t>(verifier, VT_SIZE) &&
            VerifyField<uint32_t>(verifier, VT_ALIGNMENT) &&
-           VerifyField<uint32_t>(verifier, VT_BLOB_ID) &&
+           VerifyOffset(verifier, VT_CONTENTS) &&
+           verifier.VerifyVector(contents()) &&
+           verifier.VerifyVectorOfStrings(contents()) &&
+           VerifyOffset(verifier, VT_OFFSETS) &&
+           verifier.VerifyVector(offsets()) &&
            verifier.EndTable();
   }
 };
@@ -414,8 +422,11 @@ struct MemoryListEntryBuilder {
   void add_alignment(uint32_t alignment) {
     fbb_.AddElement<uint32_t>(MemoryListEntry::VT_ALIGNMENT, alignment, 0);
   }
-  void add_blob_id(uint32_t blob_id) {
-    fbb_.AddElement<uint32_t>(MemoryListEntry::VT_BLOB_ID, blob_id, 0);
+  void add_contents(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> contents) {
+    fbb_.AddOffset(MemoryListEntry::VT_CONTENTS, contents);
+  }
+  void add_offsets(flatbuffers::Offset<flatbuffers::Vector<uint64_t>> offsets) {
+    fbb_.AddOffset(MemoryListEntry::VT_OFFSETS, offsets);
   }
   explicit MemoryListEntryBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -435,15 +446,39 @@ inline flatbuffers::Offset<MemoryListEntry> CreateMemoryListEntry(
     hisdk::hmodel::MemoryFlags flags = hisdk::hmodel::MemoryFlags_NONE,
     uint64_t size = 0,
     uint32_t alignment = 0,
-    uint32_t blob_id = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> contents = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint64_t>> offsets = 0) {
   MemoryListEntryBuilder builder_(_fbb);
   builder_.add_size(size);
-  builder_.add_blob_id(blob_id);
+  builder_.add_offsets(offsets);
+  builder_.add_contents(contents);
   builder_.add_alignment(alignment);
   builder_.add_flags(flags);
   builder_.add_domain(domain);
   builder_.add_id(id);
   return builder_.Finish();
+}
+
+inline flatbuffers::Offset<MemoryListEntry> CreateMemoryListEntryDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t id = 0,
+    hisdk::hmodel::MemoryDomain domain = hisdk::hmodel::MemoryDomain_GMEM,
+    hisdk::hmodel::MemoryFlags flags = hisdk::hmodel::MemoryFlags_NONE,
+    uint64_t size = 0,
+    uint32_t alignment = 0,
+    const std::vector<flatbuffers::Offset<flatbuffers::String>> *contents = nullptr,
+    const std::vector<uint64_t> *offsets = nullptr) {
+  auto contents__ = contents ? _fbb.CreateVector<flatbuffers::Offset<flatbuffers::String>>(*contents) : 0;
+  auto offsets__ = offsets ? _fbb.CreateVector<uint64_t>(*offsets) : 0;
+  return hisdk::hmodel::CreateMemoryListEntry(
+      _fbb,
+      id,
+      domain,
+      flags,
+      size,
+      alignment,
+      contents__,
+      offsets__);
 }
 
 struct TaskListEntry FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
