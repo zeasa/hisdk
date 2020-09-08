@@ -46,9 +46,9 @@ int main(int argc, char *argv[])
     //const std::vector<MemoryListEntry>  * memorylist;
     //const std::vector<TaskListEntry>    * tasklist;
     //std::vector<MemoryListEntry>::const_iterator it_mem;
-    hirtModelCtx *pModel;
+    hirtModelCtx *pCtx;
 
-    HISDK_LOG_INFO(LOG_SYSTEM, "example_himl_model program start...");
+    HISDK_LOG_INFO(LOG_SYSTEM, "example_hirt_model program start...");
     
     /* verify the argtable[] entries were allocated sucessfully */
     if (arg_nullcheck(argtable) != 0)
@@ -90,9 +90,8 @@ int main(int argc, char *argv[])
         HISDK_LOG_INFO(LOG_SYSTEM, "parameter error, program exit...");
     }
 
-    pModel = new hirtModelCtx();
-    pModel->loadModel(infiles->filename[0]);
-    pModel->loadModelMemory();
+    pCtx = new hirtModelCtx();
+    pCtx->loadModel(infiles->filename[0]);
     
 #if 0
     HISDK_ERR_FCALLFAIL( hirtLoadModel(&pmodel, infiles->filename[0]) );
@@ -338,7 +337,7 @@ int main(int argc, char *argv[])
 	hisdkFree(resultCpu);
 
 #endif
-    HISDK_LOG_INFO(LOG_SYSTEM, "example_himl program end...");
+    HISDK_LOG_INFO(LOG_SYSTEM, "example_hirt_model program end...");
 
 fail:
 

@@ -54,6 +54,7 @@ hisdkRet_t hirtHostFree(void *ptr)
 __R_HOST
 hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes)
 {
+    HISDK_LOG_INFO(LOG_SYSTEM, "<GpuMalloc:size=%lu", nBytes);
     return HISDK_RET_SUCCESS; 
 }
 

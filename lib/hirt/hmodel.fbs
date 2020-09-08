@@ -117,8 +117,16 @@ table MemoryListEntry
 table TaskListEntry 
 {
     id           : uint;
+    name         : string;
+    type         : string;
     interface    : Interface;
-    address_list : [uint];
+    pr_addr_list : [uint];
+    in_addr_list : [uint];
+    ou_addr_list : [uint];
+    wt_addr_list : [uint];
+    bs_addr_list : [uint];
+    fm_addr_list : [uint];
+    lu_addr_list : [uint];
 }
 
 //

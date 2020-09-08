@@ -1,8 +1,7 @@
 #include "hmodel.h"
 #include "hmodel_generated.h"
 
-using std::endl;
-
+using namespace std;
 
 namespace hisdk
 {
@@ -29,7 +28,7 @@ int hModel::getNumMemoryListEntries() const
     return (int)mMemoryListEntries.size();
 }
 
-MemoryListEntry hModel::getMemoryListEntry(u32_t mem_id) const
+MemoryListEntry hModel::getMemoryListEntry(uint32_t mem_id) const
 {
     return mMemoryListEntries[mem_id];
 }
@@ -44,7 +43,7 @@ int hModel::getNumTaskListEntries() const
     return mTaskListEntries.size();
 }
 
-TaskListEntry hModel::getTaskListEntry(u32_t task_id) const
+TaskListEntry hModel::getTaskListEntry(uint32_t task_id) const
 {
     return mTaskListEntries[task_id];
 }
@@ -58,7 +57,7 @@ int hModel::getNumAddressListEntries() const
     return mAddressListEntries.size();
 }
 
-AddressListEntry hModel::getAddressListEntry(u32_t address_list_index) const
+AddressListEntry hModel::getAddressListEntry(uint32_t address_list_index) const
 {
     return mAddressListEntries[address_list_index];
 }
@@ -83,7 +82,7 @@ void hModel::setAddressListEntries(const std::vector<AddressListEntry> &e)
     mAddressListEntries = e;
 }
 
-int  hModel::setSymbolContent(std::string name, const Blob &b, u8_t *data)
+int  hModel::setSymbolContent(std::string name, const Blob &b, uint8_t *data)
 {
     mSymbols[name].name = b.name;
     mSymbols[name].interface = b.interface;
@@ -95,7 +94,7 @@ int  hModel::setSymbolContent(std::string name, const Blob &b, u8_t *data)
     return 0;
 }
 
-bool hModel::getSymbolContent(std::string name, Blob &b, u8_t * &data)
+bool hModel::getSymbolContent(std::string name, Blob &b, uint8_t * &data)
 {
     std::map<std::string, Symbol>::iterator f = mSymbols.find(name);
 
@@ -131,20 +130,36 @@ bool hModel::serialize()
     for ( size_t ti = 0, TI = mTaskListEntries.size(); ti != TI; ++ti ) 
     {
         const TaskListEntry & tle = mTaskListEntries[ti];
-        flatbuffers::Offset<flatbuffers::Vector<u32_t>> address_list = mFbb.CreateVector<u32_t>(tle.address_list);
-
+        flatbuffers::Offset<flatbuffers::Vector<uint32_t>> pr_addr_list = mFbb.CreateVector<uint32_t>(tle.pr_addr_list);
+        flatbuffers::Offset<flatbuffers::Vector<uint32_t>> in_addr_list = mFbb.CreateVector<uint32_t>(tle.in_addr_list);
+        flatbuffers::Offset<flatbuffers::Vector<uint32_t>> ou_addr_list = mFbb.CreateVector<uint32_t>(tle.ou_addr_list);
+        flatbuffers::Offset<flatbuffers::Vector<uint32_t>> wt_addr_list = mFbb.CreateVector<uint32_t>(tle.wt_addr_list);
+        flatbuffers::Offset<flatbuffers::Vector<uint32_t>> bs_addr_list = mFbb.CreateVector<uint32_t>(tle.bs_addr_list);
+        flatbuffers::Offset<flatbuffers::Vector<uint32_t>> fm_addr_list = mFbb.CreateVector<uint32_t>(tle.fm_addr_list);
+        flatbuffers::Offset<flatbuffers::Vector<uint32_t>> lu_addr_list = mFbb.CreateVector<uint32_t>(tle.lu_addr_list);
+        flatbuffers::Offset<flatbuffers::String> name = mFbb.CreateString(tle.name.c_str());
+        flatbuffers::Offset<flatbuffers::String> type = mFbb.CreateString(tle.name.c_str());
+        
         hisdk::hmodel::TaskListEntryBuilder tleb(mFbb);
-        tleb.add_address_list(address_list);
+        tleb.add_pr_addr_list(pr_addr_list);
+        tleb.add_in_addr_list(in_addr_list);
+        tleb.add_ou_addr_list(ou_addr_list);
+        tleb.add_wt_addr_list(wt_addr_list);
+        tleb.add_bs_addr_list(bs_addr_list);
+        tleb.add_fm_addr_list(fm_addr_list);
+        tleb.add_lu_addr_list(lu_addr_list);
         tleb.add_id(tle.id);
         hisdk::hmodel::Interface if_id;
-        if ( tle.interface == hisdk::TaskListEntry::interface_GPU() ) {
+        if ( tle.interface == TaskListEntry::interface_GPU() ) {
             if_id = hisdk::hmodel::Interface_GPU;
-        } else if ( tle.interface == hisdk::TaskListEntry::interface_CPU() ) {
+        } else if ( tle.interface == TaskListEntry::interface_CPU() ) {
             if_id = hisdk::hmodel::Interface_CPU;
         } else {
             if_id = hisdk::hmodel::Interface_NONE;
         }
         tleb.add_interface(if_id);
+        tleb.add_name(name);
+        tleb.add_type(type);
         task_list.push_back(tleb.Finish());
     }
 
@@ -198,36 +213,32 @@ bool hModel::serialize()
     return true;
 }
 
-hisdkRet_t hModel::getSerializedData(u8_t *buffer)
+bool hModel::getSerializedData(uint8_t *buffer) const
 {
-    hisdkRet_t e = HISDK_RET_SUCCESS;
-    u8_t *tmp = NULL;
-    u64_t size = 0;
+    uint8_t *tmp = NULL;
+    uint64_t size = 0;
 
     if (buffer == NULL)
-        HISDK_ERR_RPTFAIL(HISDK_RET_ERR_BADPARAMETER);
+        return false;
 
     size = mFbb.GetSize();
     tmp = mFbb.GetBufferPointer();
     memcpy(buffer, tmp, size);
 
-fail:
-    return e;
+    return true;
 }
 
-hisdkRet_t hModel::getSerializedDataSize(u64_t *size)
+bool hModel::getSerializedDataSize(uint64_t *size) const
 {
-    hisdkRet_t e = HISDK_RET_SUCCESS;
     if (size == NULL)
-        HISDK_ERR_RPTFAIL(HISDK_RET_ERR_BADPARAMETER);
+        return false;
 
     *size = mFbb.GetSize();
 
-fail:
-    return e;
+    return true;
 }
 
-bool hModel::deserializeFrom(u8_t *flatbuf)
+bool hModel::deserializeFrom(uint8_t *flatbuf)
 {
     const hisdk::hmodel::HModel *model = hisdk::hmodel::GetHModel(flatbuf);
     if(model == NULL)
@@ -244,14 +255,54 @@ bool hModel::deserializeFrom(u8_t *flatbuf)
     for (; tli != task_list->end(); ++tli) 
     {
         TaskListEntry tle;
-
+        std::string tle_name = tli->name()->str();
+        std::string tle_type = tli->type()->str();
+        
         tle.id = tli->id();
+        tle.name = tle_name;
+        tle.type = tle_type;
         tle.interface = tli->interface();
 
-        if ( tli->address_list() ) {
-            flatbuffers::Vector<unsigned int>::const_iterator ali = tli->address_list()->begin();
-            for (; ali != tli->address_list()->end(); ++ali) {
-                tle.address_list.push_back(*ali);
+        if ( tli->pr_addr_list() ) {
+            flatbuffers::Vector<unsigned int>::const_iterator ali = tli->pr_addr_list()->begin();
+            for (; ali != tli->pr_addr_list()->end(); ++ali) {
+                tle.pr_addr_list.push_back(*ali);
+            }
+        }
+        if ( tli->in_addr_list() ) {
+            flatbuffers::Vector<unsigned int>::const_iterator ali = tli->in_addr_list()->begin();
+            for (; ali != tli->in_addr_list()->end(); ++ali) {
+                tle.in_addr_list.push_back(*ali);
+            }
+        }
+        if ( tli->ou_addr_list() ) {
+            flatbuffers::Vector<unsigned int>::const_iterator ali = tli->ou_addr_list()->begin();
+            for (; ali != tli->ou_addr_list()->end(); ++ali) {
+                tle.ou_addr_list.push_back(*ali);
+            }
+        }
+        if ( tli->wt_addr_list() ) {
+            flatbuffers::Vector<unsigned int>::const_iterator ali = tli->wt_addr_list()->begin();
+            for (; ali != tli->wt_addr_list()->end(); ++ali) {
+                tle.wt_addr_list.push_back(*ali);
+            }
+        }
+        if ( tli->bs_addr_list() ) {
+            flatbuffers::Vector<unsigned int>::const_iterator ali = tli->bs_addr_list()->begin();
+            for (; ali != tli->bs_addr_list()->end(); ++ali) {
+                tle.bs_addr_list.push_back(*ali);
+            }
+        }
+        if ( tli->fm_addr_list() ) {
+            flatbuffers::Vector<unsigned int>::const_iterator ali = tli->fm_addr_list()->begin();
+            for (; ali != tli->fm_addr_list()->end(); ++ali) {
+                tle.fm_addr_list.push_back(*ali);
+            }
+        }
+        if ( tli->lu_addr_list() ) {
+            flatbuffers::Vector<unsigned int>::const_iterator ali = tli->lu_addr_list()->begin();
+            for (; ali != tli->lu_addr_list()->end(); ++ali) {
+                tle.lu_addr_list.push_back(*ali);
             }
         }
 
@@ -312,10 +363,10 @@ bool hModel::deserializeFrom(u8_t *flatbuf)
         mSymbols[blob_name].interface = (hisdk::Interface)bi->interface();
         mSymbols[blob_name].type = bi->type();
 
-        u8_t *blob_data = new u8_t[mSymbols[blob_name].size];
+        uint8_t *blob_data = new uint8_t[mSymbols[blob_name].size];
         memset(blob_data, 0, mSymbols[blob_name].size);
 
-        u8_t *binblob = (u8_t *)bi->data()->Data();
+        uint8_t *binblob = (uint8_t *)bi->data()->Data();
         memcpy((void*)blob_data, (void *)binblob, mSymbols[blob_name].size);
 
         mSymbols[blob_name].data = blob_data;
@@ -324,6 +375,5 @@ bool hModel::deserializeFrom(u8_t *flatbuf)
 
     return true;
 }
-
 
 } // hisdk

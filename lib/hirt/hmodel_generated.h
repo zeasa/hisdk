@@ -12,19 +12,14 @@ namespace hmodel {
 struct Version;
 
 struct Blob;
-struct BlobBuilder;
 
 struct MemoryListEntry;
-struct MemoryListEntryBuilder;
 
 struct TaskListEntry;
-struct TaskListEntryBuilder;
 
 struct AddressListEntry;
-struct AddressListEntryBuilder;
 
 struct HModel;
-struct HModelBuilder;
 
 enum Interface {
   Interface_NONE = 0,
@@ -34,17 +29,8 @@ enum Interface {
   Interface_MAX = Interface_CPU
 };
 
-inline const Interface (&EnumValuesInterface())[3] {
-  static const Interface values[] = {
-    Interface_NONE,
-    Interface_GPU,
-    Interface_CPU
-  };
-  return values;
-}
-
-inline const char * const *EnumNamesInterface() {
-  static const char * const names[4] = {
+inline const char **EnumNamesInterface() {
+  static const char *names[] = {
     "NONE",
     "GPU",
     "CPU",
@@ -54,8 +40,7 @@ inline const char * const *EnumNamesInterface() {
 }
 
 inline const char *EnumNameInterface(Interface e) {
-  if (flatbuffers::IsOutRange(e, Interface_NONE, Interface_CPU)) return "";
-  const size_t index = static_cast<size_t>(e);
+  const size_t index = static_cast<int>(e);
   return EnumNamesInterface()[index];
 }
 
@@ -65,15 +50,8 @@ enum HModelVersionMain {
   HModelVersionMain_MAX = HModelVersionMain_VAL
 };
 
-inline const HModelVersionMain (&EnumValuesHModelVersionMain())[1] {
-  static const HModelVersionMain values[] = {
-    HModelVersionMain_VAL
-  };
-  return values;
-}
-
-inline const char * const *EnumNamesHModelVersionMain() {
-  static const char * const names[2] = {
+inline const char **EnumNamesHModelVersionMain() {
+  static const char *names[] = {
     "VAL",
     nullptr
   };
@@ -81,8 +59,7 @@ inline const char * const *EnumNamesHModelVersionMain() {
 }
 
 inline const char *EnumNameHModelVersionMain(HModelVersionMain e) {
-  if (flatbuffers::IsOutRange(e, HModelVersionMain_VAL, HModelVersionMain_VAL)) return "";
-  const size_t index = static_cast<size_t>(e);
+  const size_t index = static_cast<int>(e);
   return EnumNamesHModelVersionMain()[index];
 }
 
@@ -92,15 +69,8 @@ enum HModelVersionSub {
   HModelVersionSub_MAX = HModelVersionSub_VAL
 };
 
-inline const HModelVersionSub (&EnumValuesHModelVersionSub())[1] {
-  static const HModelVersionSub values[] = {
-    HModelVersionSub_VAL
-  };
-  return values;
-}
-
-inline const char * const *EnumNamesHModelVersionSub() {
-  static const char * const names[2] = {
+inline const char **EnumNamesHModelVersionSub() {
+  static const char *names[] = {
     "VAL",
     nullptr
   };
@@ -108,8 +78,7 @@ inline const char * const *EnumNamesHModelVersionSub() {
 }
 
 inline const char *EnumNameHModelVersionSub(HModelVersionSub e) {
-  if (flatbuffers::IsOutRange(e, HModelVersionSub_VAL, HModelVersionSub_VAL)) return "";
-  const size_t index = static_cast<size_t>(e) - static_cast<size_t>(HModelVersionSub_VAL);
+  const size_t index = static_cast<int>(e) - static_cast<int>(HModelVersionSub_VAL);
   return EnumNamesHModelVersionSub()[index];
 }
 
@@ -119,15 +88,8 @@ enum HModelVersionSubMinor {
   HModelVersionSubMinor_MAX = HModelVersionSubMinor_VAL
 };
 
-inline const HModelVersionSubMinor (&EnumValuesHModelVersionSubMinor())[1] {
-  static const HModelVersionSubMinor values[] = {
-    HModelVersionSubMinor_VAL
-  };
-  return values;
-}
-
-inline const char * const *EnumNamesHModelVersionSubMinor() {
-  static const char * const names[2] = {
+inline const char **EnumNamesHModelVersionSubMinor() {
+  static const char *names[] = {
     "VAL",
     nullptr
   };
@@ -135,8 +97,7 @@ inline const char * const *EnumNamesHModelVersionSubMinor() {
 }
 
 inline const char *EnumNameHModelVersionSubMinor(HModelVersionSubMinor e) {
-  if (flatbuffers::IsOutRange(e, HModelVersionSubMinor_VAL, HModelVersionSubMinor_VAL)) return "";
-  const size_t index = static_cast<size_t>(e);
+  const size_t index = static_cast<int>(e);
   return EnumNamesHModelVersionSubMinor()[index];
 }
 
@@ -147,16 +108,8 @@ enum MemoryDomain {
   MemoryDomain_MAX = MemoryDomain_MRAB
 };
 
-inline const MemoryDomain (&EnumValuesMemoryDomain())[2] {
-  static const MemoryDomain values[] = {
-    MemoryDomain_GMEM,
-    MemoryDomain_MRAB
-  };
-  return values;
-}
-
-inline const char * const *EnumNamesMemoryDomain() {
-  static const char * const names[3] = {
+inline const char **EnumNamesMemoryDomain() {
+  static const char *names[] = {
     "GMEM",
     "MRAB",
     nullptr
@@ -165,8 +118,7 @@ inline const char * const *EnumNamesMemoryDomain() {
 }
 
 inline const char *EnumNameMemoryDomain(MemoryDomain e) {
-  if (flatbuffers::IsOutRange(e, MemoryDomain_GMEM, MemoryDomain_MRAB)) return "";
-  const size_t index = static_cast<size_t>(e);
+  const size_t index = static_cast<int>(e);
   return EnumNamesMemoryDomain()[index];
 }
 
@@ -180,19 +132,8 @@ enum MemoryFlags {
   MemoryFlags_MAX = MemoryFlags_OUTPUT
 };
 
-inline const MemoryFlags (&EnumValuesMemoryFlags())[5] {
-  static const MemoryFlags values[] = {
-    MemoryFlags_NONE,
-    MemoryFlags_ALLOC,
-    MemoryFlags_SET,
-    MemoryFlags_INPUT,
-    MemoryFlags_OUTPUT
-  };
-  return values;
-}
-
-inline const char * const *EnumNamesMemoryFlags() {
-  static const char * const names[10] = {
+inline const char **EnumNamesMemoryFlags() {
+  static const char *names[] = {
     "NONE",
     "ALLOC",
     "SET",
@@ -208,22 +149,22 @@ inline const char * const *EnumNamesMemoryFlags() {
 }
 
 inline const char *EnumNameMemoryFlags(MemoryFlags e) {
-  if (flatbuffers::IsOutRange(e, MemoryFlags_NONE, MemoryFlags_OUTPUT)) return "";
-  const size_t index = static_cast<size_t>(e);
+  const size_t index = static_cast<int>(e);
   return EnumNamesMemoryFlags()[index];
 }
 
-FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(1) Version FLATBUFFERS_FINAL_CLASS {
+MANUALLY_ALIGNED_STRUCT(1) Version FLATBUFFERS_FINAL_CLASS {
  private:
   uint8_t main_;
   uint8_t sub_;
   uint8_t sub_minor_;
 
  public:
-  Version()
-      : main_(0),
-        sub_(0),
-        sub_minor_(0) {
+  Version() {
+    memset(this, 0, sizeof(Version));
+  }
+  Version(const Version &_o) {
+    memcpy(this, &_o, sizeof(Version));
   }
   Version(uint8_t _main, uint8_t _sub, uint8_t _sub_minor)
       : main_(flatbuffers::EndianScalar(_main)),
@@ -240,11 +181,10 @@ FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(1) Version FLATBUFFERS_FINAL_CLASS {
     return flatbuffers::EndianScalar(sub_minor_);
   }
 };
-FLATBUFFERS_STRUCT_END(Version, 3);
+STRUCT_END(Version, 3);
 
 struct Blob FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef BlobBuilder Builder;
-  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+  enum {
     VT_NAME = 4,
     VT_SIZE = 6,
     VT_INTERFACE = 8,
@@ -258,34 +198,33 @@ struct Blob FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   uint64_t size() const {
     return GetField<uint64_t>(VT_SIZE, 0);
   }
-  hisdk::hmodel::Interface interface() const {
-    return static_cast<hisdk::hmodel::Interface>(GetField<uint32_t>(VT_INTERFACE, 0));
+  Interface interface() const {
+    return static_cast<Interface>(GetField<uint32_t>(VT_INTERFACE, 0));
   }
   uint32_t type() const {
     return GetField<uint32_t>(VT_TYPE, 0);
   }
-  const hisdk::hmodel::Version *version() const {
-    return GetStruct<const hisdk::hmodel::Version *>(VT_VERSION);
+  const Version *version() const {
+    return GetStruct<const Version *>(VT_VERSION);
   }
   const flatbuffers::Vector<uint8_t> *data() const {
     return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_DATA);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_NAME) &&
-           verifier.VerifyString(name()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_NAME) &&
+           verifier.Verify(name()) &&
            VerifyField<uint64_t>(verifier, VT_SIZE) &&
            VerifyField<uint32_t>(verifier, VT_INTERFACE) &&
            VerifyField<uint32_t>(verifier, VT_TYPE) &&
-           VerifyField<hisdk::hmodel::Version>(verifier, VT_VERSION) &&
-           VerifyOffset(verifier, VT_DATA) &&
-           verifier.VerifyVector(data()) &&
+           VerifyField<Version>(verifier, VT_VERSION) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_DATA) &&
+           verifier.Verify(data()) &&
            verifier.EndTable();
   }
 };
 
 struct BlobBuilder {
-  typedef Blob Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_name(flatbuffers::Offset<flatbuffers::String> name) {
@@ -294,24 +233,25 @@ struct BlobBuilder {
   void add_size(uint64_t size) {
     fbb_.AddElement<uint64_t>(Blob::VT_SIZE, size, 0);
   }
-  void add_interface(hisdk::hmodel::Interface interface) {
+  void add_interface(Interface interface) {
     fbb_.AddElement<uint32_t>(Blob::VT_INTERFACE, static_cast<uint32_t>(interface), 0);
   }
   void add_type(uint32_t type) {
     fbb_.AddElement<uint32_t>(Blob::VT_TYPE, type, 0);
   }
-  void add_version(const hisdk::hmodel::Version *version) {
+  void add_version(const Version *version) {
     fbb_.AddStruct(Blob::VT_VERSION, version);
   }
   void add_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data) {
     fbb_.AddOffset(Blob::VT_DATA, data);
   }
-  explicit BlobBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  BlobBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
+  BlobBuilder &operator=(const BlobBuilder &);
   flatbuffers::Offset<Blob> Finish() {
-    const auto end = fbb_.EndTable(start_);
+    const auto end = fbb_.EndTable(start_, 6);
     auto o = flatbuffers::Offset<Blob>(end);
     return o;
   }
@@ -321,9 +261,9 @@ inline flatbuffers::Offset<Blob> CreateBlob(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> name = 0,
     uint64_t size = 0,
-    hisdk::hmodel::Interface interface = hisdk::hmodel::Interface_NONE,
+    Interface interface = Interface_NONE,
     uint32_t type = 0,
-    const hisdk::hmodel::Version *version = 0,
+    const Version *version = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data = 0) {
   BlobBuilder builder_(_fbb);
   builder_.add_size(size);
@@ -339,25 +279,22 @@ inline flatbuffers::Offset<Blob> CreateBlobDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *name = nullptr,
     uint64_t size = 0,
-    hisdk::hmodel::Interface interface = hisdk::hmodel::Interface_NONE,
+    Interface interface = Interface_NONE,
     uint32_t type = 0,
-    const hisdk::hmodel::Version *version = 0,
+    const Version *version = 0,
     const std::vector<uint8_t> *data = nullptr) {
-  auto name__ = name ? _fbb.CreateString(name) : 0;
-  auto data__ = data ? _fbb.CreateVector<uint8_t>(*data) : 0;
   return hisdk::hmodel::CreateBlob(
       _fbb,
-      name__,
+      name ? _fbb.CreateString(name) : 0,
       size,
       interface,
       type,
       version,
-      data__);
+      data ? _fbb.CreateVector<uint8_t>(*data) : 0);
 }
 
 struct MemoryListEntry FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef MemoryListEntryBuilder Builder;
-  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+  enum {
     VT_ID = 4,
     VT_DOMAIN = 6,
     VT_FLAGS = 8,
@@ -369,11 +306,11 @@ struct MemoryListEntry FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   uint32_t id() const {
     return GetField<uint32_t>(VT_ID, 0);
   }
-  hisdk::hmodel::MemoryDomain domain() const {
-    return static_cast<hisdk::hmodel::MemoryDomain>(GetField<uint32_t>(VT_DOMAIN, 0));
+  MemoryDomain domain() const {
+    return static_cast<MemoryDomain>(GetField<uint32_t>(VT_DOMAIN, 0));
   }
-  hisdk::hmodel::MemoryFlags flags() const {
-    return static_cast<hisdk::hmodel::MemoryFlags>(GetField<uint32_t>(VT_FLAGS, 0));
+  MemoryFlags flags() const {
+    return static_cast<MemoryFlags>(GetField<uint32_t>(VT_FLAGS, 0));
   }
   uint64_t size() const {
     return GetField<uint64_t>(VT_SIZE, 0);
@@ -394,26 +331,25 @@ struct MemoryListEntry FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint32_t>(verifier, VT_FLAGS) &&
            VerifyField<uint64_t>(verifier, VT_SIZE) &&
            VerifyField<uint32_t>(verifier, VT_ALIGNMENT) &&
-           VerifyOffset(verifier, VT_CONTENTS) &&
-           verifier.VerifyVector(contents()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_CONTENTS) &&
+           verifier.Verify(contents()) &&
            verifier.VerifyVectorOfStrings(contents()) &&
-           VerifyOffset(verifier, VT_OFFSETS) &&
-           verifier.VerifyVector(offsets()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_OFFSETS) &&
+           verifier.Verify(offsets()) &&
            verifier.EndTable();
   }
 };
 
 struct MemoryListEntryBuilder {
-  typedef MemoryListEntry Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_id(uint32_t id) {
     fbb_.AddElement<uint32_t>(MemoryListEntry::VT_ID, id, 0);
   }
-  void add_domain(hisdk::hmodel::MemoryDomain domain) {
+  void add_domain(MemoryDomain domain) {
     fbb_.AddElement<uint32_t>(MemoryListEntry::VT_DOMAIN, static_cast<uint32_t>(domain), 0);
   }
-  void add_flags(hisdk::hmodel::MemoryFlags flags) {
+  void add_flags(MemoryFlags flags) {
     fbb_.AddElement<uint32_t>(MemoryListEntry::VT_FLAGS, static_cast<uint32_t>(flags), 0);
   }
   void add_size(uint64_t size) {
@@ -428,12 +364,13 @@ struct MemoryListEntryBuilder {
   void add_offsets(flatbuffers::Offset<flatbuffers::Vector<uint64_t>> offsets) {
     fbb_.AddOffset(MemoryListEntry::VT_OFFSETS, offsets);
   }
-  explicit MemoryListEntryBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  MemoryListEntryBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
+  MemoryListEntryBuilder &operator=(const MemoryListEntryBuilder &);
   flatbuffers::Offset<MemoryListEntry> Finish() {
-    const auto end = fbb_.EndTable(start_);
+    const auto end = fbb_.EndTable(start_, 7);
     auto o = flatbuffers::Offset<MemoryListEntry>(end);
     return o;
   }
@@ -442,8 +379,8 @@ struct MemoryListEntryBuilder {
 inline flatbuffers::Offset<MemoryListEntry> CreateMemoryListEntry(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t id = 0,
-    hisdk::hmodel::MemoryDomain domain = hisdk::hmodel::MemoryDomain_GMEM,
-    hisdk::hmodel::MemoryFlags flags = hisdk::hmodel::MemoryFlags_NONE,
+    MemoryDomain domain = MemoryDomain_GMEM,
+    MemoryFlags flags = MemoryFlags_NONE,
     uint64_t size = 0,
     uint32_t alignment = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> contents = 0,
@@ -462,14 +399,12 @@ inline flatbuffers::Offset<MemoryListEntry> CreateMemoryListEntry(
 inline flatbuffers::Offset<MemoryListEntry> CreateMemoryListEntryDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t id = 0,
-    hisdk::hmodel::MemoryDomain domain = hisdk::hmodel::MemoryDomain_GMEM,
-    hisdk::hmodel::MemoryFlags flags = hisdk::hmodel::MemoryFlags_NONE,
+    MemoryDomain domain = MemoryDomain_GMEM,
+    MemoryFlags flags = MemoryFlags_NONE,
     uint64_t size = 0,
     uint32_t alignment = 0,
     const std::vector<flatbuffers::Offset<flatbuffers::String>> *contents = nullptr,
     const std::vector<uint64_t> *offsets = nullptr) {
-  auto contents__ = contents ? _fbb.CreateVector<flatbuffers::Offset<flatbuffers::String>>(*contents) : 0;
-  auto offsets__ = offsets ? _fbb.CreateVector<uint64_t>(*offsets) : 0;
   return hisdk::hmodel::CreateMemoryListEntry(
       _fbb,
       id,
@@ -477,55 +412,126 @@ inline flatbuffers::Offset<MemoryListEntry> CreateMemoryListEntryDirect(
       flags,
       size,
       alignment,
-      contents__,
-      offsets__);
+      contents ? _fbb.CreateVector<flatbuffers::Offset<flatbuffers::String>>(*contents) : 0,
+      offsets ? _fbb.CreateVector<uint64_t>(*offsets) : 0);
 }
 
 struct TaskListEntry FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef TaskListEntryBuilder Builder;
-  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+  enum {
     VT_ID = 4,
-    VT_INTERFACE = 6,
-    VT_ADDRESS_LIST = 8
+    VT_NAME = 6,
+    VT_TYPE = 8,
+    VT_INTERFACE = 10,
+    VT_PR_ADDR_LIST = 12,
+    VT_IN_ADDR_LIST = 14,
+    VT_OU_ADDR_LIST = 16,
+    VT_WT_ADDR_LIST = 18,
+    VT_BS_ADDR_LIST = 20,
+    VT_FM_ADDR_LIST = 22,
+    VT_LU_ADDR_LIST = 24
   };
   uint32_t id() const {
     return GetField<uint32_t>(VT_ID, 0);
   }
-  hisdk::hmodel::Interface interface() const {
-    return static_cast<hisdk::hmodel::Interface>(GetField<uint32_t>(VT_INTERFACE, 0));
+  const flatbuffers::String *name() const {
+    return GetPointer<const flatbuffers::String *>(VT_NAME);
   }
-  const flatbuffers::Vector<uint32_t> *address_list() const {
-    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_ADDRESS_LIST);
+  const flatbuffers::String *type() const {
+    return GetPointer<const flatbuffers::String *>(VT_TYPE);
+  }
+  Interface interface() const {
+    return static_cast<Interface>(GetField<uint32_t>(VT_INTERFACE, 0));
+  }
+  const flatbuffers::Vector<uint32_t> *pr_addr_list() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_PR_ADDR_LIST);
+  }
+  const flatbuffers::Vector<uint32_t> *in_addr_list() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_IN_ADDR_LIST);
+  }
+  const flatbuffers::Vector<uint32_t> *ou_addr_list() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_OU_ADDR_LIST);
+  }
+  const flatbuffers::Vector<uint32_t> *wt_addr_list() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_WT_ADDR_LIST);
+  }
+  const flatbuffers::Vector<uint32_t> *bs_addr_list() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_BS_ADDR_LIST);
+  }
+  const flatbuffers::Vector<uint32_t> *fm_addr_list() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_FM_ADDR_LIST);
+  }
+  const flatbuffers::Vector<uint32_t> *lu_addr_list() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_LU_ADDR_LIST);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint32_t>(verifier, VT_ID) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_NAME) &&
+           verifier.Verify(name()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_TYPE) &&
+           verifier.Verify(type()) &&
            VerifyField<uint32_t>(verifier, VT_INTERFACE) &&
-           VerifyOffset(verifier, VT_ADDRESS_LIST) &&
-           verifier.VerifyVector(address_list()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_PR_ADDR_LIST) &&
+           verifier.Verify(pr_addr_list()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_IN_ADDR_LIST) &&
+           verifier.Verify(in_addr_list()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_OU_ADDR_LIST) &&
+           verifier.Verify(ou_addr_list()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_WT_ADDR_LIST) &&
+           verifier.Verify(wt_addr_list()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_BS_ADDR_LIST) &&
+           verifier.Verify(bs_addr_list()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_FM_ADDR_LIST) &&
+           verifier.Verify(fm_addr_list()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_LU_ADDR_LIST) &&
+           verifier.Verify(lu_addr_list()) &&
            verifier.EndTable();
   }
 };
 
 struct TaskListEntryBuilder {
-  typedef TaskListEntry Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_id(uint32_t id) {
     fbb_.AddElement<uint32_t>(TaskListEntry::VT_ID, id, 0);
   }
-  void add_interface(hisdk::hmodel::Interface interface) {
+  void add_name(flatbuffers::Offset<flatbuffers::String> name) {
+    fbb_.AddOffset(TaskListEntry::VT_NAME, name);
+  }
+  void add_type(flatbuffers::Offset<flatbuffers::String> type) {
+    fbb_.AddOffset(TaskListEntry::VT_TYPE, type);
+  }
+  void add_interface(Interface interface) {
     fbb_.AddElement<uint32_t>(TaskListEntry::VT_INTERFACE, static_cast<uint32_t>(interface), 0);
   }
-  void add_address_list(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> address_list) {
-    fbb_.AddOffset(TaskListEntry::VT_ADDRESS_LIST, address_list);
+  void add_pr_addr_list(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> pr_addr_list) {
+    fbb_.AddOffset(TaskListEntry::VT_PR_ADDR_LIST, pr_addr_list);
   }
-  explicit TaskListEntryBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  void add_in_addr_list(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> in_addr_list) {
+    fbb_.AddOffset(TaskListEntry::VT_IN_ADDR_LIST, in_addr_list);
+  }
+  void add_ou_addr_list(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> ou_addr_list) {
+    fbb_.AddOffset(TaskListEntry::VT_OU_ADDR_LIST, ou_addr_list);
+  }
+  void add_wt_addr_list(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> wt_addr_list) {
+    fbb_.AddOffset(TaskListEntry::VT_WT_ADDR_LIST, wt_addr_list);
+  }
+  void add_bs_addr_list(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> bs_addr_list) {
+    fbb_.AddOffset(TaskListEntry::VT_BS_ADDR_LIST, bs_addr_list);
+  }
+  void add_fm_addr_list(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> fm_addr_list) {
+    fbb_.AddOffset(TaskListEntry::VT_FM_ADDR_LIST, fm_addr_list);
+  }
+  void add_lu_addr_list(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> lu_addr_list) {
+    fbb_.AddOffset(TaskListEntry::VT_LU_ADDR_LIST, lu_addr_list);
+  }
+  TaskListEntryBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
+  TaskListEntryBuilder &operator=(const TaskListEntryBuilder &);
   flatbuffers::Offset<TaskListEntry> Finish() {
-    const auto end = fbb_.EndTable(start_);
+    const auto end = fbb_.EndTable(start_, 11);
     auto o = flatbuffers::Offset<TaskListEntry>(end);
     return o;
   }
@@ -534,11 +540,27 @@ struct TaskListEntryBuilder {
 inline flatbuffers::Offset<TaskListEntry> CreateTaskListEntry(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t id = 0,
-    hisdk::hmodel::Interface interface = hisdk::hmodel::Interface_NONE,
-    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> address_list = 0) {
+    flatbuffers::Offset<flatbuffers::String> name = 0,
+    flatbuffers::Offset<flatbuffers::String> type = 0,
+    Interface interface = Interface_NONE,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> pr_addr_list = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> in_addr_list = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> ou_addr_list = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> wt_addr_list = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> bs_addr_list = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> fm_addr_list = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> lu_addr_list = 0) {
   TaskListEntryBuilder builder_(_fbb);
-  builder_.add_address_list(address_list);
+  builder_.add_lu_addr_list(lu_addr_list);
+  builder_.add_fm_addr_list(fm_addr_list);
+  builder_.add_bs_addr_list(bs_addr_list);
+  builder_.add_wt_addr_list(wt_addr_list);
+  builder_.add_ou_addr_list(ou_addr_list);
+  builder_.add_in_addr_list(in_addr_list);
+  builder_.add_pr_addr_list(pr_addr_list);
   builder_.add_interface(interface);
+  builder_.add_type(type);
+  builder_.add_name(name);
   builder_.add_id(id);
   return builder_.Finish();
 }
@@ -546,19 +568,33 @@ inline flatbuffers::Offset<TaskListEntry> CreateTaskListEntry(
 inline flatbuffers::Offset<TaskListEntry> CreateTaskListEntryDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t id = 0,
-    hisdk::hmodel::Interface interface = hisdk::hmodel::Interface_NONE,
-    const std::vector<uint32_t> *address_list = nullptr) {
-  auto address_list__ = address_list ? _fbb.CreateVector<uint32_t>(*address_list) : 0;
+    const char *name = nullptr,
+    const char *type = nullptr,
+    Interface interface = Interface_NONE,
+    const std::vector<uint32_t> *pr_addr_list = nullptr,
+    const std::vector<uint32_t> *in_addr_list = nullptr,
+    const std::vector<uint32_t> *ou_addr_list = nullptr,
+    const std::vector<uint32_t> *wt_addr_list = nullptr,
+    const std::vector<uint32_t> *bs_addr_list = nullptr,
+    const std::vector<uint32_t> *fm_addr_list = nullptr,
+    const std::vector<uint32_t> *lu_addr_list = nullptr) {
   return hisdk::hmodel::CreateTaskListEntry(
       _fbb,
       id,
+      name ? _fbb.CreateString(name) : 0,
+      type ? _fbb.CreateString(type) : 0,
       interface,
-      address_list__);
+      pr_addr_list ? _fbb.CreateVector<uint32_t>(*pr_addr_list) : 0,
+      in_addr_list ? _fbb.CreateVector<uint32_t>(*in_addr_list) : 0,
+      ou_addr_list ? _fbb.CreateVector<uint32_t>(*ou_addr_list) : 0,
+      wt_addr_list ? _fbb.CreateVector<uint32_t>(*wt_addr_list) : 0,
+      bs_addr_list ? _fbb.CreateVector<uint32_t>(*bs_addr_list) : 0,
+      fm_addr_list ? _fbb.CreateVector<uint32_t>(*fm_addr_list) : 0,
+      lu_addr_list ? _fbb.CreateVector<uint32_t>(*lu_addr_list) : 0);
 }
 
 struct AddressListEntry FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef AddressListEntryBuilder Builder;
-  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+  enum {
     VT_ID = 4,
     VT_MEM_ID = 6,
     VT_OFFSET = 8,
@@ -587,7 +623,6 @@ struct AddressListEntry FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 };
 
 struct AddressListEntryBuilder {
-  typedef AddressListEntry Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_id(uint32_t id) {
@@ -602,12 +637,13 @@ struct AddressListEntryBuilder {
   void add_size(uint64_t size) {
     fbb_.AddElement<uint64_t>(AddressListEntry::VT_SIZE, size, 0);
   }
-  explicit AddressListEntryBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  AddressListEntryBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
+  AddressListEntryBuilder &operator=(const AddressListEntryBuilder &);
   flatbuffers::Offset<AddressListEntry> Finish() {
-    const auto end = fbb_.EndTable(start_);
+    const auto end = fbb_.EndTable(start_, 4);
     auto o = flatbuffers::Offset<AddressListEntry>(end);
     return o;
   }
@@ -628,73 +664,72 @@ inline flatbuffers::Offset<AddressListEntry> CreateAddressListEntry(
 }
 
 struct HModel FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef HModelBuilder Builder;
-  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
+  enum {
     VT_VERSION = 4,
     VT_TASK_LIST = 6,
     VT_ADDRESS_LIST = 8,
     VT_MEMORY_LIST = 10,
     VT_BLOBS = 12
   };
-  const hisdk::hmodel::Version *version() const {
-    return GetStruct<const hisdk::hmodel::Version *>(VT_VERSION);
+  const Version *version() const {
+    return GetStruct<const Version *>(VT_VERSION);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::TaskListEntry>> *task_list() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::TaskListEntry>> *>(VT_TASK_LIST);
+  const flatbuffers::Vector<flatbuffers::Offset<TaskListEntry>> *task_list() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<TaskListEntry>> *>(VT_TASK_LIST);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::AddressListEntry>> *address_list() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::AddressListEntry>> *>(VT_ADDRESS_LIST);
+  const flatbuffers::Vector<flatbuffers::Offset<AddressListEntry>> *address_list() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<AddressListEntry>> *>(VT_ADDRESS_LIST);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::MemoryListEntry>> *memory_list() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::MemoryListEntry>> *>(VT_MEMORY_LIST);
+  const flatbuffers::Vector<flatbuffers::Offset<MemoryListEntry>> *memory_list() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<MemoryListEntry>> *>(VT_MEMORY_LIST);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::Blob>> *blobs() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::Blob>> *>(VT_BLOBS);
+  const flatbuffers::Vector<flatbuffers::Offset<Blob>> *blobs() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Blob>> *>(VT_BLOBS);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyFieldRequired<hisdk::hmodel::Version>(verifier, VT_VERSION) &&
-           VerifyOffset(verifier, VT_TASK_LIST) &&
-           verifier.VerifyVector(task_list()) &&
+           VerifyFieldRequired<Version>(verifier, VT_VERSION) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_TASK_LIST) &&
+           verifier.Verify(task_list()) &&
            verifier.VerifyVectorOfTables(task_list()) &&
-           VerifyOffset(verifier, VT_ADDRESS_LIST) &&
-           verifier.VerifyVector(address_list()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_ADDRESS_LIST) &&
+           verifier.Verify(address_list()) &&
            verifier.VerifyVectorOfTables(address_list()) &&
-           VerifyOffset(verifier, VT_MEMORY_LIST) &&
-           verifier.VerifyVector(memory_list()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_MEMORY_LIST) &&
+           verifier.Verify(memory_list()) &&
            verifier.VerifyVectorOfTables(memory_list()) &&
-           VerifyOffset(verifier, VT_BLOBS) &&
-           verifier.VerifyVector(blobs()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_BLOBS) &&
+           verifier.Verify(blobs()) &&
            verifier.VerifyVectorOfTables(blobs()) &&
            verifier.EndTable();
   }
 };
 
 struct HModelBuilder {
-  typedef HModel Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_version(const hisdk::hmodel::Version *version) {
+  void add_version(const Version *version) {
     fbb_.AddStruct(HModel::VT_VERSION, version);
   }
-  void add_task_list(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::TaskListEntry>>> task_list) {
+  void add_task_list(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<TaskListEntry>>> task_list) {
     fbb_.AddOffset(HModel::VT_TASK_LIST, task_list);
   }
-  void add_address_list(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::AddressListEntry>>> address_list) {
+  void add_address_list(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AddressListEntry>>> address_list) {
     fbb_.AddOffset(HModel::VT_ADDRESS_LIST, address_list);
   }
-  void add_memory_list(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::MemoryListEntry>>> memory_list) {
+  void add_memory_list(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<MemoryListEntry>>> memory_list) {
     fbb_.AddOffset(HModel::VT_MEMORY_LIST, memory_list);
   }
-  void add_blobs(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::Blob>>> blobs) {
+  void add_blobs(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Blob>>> blobs) {
     fbb_.AddOffset(HModel::VT_BLOBS, blobs);
   }
-  explicit HModelBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  HModelBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
+  HModelBuilder &operator=(const HModelBuilder &);
   flatbuffers::Offset<HModel> Finish() {
-    const auto end = fbb_.EndTable(start_);
+    const auto end = fbb_.EndTable(start_, 5);
     auto o = flatbuffers::Offset<HModel>(end);
     fbb_.Required(o, HModel::VT_VERSION);
     return o;
@@ -703,11 +738,11 @@ struct HModelBuilder {
 
 inline flatbuffers::Offset<HModel> CreateHModel(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const hisdk::hmodel::Version *version = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::TaskListEntry>>> task_list = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::AddressListEntry>>> address_list = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::MemoryListEntry>>> memory_list = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<hisdk::hmodel::Blob>>> blobs = 0) {
+    const Version *version = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<TaskListEntry>>> task_list = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AddressListEntry>>> address_list = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<MemoryListEntry>>> memory_list = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Blob>>> blobs = 0) {
   HModelBuilder builder_(_fbb);
   builder_.add_blobs(blobs);
   builder_.add_memory_list(memory_list);
@@ -719,30 +754,22 @@ inline flatbuffers::Offset<HModel> CreateHModel(
 
 inline flatbuffers::Offset<HModel> CreateHModelDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const hisdk::hmodel::Version *version = 0,
-    const std::vector<flatbuffers::Offset<hisdk::hmodel::TaskListEntry>> *task_list = nullptr,
-    const std::vector<flatbuffers::Offset<hisdk::hmodel::AddressListEntry>> *address_list = nullptr,
-    const std::vector<flatbuffers::Offset<hisdk::hmodel::MemoryListEntry>> *memory_list = nullptr,
-    const std::vector<flatbuffers::Offset<hisdk::hmodel::Blob>> *blobs = nullptr) {
-  auto task_list__ = task_list ? _fbb.CreateVector<flatbuffers::Offset<hisdk::hmodel::TaskListEntry>>(*task_list) : 0;
-  auto address_list__ = address_list ? _fbb.CreateVector<flatbuffers::Offset<hisdk::hmodel::AddressListEntry>>(*address_list) : 0;
-  auto memory_list__ = memory_list ? _fbb.CreateVector<flatbuffers::Offset<hisdk::hmodel::MemoryListEntry>>(*memory_list) : 0;
-  auto blobs__ = blobs ? _fbb.CreateVector<flatbuffers::Offset<hisdk::hmodel::Blob>>(*blobs) : 0;
+    const Version *version = 0,
+    const std::vector<flatbuffers::Offset<TaskListEntry>> *task_list = nullptr,
+    const std::vector<flatbuffers::Offset<AddressListEntry>> *address_list = nullptr,
+    const std::vector<flatbuffers::Offset<MemoryListEntry>> *memory_list = nullptr,
+    const std::vector<flatbuffers::Offset<Blob>> *blobs = nullptr) {
   return hisdk::hmodel::CreateHModel(
       _fbb,
       version,
-      task_list__,
-      address_list__,
-      memory_list__,
-      blobs__);
+      task_list ? _fbb.CreateVector<flatbuffers::Offset<TaskListEntry>>(*task_list) : 0,
+      address_list ? _fbb.CreateVector<flatbuffers::Offset<AddressListEntry>>(*address_list) : 0,
+      memory_list ? _fbb.CreateVector<flatbuffers::Offset<MemoryListEntry>>(*memory_list) : 0,
+      blobs ? _fbb.CreateVector<flatbuffers::Offset<Blob>>(*blobs) : 0);
 }
 
 inline const hisdk::hmodel::HModel *GetHModel(const void *buf) {
   return flatbuffers::GetRoot<hisdk::hmodel::HModel>(buf);
-}
-
-inline const hisdk::hmodel::HModel *GetSizePrefixedHModel(const void *buf) {
-  return flatbuffers::GetSizePrefixedRoot<hisdk::hmodel::HModel>(buf);
 }
 
 inline bool VerifyHModelBuffer(
@@ -750,21 +777,10 @@ inline bool VerifyHModelBuffer(
   return verifier.VerifyBuffer<hisdk::hmodel::HModel>(nullptr);
 }
 
-inline bool VerifySizePrefixedHModelBuffer(
-    flatbuffers::Verifier &verifier) {
-  return verifier.VerifySizePrefixedBuffer<hisdk::hmodel::HModel>(nullptr);
-}
-
 inline void FinishHModelBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
     flatbuffers::Offset<hisdk::hmodel::HModel> root) {
   fbb.Finish(root);
-}
-
-inline void FinishSizePrefixedHModelBuffer(
-    flatbuffers::FlatBufferBuilder &fbb,
-    flatbuffers::Offset<hisdk::hmodel::HModel> root) {
-  fbb.FinishSizePrefixed(root);
 }
 
 }  // namespace hmodel

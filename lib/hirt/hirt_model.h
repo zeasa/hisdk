@@ -29,7 +29,13 @@ public:
         u16_t id() const { return mEntry.id; }
         u32_t interface() const { return mEntry.interface; }
         //i32_t instance()  const { return mEntry.instance; }
-        std::vector<u32_t> &address_list() { return mEntry.address_list; }
+        std::vector<u32_t> &pr_addr_list() { return mEntry.pr_addr_list; }
+        std::vector<u32_t> &in_addr_list() { return mEntry.in_addr_list; }
+        std::vector<u32_t> &ou_addr_list() { return mEntry.ou_addr_list; }
+        std::vector<u32_t> &wt_addr_list() { return mEntry.wt_addr_list; }
+        std::vector<u32_t> &bs_addr_list() { return mEntry.bs_addr_list; }
+        std::vector<u32_t> &fm_addr_list() { return mEntry.fm_addr_list; }
+        std::vector<u32_t> &lu_addr_list() { return mEntry.lu_addr_list; }
     protected:
         TaskListEntry mEntry;
 
@@ -38,18 +44,17 @@ public:
     class Memory {
     public:
         Memory() : hMem(0), pVirtAddr(0) { }
-        Memory(const MemoryListEntry &e) : hMem(0), pVirtAddr(0), mEntry(e) { }
-        Memory(const Memory &o) : hMem(o.hMem), pVirtAddr(0), mEntry(o.mEntry) { }
+        Memory(const MemoryListEntry &e) : hMem(0), mEntry(e) { }
+        Memory(const Memory &o) : hMem(o.hMem), mEntry(o.mEntry) { }
         inline u16_t id() { return mEntry.id; }
         inline u64_t size() { return mEntry.size; }
         inline u32_t alignment() { return mEntry.alignment; }
         inline u32_t domain() { return mEntry.domain; }
-        inline bool  bound() { return hMem != 0; }
         inline u32_t flags() { return mEntry.flags; }
-        inline void setHandle(void *h) { hMem = h; }
-        inline void *getHandle() const { return hMem; }
-        inline void setVirtAddr(void *addr) { pVirtAddr = addr; }
-        inline void *getVirtAddr() const { return pVirtAddr; }
+        
+        inline void setHandle(hirtGMemAddress_t h) { hMem = h; }
+        inline hirtGMemAddress_t getHandle() const { return hMem; }
+        
         inline std::vector<std::string> & contents() { return mEntry.contents; }
         inline std::vector<u64_t> & offsets() { return mEntry.offsets; }
    #if 0
@@ -90,8 +95,7 @@ public:
         }
     #endif
     protected:
-        void *hMem;
-        void *pVirtAddr;
+        hirtGMemAddress_t hMem;
         MemoryListEntry mEntry;
     };
 
@@ -107,15 +111,25 @@ public:
         AddressListEntry mEntry;
     };
 
+protected:
+    std::vector<TaskListEntry>    m_task_entries;
+    std::vector<MemoryListEntry>  m_memory_entries;
+    std::vector<AddressListEntry> m_address_entries;
+
+    std::vector<Task>    m_task;
+    std::vector<Memory>  m_memory;
+    std::vector<Address> m_address;
+
 public:
     hirtModelCtx();
     ~hirtModelCtx();
 
     hisdkRet_t loadModel(const char* fname);
-    hisdkRet_t unloadModel();
-    hisdkRet_t loadModelMemory();
-
-    hisdkRet_t runModel();
+    void       unloadModel();
+    hisdkRet_t loadMemory();
+    void       unloadMemory();
+    hisdkRet_t submit();
+    
 private:
     hModel m_hModel;
 

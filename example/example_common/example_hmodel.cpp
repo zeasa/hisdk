@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include "argtable3.h"
 #include "hmodel.h"
+#include "hisdk_type.h"
+#include "hisdk_config.h"
+#include "hisdk_port.h"
+#include "hisdk_log.h"
+#include "hisdk_error.h"
 
 using namespace hisdk;
 
