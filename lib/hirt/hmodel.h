@@ -130,6 +130,8 @@ struct TaskListEntry
     std::vector<uint32_t> fm_addr_list;
     std::vector<uint32_t> lu_addr_list;
     TaskListEntry(const TaskListEntry &o) :
+        name(o.name),
+        type(o.type),
         id(o.id),
         interface(o.interface),
         pr_addr_list(o.pr_addr_list),

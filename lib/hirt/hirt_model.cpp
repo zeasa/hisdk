@@ -76,7 +76,7 @@ hisdkRet_t hirtModelCtx::loadModel(const char* fname)
         m_memory[mi] = Memory(m_memory_entries[mi]);
     }
     
-	loadMemory();
+	loadMemorys();
 	
     m_address.resize(m_address_entries.size());
     for ( size_t ai = 0, AI = m_address_entries.size(); ai != AI; ++ai ) 
@@ -117,7 +117,7 @@ fail:
     return e;
 }
 
-hisdkRet_t hirtModelCtx::loadMemory()
+hisdkRet_t hirtModelCtx::loadMemorys()
 {
     hisdkRet_t e = HISDK_RET_SUCCESS;
     size_t mi, MI;
@@ -139,23 +139,21 @@ hisdkRet_t hirtModelCtx::loadMemory()
         {
             //do the gmem alloc for the memory area
             hirtGMemAddress_t gmem_addr;
-            u8_t *pbuf;
+
 
             //HISDK_LOG_INFO(LOG_SYSTEM, "MemoryListEntry::domain_gmem()");
-            
-            pbuf = (u8_t*)hisdkAlloc(mle.size());
-            if(pbuf == NULL)
-            {
-                HISDK_ERR_RPTFAIL(HISDK_RET_ERR_NOMEM,
-                                         "failed to alloc buffer for memorylistentry");
-            }
             HISDK_ERR_FCALLFAIL( hirtGpuMalloc(&gmem_addr, mle.size()) );
             mle.setHandle(gmem_addr);
             
             if(mle.flags() & MemoryListEntry::flags_set())
             {
-                //HISDK_LOG_INFO(LOG_SYSTEM, "flags_set()");
-                //load the memory with blob contents
+                u8_t *pbuf;
+                pbuf = (u8_t*)hisdkAlloc(mle.size());
+                if(pbuf == NULL)
+                {
+                    HISDK_ERR_RPTFAIL(HISDK_RET_ERR_NOMEM,
+                                             "failed to alloc buffer for memorylistentry");
+                }
                 const std::vector<std::string> contents = mle.contents();
                 const std::vector<u64_t>       offsets  = mle.offsets();
                 HISDK_LOG_INFO(LOG_SYSTEM, "contents.size=%lu", mle.contents().size());
@@ -192,9 +190,12 @@ hisdkRet_t hirtModelCtx::loadMemory()
                         HISDK_ERR_RPTFAIL(HISDK_RET_ERR_BADPARAMETER, "content blob too large for pool size");
                     }
                 }
+
+                HISDK_ERR_FCALLFAIL( hirtMemcpy((void*)gmem_addr, pbuf, mle.size(), HIRT_MEM_TRANS_DIR_HOST2GPU) );
+                hisdkFree(pbuf);
             }
             //transfor the memory contents to gmem
-            HISDK_ERR_FCALLFAIL( hirtMemcpy((void*)gmem_addr, pbuf, mle.size(), HIRT_MEM_TRANS_DIR_HOST2GPU) );
+            
         }
     }
 
@@ -204,7 +205,7 @@ fail:
 
 void hirtModelCtx::unloadModel()
 {
-    unloadMemory();
+    unloadMemorys();
 
     m_task_entries.clear();
     m_memory_entries.clear();
@@ -215,15 +216,16 @@ void hirtModelCtx::unloadModel()
     m_address.clear();
 }
 
-
-hisdkRet_t submit()
+#include <iostream>
+hisdkRet_t hirtModelCtx::submit()
 {
     //for each task in modelctx,choose the right 
     //kernel and invoke kernel to do the inference
     hisdkRet_t e = HISDK_RET_SUCCESS;
     
     HISDK_LOG_INFO(LOG_SYSTEM, "example_hirt program start...");
-    
+
+    /*prepare gpu execution envirement*/
     hirtInit(0);
     hirtDev_t dev = 0;
     hirtGetDeviceHandle(&dev, 0);
@@ -237,23 +239,63 @@ hisdkRet_t submit()
     
     hirtEventHandler_t *pEventHandler = NULL;
     hirtEventHandlerCreate(&pEventHandler, pScheduler);
+
+    /*prepare the input buffer for the network*/
     
-#if 0
-    int *k_a, *k_b;
-    hirtGpuMalloc((void **)&k_a, sizeof(int));
-    hirtGpuMalloc((void **)&k_b, sizeof(int));
-    hirtMemcpy(k_a, &a, sizeof(int), HIRT_MEM_TRANS_DIR_HOST2GPU);
-    hirtMemcpy(k_b, &b, sizeof(int), HIRT_MEM_TRANS_DIR_HOST2GPU);
-#endif
+    /*prepare kernel for all layers of the network*/
+    for(int i=0; i<m_task_entries.size(); i++)
+    {
+        std::string op_name = m_task_entries[i].name;
+        std::string op_type = m_task_entries[i].type;
+        std::cout << "op[" << i << "]==========" << op_name.c_str() << "," << op_type.c_str() << std::endl;
+
+        std::cout << "  pr_addr_list:" << std::endl;
+        for(int j=0; j<m_task_entries[i].pr_addr_list.size(); j++)
+        {
+            std::cout << "    [" << j << "] = " << m_task_entries[i].pr_addr_list[j] << std::endl;
+        }
+        std::cout << "  in_addr_list:" << std::endl;
+        for(int j=0; j<m_task_entries[i].in_addr_list.size(); j++)
+        {
+            std::cout << "    [" << j << "] = " << m_task_entries[i].in_addr_list[j] << std::endl;
+        }
+        std::cout << "  ou_addr_list:" << std::endl;
+        for(int j=0; j<m_task_entries[i].ou_addr_list.size(); j++)
+        {
+            std::cout << "    [" << j << "] = " << m_task_entries[i].ou_addr_list[j] << std::endl;
+        }
+        std::cout << "  wt_addr_list:" << std::endl;
+        for(int j=0; j<m_task_entries[i].wt_addr_list.size(); j++)
+        {
+            std::cout << "    [" << j << "] = " << m_task_entries[i].wt_addr_list[j] << std::endl;
+        }
+        std::cout << "  bs_addr_list:" << std::endl;
+        for(int j=0; j<m_task_entries[i].bs_addr_list.size(); j++)
+        {
+            std::cout << "    [" << j << "] = " << m_task_entries[i].bs_addr_list[j] << std::endl;
+        }
+        std::cout << "  fm_addr_list:" << std::endl;
+        for(int j=0; j<m_task_entries[i].fm_addr_list.size(); j++)
+        {
+            std::cout << "    [" << j << "] = " << m_task_entries[i].fm_addr_list[j] << std::endl;
+        }
+        std::cout << "  lu_addr_list:" << std::endl;
+        for(int j=0; j<m_task_entries[i].lu_addr_list.size(); j++)
+        {
+            std::cout << "    [" << j << "] = " << m_task_entries[i].lu_addr_list[j] << std::endl;
+        }
+        //hirtKernelParamsBuffer_t *pParams = NULL;
+        //hirtKernelParamsBufferCreate(&pParams);
+        //hirtKernelParamsBufferAddParam(pParams, &k_a, sizeof(int *));
+        //hirtKernelBinBuffer_t *pkrnlBin = NULL;
+        //hirtInvokeKernel("kernel.o", pParams, &pkrnlBin, 1, pCmdQueue);
+        //hirtCmdQueueSync(pCmdQueue);
+    }
     
+    /*copy out the result from the gpu output buffer gmem to the host memory*/
+    //hirtMemcpy(&out, k_a, sizeof(int), HIRT_MEM_TRANS_DIR_GPU2HOST);
     
-    hirtKernelParamsBuffer_t *pParams = NULL;
-    hirtKernelParamsBufferCreate(&pParams);
-    //hirtKernelParamsBufferAddParam(pParams, &k_a, sizeof(int *));
-    hirtKernelBinBuffer_t *pkrnlBin = NULL;
-    hirtInvokeKernel("kernel.o", pParams, &pkrnlBin, 1, pCmdQueue);
-    hirtCmdQueueSync(pCmdQueue);
-    
+    /*deinit the gpu execution envirement*/
 #if 0    
     hirtInvokeKernel(&kernel1, 3, pParams, queue);
     hirtInvokeKernel(&kernel2, 3, pParams, queue);
@@ -265,9 +307,9 @@ hisdkRet_t submit()
     hirtDestroy();
 #endif
     
-    hirtEventHandlerDestroy(pEventHandler);
-    hirtSchedulerDestroy(pScheduler);
-    hirtCmdQueueDestroy(pCmdQueue);
+    //hirtEventHandlerDestroy(pEventHandler);
+    //hirtSchedulerDestroy(pScheduler);
+    //hirtCmdQueueDestroy(pCmdQueue);
 }
 
 

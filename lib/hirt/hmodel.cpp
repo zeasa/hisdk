@@ -1,6 +1,6 @@
 #include "hmodel.h"
 #include "hmodel_generated.h"
-
+#include <iostream>
 using namespace std;
 
 namespace hisdk

@@ -43,7 +43,7 @@ public:
 
     class Memory {
     public:
-        Memory() : hMem(0), pVirtAddr(0) { }
+        Memory() : hMem(0) { }
         Memory(const MemoryListEntry &e) : hMem(0), mEntry(e) { }
         Memory(const Memory &o) : hMem(o.hMem), mEntry(o.mEntry) { }
         inline u16_t id() { return mEntry.id; }
@@ -126,8 +126,8 @@ public:
 
     hisdkRet_t loadModel(const char* fname);
     void       unloadModel();
-    hisdkRet_t loadMemory();
-    void       unloadMemory();
+    hisdkRet_t loadMemorys();
+    void       unloadMemorys() {};
     hisdkRet_t submit();
     
 private:

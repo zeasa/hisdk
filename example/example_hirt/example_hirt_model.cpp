@@ -92,7 +92,8 @@ int main(int argc, char *argv[])
 
     pCtx = new hirtModelCtx();
     pCtx->loadModel(infiles->filename[0]);
-    
+
+    pCtx->submit();
 #if 0
     HISDK_ERR_FCALLFAIL( hirtLoadModel(&pmodel, infiles->filename[0]) );
 
