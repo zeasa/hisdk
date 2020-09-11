@@ -106,6 +106,7 @@ public:
         Address(const Address &o) : mEntry(o.mEntry) { }
         u16_t id() const { return mEntry.id; }
         u16_t mem_id() const { return mEntry.mem_id; }
+        u64_t size()   const { return mEntry.size; }
         u64_t offset() const { return mEntry.offset; }
     public:
         AddressListEntry mEntry;
@@ -120,15 +121,18 @@ protected:
     std::vector<Memory>  m_memory;
     std::vector<Address> m_address;
 
+    Memory m_memory_input;
+    Memory m_memory_output;
+
 public:
     hirtModelCtx();
     ~hirtModelCtx();
 
     hisdkRet_t loadModel(const char* fname);
     void       unloadModel();
-    hisdkRet_t loadMemorys();
-    void       unloadMemorys() {};
-    hisdkRet_t submit();
+    hisdkRet_t loadMemories();
+    void       unloadMemories() {};
+    hisdkRet_t submit(const unsigned char* pBufInput, unsigned char* pBufOutput);
     
 private:
     hModel m_hModel;

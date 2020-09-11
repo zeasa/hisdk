@@ -41,6 +41,7 @@ hisdkRet_t hirtKernelParamsBufferCreate(hirtKernelParamsBuffer_t **ppParams)
         goto fail;
     }
 
+    *ppParams = pBuf;
     HISDK_LOG_INFO(LOG_SYSTEM, "hirtKernelParamsBufferCreate done.");
     return ret;
 

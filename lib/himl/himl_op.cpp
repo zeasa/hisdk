@@ -17,7 +17,7 @@ hisdkRet_t himlCreateConvOp(
 
     /*construct the parambuf*/
     hirtKernelParamsBufferCreate(&pKernelParams);
-    hirtKernelParamsBufferAddPlaceHolder(pKernelParams, sizeof(hirtKernelParamTable_t));
+    hirtKernelParamsBufferAddPlaceHolder(pKernelParams, sizeof(hirtKernelParamParallel_t));
     hirtKernelParamsBufferAddParam(pKernelParams, inputTensor,  sizeof(himlGpuTensor_t));
     hirtKernelParamsBufferAddParam(pKernelParams, outputTensor, sizeof(himlGpuTensor_t));
     hirtKernelParamsBufferAddParam(pKernelParams, filterTensor, sizeof(himlGpuTensor_t));

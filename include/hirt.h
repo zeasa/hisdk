@@ -98,11 +98,13 @@ typedef struct {
   unsigned int size;
 } hirtKernelBinBuffer_t;
 
+#if 0
 typedef struct {
   u64_t function_start;
   u64_t function_end;
   u64_t function_size;
 } hirtKernelFunction_t;
+#endif
 
 typedef struct {
   hirtGMemAddress_t base;
@@ -118,14 +120,20 @@ typedef struct
 
 typedef struct
 {
-  u32_t dummy;
+  u32_t mem_param_num;
+  u32_t mem_input_num;
+  u32_t mem_output_num;
+  u32_t mem_weight_num;
+  u32_t mem_bias_num;
+  u32_t mem_feature_num;
+  u32_t mem_lut_num;
 }hirtKernelParamMemory_t;
 
 typedef struct
 {
     hirtKernelParamParallel_t parallel_info;
     hirtKernelParamMemory_t   memory_info;
-}hirtKernelParamTable_t;
+}hirtKernelParamHdr_t;
 
 //typedef struct hirtKernelTaskParam
 //{

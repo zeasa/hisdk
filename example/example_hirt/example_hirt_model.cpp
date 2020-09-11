@@ -47,6 +47,11 @@ int main(int argc, char *argv[])
     //const std::vector<TaskListEntry>    * tasklist;
     //std::vector<MemoryListEntry>::const_iterator it_mem;
     hirtModelCtx *pCtx;
+    unsigned char* pBufInputImg;
+    unsigned char* pBufOutputImg;
+
+    pBufInputImg  = new unsigned char[ni*ci*hi*wi];
+    pBufOutputImg = new unsigned char[no*co*ho*wo];
 
     HISDK_LOG_INFO(LOG_SYSTEM, "example_hirt_model program start...");
     
@@ -93,7 +98,8 @@ int main(int argc, char *argv[])
     pCtx = new hirtModelCtx();
     pCtx->loadModel(infiles->filename[0]);
 
-    pCtx->submit();
+    pCtx->submit(pBufInputImg, pBufOutputImg);
+    
 #if 0
     HISDK_ERR_FCALLFAIL( hirtLoadModel(&pmodel, infiles->filename[0]) );
 
