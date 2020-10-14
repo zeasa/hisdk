@@ -51,7 +51,7 @@ hisdkRet_t hirtHostFree(void *ptr)
  * @return hirt_RET_SUCCESS if success,
  *         otherwise the error code is returned.
  */
-#define GMEM_BASE_ADDR      (0x80000000)
+#define GMEM_BASE_ADDR      (HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR0, 0x0))
 #define GMEM_ALIGN_SIZE     (64)
 #define GMEM_ALIGN_CARRY    (GMEM_ALIGN_SIZE)
 #define GMEM_ALIGN_MASK     (GMEM_ALIGN_SIZE-1)
@@ -109,11 +109,11 @@ hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDi
 
     if(dir == HIRT_MEM_TRANS_DIR_HOST2GPU)
     {
-        
+        hidvWriteChipMem((uint64_t)dest, nBytes, const_cast<void*>(src));
     }
     else if(dir == HIRT_MEM_TRANS_DIR_GPU2HOST)
     {
-        
+        hidvReadChipMem((uint64_t)src, nBytes, dest);
     }
     else
     {
@@ -123,7 +123,6 @@ hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDi
 fail:
     return e;
 }
-
 
 hisdkRet_t hirtMemManagerCreate(hirtMemManager_t **ppMemManager)
 {

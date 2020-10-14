@@ -2,6 +2,7 @@
 #define _HIRT_UTILS_H__
 
 #include "hirt.h"
+#include "hidv.h"
 
 #ifdef __cplusplus
 extern "C" {

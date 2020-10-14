@@ -8,6 +8,7 @@
 #include "hirt_scheduler.h"
 #include "hirt_event.h"
 #include "hirt_utils.h"
+#include "hirt_mm.h"
 #include "hisdk_log.h"
 #include "argtable3.h"
 
@@ -39,7 +40,7 @@ int main(int argc, char *argv[])
     //srand((unsigned)time(NULL));
     //a = (int)rand();
     //b = (int)rand();
-
+#if 0
     hirtCmdQueue_t *pCmdQueue = NULL;
     hirtCmdQueueCreate(&pCmdQueue);
 
@@ -48,23 +49,38 @@ int main(int argc, char *argv[])
 
     hirtEventHandler_t *pEventHandler = NULL;
     hirtEventHandlerCreate(&pEventHandler, pScheduler);
-
-#if 0
-    int *k_a, *k_b;
-    hirtGpuMalloc((void **)&k_a, sizeof(int));
-    hirtGpuMalloc((void **)&k_b, sizeof(int));
-    hirtMemcpy(k_a, &a, sizeof(int), HIRT_MEM_TRANS_DIR_HOST2GPU);
-    hirtMemcpy(k_b, &b, sizeof(int), HIRT_MEM_TRANS_DIR_HOST2GPU);
 #endif
 
+    unsigned char buf1[256];
+    unsigned char buf2[256];
+    for (unsigned char i = 0; i < 255;i++)
+    {
+        buf1[i] = i;
+        buf2[i] = 255 - i;
+    }
 
+    hirtGMemAddress_t k_a, k_b;
+    hirtGpuMalloc(&k_a, 1024);
+    hirtGpuMalloc(&k_b, 1024);
+    hirtMemcpy((void*)k_a, buf1, 256, HIRT_MEM_TRANS_DIR_HOST2GPU);
+    hirtMemcpy((void*)k_b, buf2, 256, HIRT_MEM_TRANS_DIR_HOST2GPU);
+
+    hirtMemcpy(buf1, (void*)k_b, 256, HIRT_MEM_TRANS_DIR_GPU2HOST);
+    hirtMemcpy(buf2, (void*)k_a, 256, HIRT_MEM_TRANS_DIR_GPU2HOST);
+
+    for (unsigned char i = 0; i < 255;i++)
+    {
+        printf("%x,%x\n", buf1[i], buf2[i]);
+    }
+
+#if 0
     hirtKernelParamsBuffer_t *pParams = NULL;
     hirtKernelParamsBufferCreate(&pParams);
     //hirtKernelParamsBufferAddParam(pParams, &k_a, sizeof(int *));
     hirtKernelBinBuffer_t *pkrnlBin = NULL;
     hirtInvokeKernel("kernel.o", pParams, &pkrnlBin, 1, pCmdQueue);
     hirtCmdQueueSync(pCmdQueue);
-    
+#endif
 #if 0    
     hirtInvokeKernel(&kernel1, 3, pParams, queue);
     hirtInvokeKernel(&kernel2, 3, pParams, queue);
@@ -75,11 +91,11 @@ int main(int argc, char *argv[])
     hirtDestroyQueue(queue);
     hirtDestroy();
 #endif
-
+#if 0
     hirtEventHandlerDestroy(pEventHandler);
     hirtSchedulerDestroy(pScheduler);
     hirtCmdQueueDestroy(pCmdQueue);
-    
+#endif
     HISDK_LOG_INFO(LOG_SYSTEM, "example_hirt program end...");
     return 0;
 #if 0

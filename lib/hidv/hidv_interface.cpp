@@ -31,6 +31,10 @@ hisdkRet_t hidvInit()
     return (ret == 0) ? HISDK_RET_SUCCESS : HISDK_RET_ERR_IO;
 }
 
+void hidvDestroy()
+{
+}
+
 void  hidvWriteChipReg(uint32_t offset,uint32_t value)
 {
     hidvWriteMMapReg32(offset, value);//enable clock
@@ -53,6 +57,18 @@ void hidvReadNocNodeMem(uint8_t node_xy, uint64_t offset, uint64_t size, void * 
 {
     uint64_t addr = HIPU200_NOC_MAKEADDR(node_xy, offset);
 
+    hidvDmaSetReadSize(size);//pcie bridge
+    hidvDmaReadNOCAddr(addr, size, data);
+}
+
+void hidvWriteChipMem(uint64_t addr, uint64_t size, void * data)
+{
+    hidvDmaSetWriteSize(size);
+    hidvDmaWriteNOCAddr(addr, size, data);
+}
+
+void hidvReadChipMem(uint64_t addr, uint64_t size, void * data)
+{
     hidvDmaSetReadSize(size);//pcie bridge
     hidvDmaReadNOCAddr(addr, size, data);
 }

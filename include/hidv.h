@@ -168,11 +168,15 @@ extern "C" {
 #define HIPU200_MEM_MMAP_SIZE           (32)
 
 hisdkRet_t hidvInit();
+void hidvDestroy();
 void hidvWriteChipReg(uint32_t offset, uint32_t value);
 uint32_t hidvReadChipReg(uint32_t offset);
 void hidvWriteNocNodeMem(uint8_t node_xy, uint64_t offset, uint64_t size, void *data);
 void hidvReadNocNodeMem(uint8_t node_xy, uint64_t offset, uint64_t size, void *data);
 void hidvWriteFileNocNode(uint8_t node_xy, uint64_t offset, const char *filename);
+void hidvWriteChipMem(uint64_t addr, uint64_t size, void *data);
+void hidvReadChipMem(uint64_t addr, uint64_t size, void *data);
+
 
 #ifdef __cplusplus
 }

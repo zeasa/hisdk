@@ -45,9 +45,12 @@ hisdkRet_t hirtGetLastErr(void)
 __R_HOST
 hisdkRet_t hirtInit(unsigned int Flags)
 {
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
     HISDK_LOG_INFO(LOG_SYSTEM, "%s", "hirt Init.");
-    
-    return HISDK_RET_SUCCESS;
+
+    ret = hidvInit();
+
+    return ret;
 }
 
 /**
@@ -61,5 +64,7 @@ __R_HOST
 void hirtDestroy(void)
 {
     HISDK_LOG_INFO(LOG_SYSTEM, "%s", "hirt destroy.");
+    
+    hidvDestroy();
 }
 
