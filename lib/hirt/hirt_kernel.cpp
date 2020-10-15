@@ -84,7 +84,7 @@ hisdkRet_t hirtKernelParamsBufferAddParam(hirtKernelParamsBuffer_t *pParams,
         return HISDK_RET_ERR_MEMCPY;
     }
 
-    memcpy((void*)(pParams->pbuf_host+pParams->cur_param), data, nBytes);
+    memcpy((void*)((uint64_t)pParams->pbuf_host+pParams->cur_param), data, nBytes);
     return HISDK_RET_SUCCESS;
 }
 

@@ -30,8 +30,8 @@ typedef struct
 
 typedef struct
 {
-    hirtMemBlockInfo_t m_blocktbl[HIRT_HIPU200_MEM_CH_NUM][HIRT_HIPU200_MEM_BLK_NUM];
-    hirtMemAllocRecord_t m_recordtbl[HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM];
+    hirtMemBlockInfo_t m_blocktbl[HIRT_HIPU200_MEM_CH_NUM][HIRT_HIPU200_MEM_CH_BLKNUM];
+    hirtMemAllocRecord_t m_recordtbl[HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_CH_BLKNUM];
 } hirtMemManager_t;
 
 hisdkRet_t hirtMemManagerCreate(hirtMemManager_t **ppMemManager);
@@ -44,7 +44,7 @@ hisdkRet_t hirtHostMalloc(void **pPtr, size_t nBytes/*, hirtMemType_t type*/);
 __R_HOST
 hisdkRet_t hirtHostFree(void *ptr);
 __R_HOST
-hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes);
+hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes, hirtGMemType_t memType = HIRT_GMEM_TYPE_SHARE);
 __R_HOST
 hisdkRet_t hirtGpuFree(hirtGMemAddress_t devAddr);
 __R_HOST

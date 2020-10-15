@@ -33,6 +33,13 @@ typedef enum {
   HIRT_MEM_TRANS_DIR_HOST2HOST,      /**< Host to Host */
 } hirtMemTransDir_t;
 
+typedef enum {
+  HIRT_GMEM_TYPE_CODE_BLOCK = 0,     /**< local block*/
+  HIRT_GMEM_TYPE_DATA_BLOCK,         /**< share block */
+  HIRT_GMEM_TYPE_SHARE,              /**< share */
+  HIRT_GMEM_TYPE_LOCAL_SRAM          /**< local */
+} hirtGMemType_t;
+
 /**< Version and revision  */
 typedef struct {
   u32_t   hirtPlatformVersion;     /**< platform version */

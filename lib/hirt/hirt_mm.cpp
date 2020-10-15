@@ -51,21 +51,37 @@ hisdkRet_t hirtHostFree(void *ptr)
  * @return hirt_RET_SUCCESS if success,
  *         otherwise the error code is returned.
  */
-#define GMEM_BASE_ADDR      (HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR0, 0x0))
+#define GMEM_BASE_ADDR      ()
 #define GMEM_ALIGN_SIZE     (64)
 #define GMEM_ALIGN_CARRY    (GMEM_ALIGN_SIZE)
 #define GMEM_ALIGN_MASK     (GMEM_ALIGN_SIZE-1)
 #define GMEM_ALIGN(x)       (((x & GMEM_ALIGN_MASK) == 0) ? (x) : ((x & GMEM_ALIGN_MASK) + GMEM_ALIGN_CARRY))
 __R_HOST
-hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes)
+hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes, hirtGMemType_t memType)
 {
-    static hirtGMemAddress_t memUsed = 0;
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
+    static hirtGMemAddress_t memUsedData = 0;
+    static hirtGMemAddress_t memUsedSha0 = 0;
+    static hirtGMemAddress_t memUsedSha1 = 0;
 
-    *pDevAddr = GMEM_BASE_ADDR + memUsed;
-    memUsed += GMEM_ALIGN(nBytes);
-    
+    switch(memType)
+    {
+    case HIRT_GMEM_TYPE_DATA_BLOCK:
+        *pDevAddr = HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR0, 0x0) + memUsedData;
+        memUsedData += GMEM_ALIGN(nBytes);
+        break;
+    case HIRT_GMEM_TYPE_SHARE:
+        *pDevAddr = HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR0, HIRT_HIPU200_MEM_SHA0_OFFSET) + memUsedSha0;
+        memUsedSha0 += GMEM_ALIGN(nBytes);
+        break;
+    default:
+        ret = HISDK_RET_ERR_BADPARAMETER;
+    }
+
     HISDK_LOG_INFO(LOG_SYSTEM, "<GpuMalloc:size=%lu", nBytes);
-    return HISDK_RET_SUCCESS; 
+    return ret;
+fail:
+    return ret;
 }
 
 /**
@@ -134,12 +150,12 @@ hisdkRet_t hirtMemManagerCreate(hirtMemManager_t **ppMemManager)
 
     for(int i=0; i<HIRT_HIPU200_MEM_CH_NUM; i++)
     {
-        for(int j=0; j<HIRT_HIPU200_MEM_BLK_NUM; j++)
+        for(int j=0; j<HIRT_HIPU200_MEM_CH_BLKNUM; j++)
         {
             pMemManager->m_blocktbl[i][j].m_mbstatus = MB_FREE;
             pMemManager->m_blocktbl[i][j].m_mbbase = 
                 MAKE_DEVADDR(HIRT_HIPU200_MEM_CH_NOCADDR_TBL[i], HIRT_HIPU200_MEM_BLK_SIZ);
-            pMemManager->m_recordtbl[i*HIRT_HIPU200_MEM_BLK_NUM+j].m_blocknum = 0;
+            pMemManager->m_recordtbl[i*HIRT_HIPU200_MEM_CH_BLKNUM+j].m_blocknum = 0;
         }
     }
 
@@ -157,14 +173,14 @@ hisdkRet_t hirtMemManagerBlkGet(hirtMemManager_t *pMemManager, hirtGMemAddress_t
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     int i, j, k;
 
-    for(i=0;i<HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM; i++)
+    for(i=0;i<HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_CH_BLKNUM; i++)
     {
         if(pMemManager->m_recordtbl[i].m_blocknum == 0)
         {
             break;
         }
     }
-    if(i == HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM)
+    if(i == HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_CH_BLKNUM)
     {
         ret = HISDK_RET_ERR_NORES;
         goto end;
@@ -172,7 +188,7 @@ hisdkRet_t hirtMemManagerBlkGet(hirtMemManager_t *pMemManager, hirtGMemAddress_t
 
     for(j=0; j<HIRT_HIPU200_MEM_CH_NUM; j++)
     {
-        for(k=0; k<HIRT_HIPU200_MEM_BLK_NUM; k++)
+        for(k=0; k<HIRT_HIPU200_MEM_CH_BLKNUM; k++)
         {
             int cnt=1;
             if(pMemManager->m_blocktbl[j][k].m_mbstatus == MB_FREE)
@@ -201,7 +217,7 @@ hisdkRet_t hirtMemManagerBlkGet(hirtMemManager_t *pMemManager, hirtGMemAddress_t
         }
     }
 
-    if( (j==HIRT_HIPU200_MEM_CH_NUM) && (k==HIRT_HIPU200_MEM_BLK_NUM) )
+    if( (j==HIRT_HIPU200_MEM_CH_NUM) && (k==HIRT_HIPU200_MEM_CH_BLKNUM) )
     {
         ret = HISDK_RET_ERR_NORES;
     }
@@ -215,7 +231,7 @@ hisdkRet_t hirtMemManagerBlkPut(hirtMemManager_t *pMemManager, hirtGMemAddress_t
     hisdkRet_t ret = HISDK_RET_SUCCESS;
     int i;
     
-    for(i=0; i<HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM; i++)
+    for(i=0; i<HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_CH_BLKNUM; i++)
     {
         if( (pMemManager->m_recordtbl[i].m_mbbase == addr) &&
             (pMemManager->m_recordtbl[i].m_blocknum > 0) )
@@ -230,7 +246,7 @@ hisdkRet_t hirtMemManagerBlkPut(hirtMemManager_t *pMemManager, hirtGMemAddress_t
         }
     }
 
-    if(i == HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_BLK_NUM)
+    if(i == HIRT_HIPU200_MEM_CH_NUM*HIRT_HIPU200_MEM_CH_BLKNUM)
     {
         ret = HISDK_RET_ERR_NO_EXIST;
     }

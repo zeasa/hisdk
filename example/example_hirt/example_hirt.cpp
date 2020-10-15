@@ -51,24 +51,25 @@ int main(int argc, char *argv[])
     hirtEventHandlerCreate(&pEventHandler, pScheduler);
 #endif
 
-    unsigned char buf1[256];
-    unsigned char buf2[256];
-    for (unsigned char i = 0; i < 255;i++)
+#define TESTLEN     16
+    unsigned char buf1[TESTLEN];
+    unsigned char buf2[TESTLEN];
+    for (unsigned char i = 0; i < TESTLEN; i++)
     {
         buf1[i] = i;
-        buf2[i] = 255 - i;
+        buf2[i] = (TESTLEN-1) - i;
     }
 
     hirtGMemAddress_t k_a, k_b;
     hirtGpuMalloc(&k_a, 1024);
     hirtGpuMalloc(&k_b, 1024);
-    hirtMemcpy((void*)k_a, buf1, 256, HIRT_MEM_TRANS_DIR_HOST2GPU);
-    hirtMemcpy((void*)k_b, buf2, 256, HIRT_MEM_TRANS_DIR_HOST2GPU);
+    hirtMemcpy((void*)k_a, buf1, TESTLEN, HIRT_MEM_TRANS_DIR_HOST2GPU);
+    hirtMemcpy((void*)k_b, buf2, TESTLEN, HIRT_MEM_TRANS_DIR_HOST2GPU);
 
-    hirtMemcpy(buf1, (void*)k_b, 256, HIRT_MEM_TRANS_DIR_GPU2HOST);
-    hirtMemcpy(buf2, (void*)k_a, 256, HIRT_MEM_TRANS_DIR_GPU2HOST);
+    hirtMemcpy(buf1, (void*)k_b, TESTLEN, HIRT_MEM_TRANS_DIR_GPU2HOST);
+    hirtMemcpy(buf2, (void*)k_a, TESTLEN, HIRT_MEM_TRANS_DIR_GPU2HOST);
 
-    for (unsigned char i = 0; i < 255;i++)
+    for (unsigned char i = 0; i < TESTLEN; i++)
     {
         printf("%x,%x\n", buf1[i], buf2[i]);
     }
