@@ -27,7 +27,7 @@
 #define HPU_CORE_NUM            (13)
 #define HPU_NOCNODE_DDR0        (0x03)
 #define HPU_NOCNODE_DDR1        (0x0F)
-#define TESTSIZE                (16)
+#define SBUF_SIZE               (64)
 
 #define MMAP_BLOCKSIZE          (64*1024*1024)
 #define MMAP_CODE_MONO_START    (0x80000000)
@@ -45,6 +45,10 @@
 #define MMAP_MMRA_START         (0x02100000)
 #define MMAP_MMRA_LENGTH        (256*1024)
 #define KERNEL_PTABLE_ADDR      (MMAP_ATOM_START+MMAP_ATOM_LENGTH-sizeof(void*))
+#define KERNEL_RTCODE_ADDR      (KERNEL_PTABLE_ADDR-sizeof(int))
+
+#define NOC_NODE_X(x)           ((x)>>4)
+#define NOC_NODE_Y(y)           ((y)&0xF)
 
 typedef unsigned int u32_t;
 
@@ -69,51 +73,119 @@ typedef struct
     u32_t len;
 } paramTableVAdd_t;
 
-void kernel_entry(void) 
+void *_kernel_malloc(int size, int type);
+void _kernel_sync(int rootCoreNum, int idx);
+
+void kernel_entry(void)
 {
-    unsigned int ka[TESTSIZE] __attribute__((aligned(64)));
-    unsigned int kb[TESTSIZE] __attribute__((aligned(64)));
-    unsigned int kc[TESTSIZE] __attribute__((aligned(64)));
+    unsigned int buf_sram_a[SBUF_SIZE] __attribute__((aligned(64)));
+    unsigned int buf_sram_b[SBUF_SIZE] __attribute__((aligned(64)));
+    unsigned int buf_sram_c[SBUF_SIZE] __attribute__((aligned(64)));
 
-    int   _coreid = get_hpuid();
-    paramTableVAdd_t *_ptable = (paramTableVAdd_t *)KERNEL_PTABLE_ADDR;
-    int vlen = _ptable->len;
-
-    int ndma_loc_addr = 0;
-    int ndma_rmt_addr = 0;
-    int ndma_len = 0;
+    int _coreid  = get_hpuid();/*get core id number*/
+    int _taskid;
     int i;
+    int *_rtcode = (int *)KERNEL_RTCODE_ADDR;                          /*kernel return code to host runtime*/
+    paramTableVAdd_t *_ptable = (paramTableVAdd_t *)KERNEL_PTABLE_ADDR;/*get kernel param table from runtime*/
+    int vlen = _ptable->len;/*kernel input vector length*/
+    int cnum = _ptable->infoBase.parallelism;
 
-    // load src_a
-    ndma_loc_addr = (int)&ka;
-    ndma_rmt_addr = _ptable->srcOffset_A;
-    ndma_len = TESTSIZE*sizeof(unsigned int);
-    ndma_load_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, _ptable->srcNocnod_A>>4, _ptable->srcNocnod_A & 0x0F);
-    ndma_wait();
-
-    // load src_b
-    ndma_loc_addr = (int)&kb;
-    ndma_rmt_addr = _ptable->srcOffset_B;
-    ndma_len = TESTSIZE*sizeof(unsigned int);
-    ndma_load_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, _ptable->srcNocnod_B>>4, _ptable->srcNocnod_B & 0x0F);
-    ndma_wait();
-
-    for (i = 0; i < TESTSIZE; ++i)
+    /*judge if the parallelism is bigger than the maxcorenum*/
+    if( (cnum>HPU_CORE_NUM) || (cnum<1) )
     {
-        kc[i] = ka[i] + kb[i];
+        *_rtcode = 0xdead0001;
+        goto fail;
+    }
+    /*find the taskid of the current core*/
+    for (i = 0; i < cnum; ++i)
+    {
+        if(_ptable->infoBase.parallelTable[i] == _coreid)
+        {
+            _taskid = i;
+            break;
+        }
+    }
+    /*judge if the taskid can be found in the paramtable*/
+    if(i == cnum)
+    {
+        *_rtcode = 0xdead0002;
+        goto fail;
     }
 
-    // save dest
-    ndma_loc_addr = (int)&kc;
-    ndma_rmt_addr = _ptable->dstOffset;
-    ndma_len = TESTSIZE*sizeof(unsigned int);
-    ndma_save_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, _ptable->dstNocnod>>4, _ptable->dstNocnod& 0x0F);
-    ndma_wait();
+    if(vlen < 1)
+    {
+        *_rtcode = 0xdead0003;
+        goto fail;
+    }
 
-    while(1);
+    int vparts = (vlen == 1) ? 1 : ((vlen - 1) / cnum + 1);
+    int vparts_sub = (vparts - 1) / SBUF_SIZE + 1;
+    int ndma_loc_addr, ndma_rmt_addr, ndma_len, itemnum;
+
+    for (int i = 0; i < vparts_sub; ++i)
+    {
+        if(((i+1) * SBUF_SIZE) <= vparts)
+        {
+            itemnum = SBUF_SIZE;
+        }
+        else
+        {
+            itemnum = vparts - i * SBUF_SIZE;
+        }
+        ndma_len = itemnum * sizeof(unsigned int);
+
+        // dma load data from ddr input buffer to local sram buffer
+        ndma_loc_addr = (int)&buf_sram_a;
+        ndma_rmt_addr = _ptable->srcOffset_A + _taskid * vparts + i * SBUF_SIZE;
+        ndma_load_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, NOC_NODE_X(_ptable->srcNocnod_A), NOC_NODE_Y(_ptable->srcNocnod_A));
+        ndma_wait();
+
+        // dma load data from ddr input buffer to local sram buffer 
+        ndma_loc_addr = (int)&buf_sram_b;
+        ndma_rmt_addr = _ptable->srcOffset_B + _taskid * vparts + i * SBUF_SIZE;
+        ndma_load_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, NOC_NODE_X(_ptable->srcNocnod_B), NOC_NODE_Y(_ptable->srcNocnod_B));
+        ndma_wait();
+
+        // do the actual calculation
+        for (i = 0; i < itemnum; ++i)
+        {
+            buf_sram_c[i] = buf_sram_a[i] + buf_sram_b[i];
+        }
+
+        // dma save data from local sram buffer to ddr output buffer
+        ndma_loc_addr = (int)&buf_sram_c;
+        ndma_rmt_addr = _ptable->dstOffset + _taskid * vparts + i * SBUF_SIZE;
+        ndma_save_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, NOC_NODE_X(_ptable->dstNocnod), NOC_NODE_Y(_ptable->dstNocnod));
+        ndma_wait();
+    }
+
+    // synchronize all cores within current task group
+    _kernel_sync(0, 0);
+    // return code = ok
+    *_rtcode = 0x12345678;
+
+fail:
+    /*send complete interrupt to runtime system
+      and wait for termination done by runtime*/
+    while (1)
+    {
+        ;
+    }
 }
 
-void kernel_malloc()
+//alloc some local sram buffer for calculation buffer
+void* _kernel_malloc(int size, int type)
+{
+
+}
+
+//multicore synchronization with rootcore dtcm
+void _kernel_sync(int rootCoreNum, int idx)
+{
+
+}
+
+void _kernel_printf()
 {
 
 }
