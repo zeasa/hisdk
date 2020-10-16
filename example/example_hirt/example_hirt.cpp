@@ -40,10 +40,10 @@ int main(int argc, char *argv[])
     //srand((unsigned)time(NULL));
     //a = (int)rand();
     //b = (int)rand();
-#if 0
+
     hirtCmdQueue_t *pCmdQueue = NULL;
     hirtCmdQueueCreate(&pCmdQueue);
-
+#if 0
     hirtScheduler_t *pScheduler = NULL;
     hirtSchedulerCreate(&pScheduler, pCmdQueue);
 
@@ -73,6 +73,12 @@ int main(int argc, char *argv[])
     {
         printf("%x,%x\n", buf1[i], buf2[i]);
     }
+
+    hirtKernelParamsBuffer_t *pParams = NULL;
+    hirtKernelParamsBufferCreate(&pParams);
+    hirtKernelParamsBufferAddParam(pParams, buf1, TESTLEN);
+    hirtKernelBinBuffer_t *pkrnlBin = NULL;
+    hirtInvokeKernel("kernel.o", pParams, &pkrnlBin, 1, pCmdQueue);
 
 #if 0
     hirtKernelParamsBuffer_t *pParams = NULL;
