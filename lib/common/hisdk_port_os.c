@@ -382,3 +382,11 @@ void hisdkPortOsDebugPrintf(const char *format, ... )
     vprintf(format, ap);
     va_end( ap );
 }
+
+int hisdkPortOsGetFileSize(const char* filename)
+{
+    struct stat statbuf;
+    stat(filename,&statbuf);
+
+    return statbuf.st_size;
+}

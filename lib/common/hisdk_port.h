@@ -89,6 +89,7 @@ hisdkRet_t hisdkPortOsOpenDir(const char *path, hisdkDir_t **dir);
 hisdkRet_t hisdkPortOsReadDir(hisdkDir_t *dir, char *name, size_t size);
 void       hisdkPortOsCloseDir(hisdkDir_t *dir);
 void       hisdkPortOsDebugPrintf( const char *format, ... );
+int        hisdkPortOsGetFileSize(const char *filename);
 
 #ifdef __cplusplus
 }
