@@ -56,18 +56,24 @@ hisdkRet_t hirtHostFree(void *ptr)
 #define GMEM_ALIGN_CARRY    (GMEM_ALIGN_SIZE)
 #define GMEM_ALIGN_MASK     (GMEM_ALIGN_SIZE-1)
 #define GMEM_ALIGN(x)       (((x & GMEM_ALIGN_MASK) == 0) ? (x) : ((x & GMEM_ALIGN_MASK) + GMEM_ALIGN_CARRY))
+
+static hirtGMemAddress_t memUsedData = 0;
+static hirtGMemAddress_t memUsedSha0 = 0;
+static hirtGMemAddress_t memUsedSha1 = 0;
+
 __R_HOST
 hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes, hirtGMemType_t memType)
 {
     hisdkRet_t ret = HISDK_RET_SUCCESS;
-    static hirtGMemAddress_t memUsedData = 0;
-    static hirtGMemAddress_t memUsedSha0 = 0;
-    static hirtGMemAddress_t memUsedSha1 = 0;
 
     switch(memType)
     {
-    case HIRT_GMEM_TYPE_DATA_BLOCK:
+    case HIRT_GMEM_TYPE_CODE_BLOCK:
         *pDevAddr = HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR0, 0x0) + memUsedData;
+        memUsedData += GMEM_ALIGN(nBytes);
+        break;
+    case HIRT_GMEM_TYPE_DATA_SHARE:
+        *pDevAddr = HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR1, 0x0) + memUsedData;
         memUsedData += GMEM_ALIGN(nBytes);
         break;
     case HIRT_GMEM_TYPE_SHARE:

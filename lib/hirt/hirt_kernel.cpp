@@ -35,7 +35,7 @@ hisdkRet_t hirtKernelParamsBufferCreate(hirtKernelParamsBuffer_t **ppParams)
     }
     hisdkMemset(pBuf->pbuf_host, 0, pBuf->max_param);
     
-    if(hirtGpuMalloc(&pBuf->pbuf_gpu, HIRT_PARAMBUF_MAXSIZE) != HISDK_RET_SUCCESS)
+    if(hirtGpuMalloc(&pBuf->pbuf_gpu, HIRT_PARAMBUF_MAXSIZE, HIRT_GMEM_TYPE_DATA_SHARE) != HISDK_RET_SUCCESS)
     {
         ret = HISDK_RET_ERR_INSUFFICIENTMEMORY;
         goto fail;
@@ -231,7 +231,7 @@ hisdkRet_t hirtInvokeKernel(const char* function,
     
     //hisdkAlloc kernel gdram in device memory
     pKernelBin->size = filesize;
-    rc = hirtGpuMalloc(&pKernelBin->pbuf_gpu, pKernelBin->size);
+    rc = hirtGpuMalloc(&pKernelBin->pbuf_gpu, pKernelBin->size, HIRT_GMEM_TYPE_CODE_BLOCK);
     if(rc != HISDK_RET_SUCCESS)
     {
         ret = HISDK_RET_ERR_NODEV;

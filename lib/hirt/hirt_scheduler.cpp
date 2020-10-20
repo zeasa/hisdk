@@ -96,8 +96,9 @@ void* hirtSchedulerThread(void* arg)
     hirtScoreboard_t *pScoreboard = pScheduler->m_pScoreboard;
     hirtCmdNode_t node;
     hirtTaskDim_t dim;
-    int schedTbl[HIRT_HIPU200_CORENUMMAX];
+    int freecores[HIRT_HIPU200_CORENUMMAX];
     int freecnt = 0;
+    unsigned int coremap = 0;
 
     HISDK_LOG_INFO(LOG_SYSTEM, "hirtSchedulerThread thread entered arg=%p", arg);
     
@@ -121,7 +122,7 @@ void* hirtSchedulerThread(void* arg)
                 {
                     if(pScoreboard->m_coreinfo[i].m_status == HIPUCORE_FREE)
                     {
-                        schedTbl[freecnt] = i;
+                        freecores[freecnt] = i;
                         freecnt++;
                     }
                 }
@@ -141,18 +142,56 @@ void* hirtSchedulerThread(void* arg)
             pthread_mutex_lock(&pScoreboard->m_mutex);
             for(int i=0; i<dim; i++)
             {
-                pScoreboard->m_coreinfo[schedTbl[i]].m_status == HIPUCORE_FREE;
+                pScoreboard->m_coreinfo[freecores[i]].m_status == HIPUCORE_BUSY;
             }
             pthread_mutex_unlock(&pScoreboard->m_mutex);
 
             //read kernel and download the kernel into gdram
             hirtMemcpy((void*)&node.buf_kernel->pbuf_gpu, node.buf_kernel->pbuf_host, node.buf_kernel->size, HIRT_MEM_TRANS_DIR_HOST2GPU);
+            
+            //typedef struct
+            //{
+            //    int typeVersion;
+            //    int tableSiz;
+            //    int parallelism;
+            //    int parallelTable[13];
+            //} paramTableBase_t;
+
+            //fill in parallelism info for paramtable
+            ((int *)node.buf_param->pbuf_host)[2] = dim;
+            for (int i = 0; i < dim; ++i)
+            {
+                ((int *)node.buf_param->pbuf_host)[3 + i] = freecores[i];
+            }
+
             //copy kernel param from host to device;
             hirtMemcpy((void*)&node.buf_param->pbuf_gpu, node.buf_param->pbuf_host, node.buf_param->max_param, HIRT_MEM_TRANS_DIR_HOST2GPU);
+            //set paramtable pointer in the core dtcm
+            for (int i = 0; i < dim; ++i)
+            {
+                uint8_t nodexy = hidvGetNocNodeXY(freecores[i]);
+                hirtGMemAddress_t gaddr = ((hirtGMemAddress_t)nodexy << 32) + HIPU200_KNL_PTABLE_ADDR;
+                hirtMemcpy((void*)gaddr, (void*)&node.buf_param->pbuf_gpu, 4, HIRT_MEM_TRANS_DIR_HOST2GPU);
+            }
 
-            //config the hipu csr reg <set mmap, set pc>
-
+            //set up hipucore mmap to pbuf_gpu
+            pthread_mutex_lock(&pScoreboard->m_mutex);
+            for(int i=0; i<dim; i++)
+            {
+                uint32_t offset = (uint32_t)node.buf_kernel->pbuf_gpu;
+                uint8_t mmap = (offset & 0xFC000000) >> 26;
+                uint8_t nodexy = hidvGetNocNodeXY(freecores[i]);
+                hidvCoreSetMMAPCode(nodexy, mmap);
+            }
+            pthread_mutex_unlock(&pScoreboard->m_mutex);
+            
             //config the hipu csr to make hipucore run
+            for (int i = 0; i < dim; ++i)
+            {
+                coremap |= (1 << i);
+            }
+            hidvCoreDeactivate(coremap);
+            hidvCoreActivate(coremap);
 
             break;
         case CMDTYPE_SYNC:

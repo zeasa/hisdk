@@ -167,6 +167,8 @@ extern "C" {
 #define HIPU200_MEM_NMAP_SIZE           (32)
 #define HIPU200_MEM_MMAP_START          (0x02012020)
 #define HIPU200_MEM_MMAP_SIZE           (32)
+#define HIPU200_KNL_PTABLE_ADDR         (HIPU200_MEM_ATOMIC_START+HIPU200_MEM_ATOMIC_SIZE-4)
+#define HIPU200_KNL_RTCODE_ADDR         (HIPU200_KNL_PTABLE_ADDR-4)
 
 #define HIPU200_MEM_MMAP_BLKSIZE            (64*1024*1024)
 #define HIPU200_MEM_MMAP_CODE_MONO_START    (0x80000000)
@@ -185,7 +187,7 @@ extern "C" {
 #define HIPU200_DDR_MMAP_CODE_MONO_BLKNUM   (HIPU200_SOC_CORE_NUM)
 #define HIPU200_DDR_MMAP_CODE_SHAR_START    (HIPU200_DDR_MMAP_CODE_MONO_START+HIPU200_DDR_MMAP_CODE_MONO_BLKNUM*HIPU200_MEM_MMAP_BLKSIZE)
 #define HIPU200_DDR_MMAP_CODE_SHAR_OFFS(x)  (HIPU200_DDR_MMAP_CODE_SHAR_START+(x)*HIPU200_MEM_MMAP_BLKSIZE)
-#define HIPU200_DDR_MMAP_CODE_MONO_BLKNUM   (HIPU200_MEM_MMAP_CODE_SHAR_BLKNUM)
+#define HIPU200_DDR_MMAP_CODE_SHAR_BLKNUM   (HIPU200_MEM_MMAP_CODE_SHAR_BLKNUM)
 
 //DDR1
 #define HIPU200_DDR_MMAP_DATA_MONO_START    (0)
@@ -193,11 +195,11 @@ extern "C" {
 #define HIPU200_DDR_MMAP_DATA_MONO_BLKNUM   (HIPU200_SOC_CORE_NUM)
 #define HIPU200_DDR_MMAP_DATA_SHAR_START    (HIPU200_DDR_MMAP_DATA_MONO_START+HIPU200_DDR_MMAP_DATA_MONO_BLKNUM*HIPU200_MEM_MMAP_BLKSIZE)
 #define HIPU200_DDR_MMAP_DATA_SHAR_OFFS(x)  (HIPU200_DDR_MMAP_DATA_SHAR_START+(x)*HIPU200_MEM_MMAP_BLKSIZE)
-#define HIPU200_DDR_MMAP_DATA_MONO_BLKNUM   (HIPU200_MEM_MMAP_DATA_SHAR_BLKNUM)
-
+#define HIPU200_DDR_MMAP_DATA_SHAR_BLKNUM   (HIPU200_MEM_MMAP_DATA_SHAR_BLKNUM)
 
 
 hisdkRet_t hidvInit();
+uint8_t hidvGetNocNodeXY(uint32_t coreidx);
 void hidvDestroy();
 void hidvWriteChipReg(uint32_t offset, uint32_t value);
 uint32_t hidvReadChipReg(uint32_t offset);
@@ -206,7 +208,12 @@ void hidvReadNocNodeMem(uint8_t node_xy, uint64_t offset, uint64_t size, void *d
 void hidvWriteFileNocNode(uint8_t node_xy, uint64_t offset, const char *filename);
 void hidvWriteChipMem(uint64_t addr, uint64_t size, void *data);
 void hidvReadChipMem(uint64_t addr, uint64_t size, void *data);
-
+void hidvCoreResetPC(uint32_t coreBitmap);
+void hidvCoreActivate(uint32_t coreBitmap);
+void hidvCoreDeactivate(uint32_t coreBitmap);
+void hidvCoreWakeup(uint32_t coreBitmap);
+void hidvCoreSetMMAPCodeData(uint8_t node_xy, uint8_t mmap_code_mono, uint8_t mmap_code_data);
+void hidvCoreSetMMAPCode(uint8_t node_xy, uint8_t mmap_code_mono);
 
 #ifdef __cplusplus
 }

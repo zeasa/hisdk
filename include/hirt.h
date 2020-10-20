@@ -35,9 +35,8 @@ typedef enum {
 
 typedef enum {
   HIRT_GMEM_TYPE_CODE_BLOCK = 0,     /**< local block*/
-  HIRT_GMEM_TYPE_DATA_BLOCK,         /**< share block */
+  HIRT_GMEM_TYPE_DATA_SHARE,         /**< share block */
   HIRT_GMEM_TYPE_SHARE,              /**< share */
-  HIRT_GMEM_TYPE_LOCAL_SRAM          /**< local */
 } hirtGMemType_t;
 
 /**< Version and revision  */

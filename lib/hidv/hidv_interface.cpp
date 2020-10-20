@@ -98,10 +98,45 @@ static uint8_t mmap_inittable[HIPU200_MEM_MMAP_SIZE] =
     HIPU200_NOC_MAKEMMAP_x64M(0)
 };
 
-#define HIDV_SET_HIPU_MMAP(x)   mmap_inittable[0] = HIPU200_DDR_MMAP_CODE_MONO_OFFS(x); \
-                                mmap_inittable[4] = HIPU200_DDR_MMAP_DATA_MONO_OFFS(x); \
-    hidvWriteNocNodeMem(HIPU200_NOC_NODEADDR_COR(x), HIPU200_MEM_NMAP_START, HIPU200_MEM_NMAP_SIZE, nmap_inittable); \
-    hidvWriteNocNodeMem(HIPU200_NOC_NODEADDR_COR(x), HIPU200_MEM_MMAP_START, HIPU200_MEM_MMAP_SIZE, mmap_inittable)
+void hidvCoreSetMMAPCodeData(uint8_t node_xy, uint8_t mmap_code_mono, uint8_t mmap_code_data)
+{
+    mmap_inittable[0] = mmap_code_mono;
+    mmap_inittable[4] = mmap_code_data;
+    hidvWriteNocNodeMem(node_xy, HIPU200_MEM_NMAP_START, HIPU200_MEM_NMAP_SIZE, nmap_inittable);
+    hidvWriteNocNodeMem(node_xy, HIPU200_MEM_MMAP_START, HIPU200_MEM_MMAP_SIZE, mmap_inittable);
+}
+
+void hidvCoreSetMMAPCode(uint8_t node_xy, uint8_t mmap_code_mono)
+{
+    mmap_inittable[0] = mmap_code_mono;
+    hidvWriteNocNodeMem(node_xy, HIPU200_MEM_NMAP_START, HIPU200_MEM_NMAP_SIZE, nmap_inittable);
+    hidvWriteNocNodeMem(node_xy, HIPU200_MEM_MMAP_START, HIPU200_MEM_MMAP_SIZE, mmap_inittable);
+}
+
+static const uint8_t nocNodeXYTable[] =
+{
+    HIPU200_NOC_NODEADDR_COR(0),
+    HIPU200_NOC_NODEADDR_COR(1),
+    HIPU200_NOC_NODEADDR_COR(2),
+    HIPU200_NOC_NODEADDR_COR(3),
+    HIPU200_NOC_NODEADDR_COR(4),
+    HIPU200_NOC_NODEADDR_COR(5),
+    HIPU200_NOC_NODEADDR_COR(6),
+    HIPU200_NOC_NODEADDR_COR(7),
+    HIPU200_NOC_NODEADDR_COR(8),
+    HIPU200_NOC_NODEADDR_COR(9),
+    HIPU200_NOC_NODEADDR_COR(10),
+    HIPU200_NOC_NODEADDR_COR(11),
+    HIPU200_NOC_NODEADDR_COR(12)
+};
+
+uint8_t hidvGetNocNodeXY(uint32_t coreidx)
+{
+    if(coreidx>=HIPU200_SOC_CORE_NUM)
+        return 0xFF;
+
+    return nocNodeXYTable[coreidx];
+}
 
 hisdkRet_t hidvInit()
 {
@@ -115,24 +150,83 @@ hisdkRet_t hidvInit()
 
     hidvWriteChipReg(HIPU200_REG_HPU_CFG_0, HIPU200_CORE_ALL_BIT);// enable clock for all cores
 
-    HIDV_SET_HIPU_MMAP(0); // set mmap for all hipu200 cores
-    HIDV_SET_HIPU_MMAP(1);
-    HIDV_SET_HIPU_MMAP(2);
-    HIDV_SET_HIPU_MMAP(3);
-    HIDV_SET_HIPU_MMAP(4);
-    HIDV_SET_HIPU_MMAP(5);
-    HIDV_SET_HIPU_MMAP(6);
-    HIDV_SET_HIPU_MMAP(7);
-    HIDV_SET_HIPU_MMAP(8);
-    HIDV_SET_HIPU_MMAP(9);
-    HIDV_SET_HIPU_MMAP(10);
-    HIDV_SET_HIPU_MMAP(11);
-    HIDV_SET_HIPU_MMAP(12);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(0),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(0) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(0) >> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(1),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(1) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(1) >> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(2),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(2) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(2) >> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(3),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(3) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(3) >> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(4),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(4) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(4) >> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(5),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(5) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(5) >> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(6),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(6) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(6) >> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(7),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(7) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(7) >> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(8),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(8) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(8) >> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(9),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(9) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(9) >> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(10), HIPU200_DDR_MMAP_CODE_MONO_OFFS(10)>> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(10)>> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(11), HIPU200_DDR_MMAP_CODE_MONO_OFFS(11)>> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(11)>> 26);
+    hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(12), HIPU200_DDR_MMAP_CODE_MONO_OFFS(12)>> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(12)>> 26);
 
     hidvWriteChipReg(HIPU200_REG_INITPC,  HIPU200_MEM_MMAP_CODE_MONO_START); // init pc
 
 fail:
     return (ret == 0) ? HISDK_RET_SUCCESS : HISDK_RET_ERR_IO;
+}
+
+#define HIPU200_SOC_CORE_NUM            (13)
+#define HIPU200_DMA_BUF_ALIGNSIZE       (1024)
+
+#define HIPU200_CORE_0                  (0)
+#define HIPU200_CORE_1                  (1)
+#define HIPU200_CORE_2                  (2)
+#define HIPU200_CORE_3                  (3)
+#define HIPU200_CORE_4                  (4)
+#define HIPU200_CORE_5                  (5)
+#define HIPU200_CORE_6                  (6)
+#define HIPU200_CORE_7                  (7)
+#define HIPU200_CORE_8                  (8)
+#define HIPU200_CORE_9                  (9)
+#define HIPU200_CORE_10                 (10)
+#define HIPU200_CORE_11                 (11)
+#define HIPU200_CORE_12                 (12)
+
+#define HIPU200_CORE_0_BIT              (0x01 << HIPU200_CORE_0 )
+#define HIPU200_CORE_1_BIT              (0x01 << HIPU200_CORE_1 )
+#define HIPU200_CORE_2_BIT              (0x01 << HIPU200_CORE_2 )
+#define HIPU200_CORE_3_BIT              (0x01 << HIPU200_CORE_3 )
+#define HIPU200_CORE_4_BIT              (0x01 << HIPU200_CORE_4 )
+#define HIPU200_CORE_5_BIT              (0x01 << HIPU200_CORE_5 )
+#define HIPU200_CORE_6_BIT              (0x01 << HIPU200_CORE_6 )
+#define HIPU200_CORE_7_BIT              (0x01 << HIPU200_CORE_7 )
+#define HIPU200_CORE_8_BIT              (0x01 << HIPU200_CORE_8 )
+#define HIPU200_CORE_9_BIT              (0x01 << HIPU200_CORE_9 )
+#define HIPU200_CORE_10_BIT             (0x01 << HIPU200_CORE_10)
+#define HIPU200_CORE_11_BIT             (0x01 << HIPU200_CORE_11)
+#define HIPU200_CORE_12_BIT             (0x01 << HIPU200_CORE_12)
+
+#define HIPU200_CORE_BIT(x)             (0x01 << x)
+
+void hidvCoreResetPC(uint32_t coreBitmap)
+{
+
+}
+
+void hidvCoreActivate(uint32_t coreBitmap)
+{
+    uint32_t regval;
+    regval = hidvReadChipReg(HIPU200_REG_RESET_0);
+    regval = regval & ~(coreBitmap & HIPU200_CORE_ALL_BIT);
+    hidvWriteChipReg(HIPU200_REG_RESET_0, regval);
+}
+
+void hidvCoreDeactivate(uint32_t coreBitmap)
+{
+    uint32_t regval;
+    regval = hidvReadChipReg(HIPU200_REG_RESET_0);
+    regval = regval | (coreBitmap & HIPU200_CORE_ALL_BIT);
+    hidvWriteChipReg(HIPU200_REG_RESET_0, regval);
+}
+
+void hidvCoreWakeup(uint32_t coreBitmap)
+{
+    hidvWriteChipReg(HIPU200_REG_INT_CLR_0, (coreBitmap & HIPU200_CORE_ALL_BIT));
 }
 
 void hidvDestroy()
