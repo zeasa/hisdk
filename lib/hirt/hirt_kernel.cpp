@@ -114,7 +114,7 @@ hisdkRet_t hirtLoadKernelFromFile(const char *kernel_filename, unsigned char **p
         goto fail;
     }
 
-    HISDK_LOG_INFO(LOG_SYSTEM, "hirtLoadKernelFromFile file=%s", kernel_filename);
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtLoadKernelFromFile file=\"%s\"", kernel_filename);
     
     rc = hisdkPortOsFopen(kernel_filename, HISDK_OPEN_READ, &file);
     if(rc != HISDK_RET_SUCCESS)
@@ -260,5 +260,14 @@ fail:
 
     HISDK_LOG_INFO(LOG_SYSTEM, "hirtInvokeKernel failed.");
     *ppKernelBin == NULL;
+    return ret;
+}
+
+__R_HOST
+hisdkRet_t hirtKernelBinBufferDestroy(hirtKernelBinBuffer_t *pKernelBin)
+{
+    hisdkRet_t ret = HISDK_RET_SUCCESS;
+
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtKernelParamsBufferDestroy done.");
     return ret;
 }

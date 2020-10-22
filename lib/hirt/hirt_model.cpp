@@ -130,7 +130,7 @@ hisdkRet_t hirtModelCtx::loadMemories()
         
         if( !(mle.flags() & MemoryListEntry::flags_alloc()) )
         {
-            //HISDK_LOG_INFO(LOG_SYSTEM, "!flags_alloc()");
+            HISDK_LOG_INFO(LOG_SYSTEM, "!flags_alloc()");
             continue;
         }
 
@@ -202,7 +202,8 @@ hisdkRet_t hirtModelCtx::loadMemories()
                     }
                 }
 
-                HISDK_ERR_FCALLFAIL( hirtMemcpy((void*)gmem_addr, pbuf, mle.size(), HIRT_MEM_TRANS_DIR_HOST2GPU) );
+                //HISDK_ERR_FCALLFAIL( hirtMemcpy((void*)gmem_addr, pbuf, mle.size(), HIRT_MEM_TRANS_DIR_HOST2GPU) );
+                HISDK_LOG_INFO(LOG_SYSTEM, "hirtMemcpy->0x%lx,size=%lu", gmem_addr, mle.size());
                 hisdkFree(pbuf);
             }
             //transfor the memory contents to gmem
@@ -228,29 +229,14 @@ void hirtModelCtx::unloadModel()
 }
 
 #include <iostream>
-hisdkRet_t hirtModelCtx::submit(const unsigned char* pBufInput, unsigned char* pBufOutput)
+hisdkRet_t hirtModelCtx::submit(const unsigned char* pBufInput, unsigned char* pBufOutput, hirtCmdQueue_t *pCmdQueue)
 {
     //for each task in modelctx,choose the right 
     //kernel and invoke kernel to do the inference
     hisdkRet_t e = HISDK_RET_SUCCESS;
     hirtGMemAddress_t gmemaddr;
     
-    HISDK_LOG_INFO(LOG_SYSTEM, "example_hirt program start...");
-
-    /*prepare gpu execution envirement*/
-    hirtInit(0);
-    hirtDev_t dev = 0;
-    hirtGetDeviceHandle(&dev, 0);
-    hirtSetCurrentDevice(dev);
-    
-    hirtCmdQueue_t *pCmdQueue = NULL;
-    hirtCmdQueueCreate(&pCmdQueue);
-    
-    hirtScheduler_t *pScheduler = NULL;
-    hirtSchedulerCreate(&pScheduler, pCmdQueue);
-    
-    hirtEventHandler_t *pEventHandler = NULL;
-    hirtEventHandlerCreate(&pEventHandler, pScheduler);
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtModelCtx::submit...");
 
     /*prepare the input&output buffer for the network*/
     gmemaddr = m_memory_input.getHandle();
@@ -259,81 +245,7 @@ hisdkRet_t hirtModelCtx::submit(const unsigned char* pBufInput, unsigned char* p
     /*prepare kernel for all layers of the network*/
     for(int i=0; i<m_task_entries.size(); i++)
     {
-        std::string op_name = m_task_entries[i].name;
-        std::string op_type = m_task_entries[i].type + ".o";
-        std::cout << "op[" << i << "]==========" << op_name.c_str() << "," << op_type.c_str() << std::endl;
-
-#if 1
-        std::cout << "  pr_addr_list:" << std::endl;
-        for(int j=0; j<m_task_entries[i].pr_addr_list.size(); j++)
-        {
-            uint32_t addr = m_task_entries[i].pr_addr_list[j];
-            std::cout << "    [" << j << "] = " << addr
-                      << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
-                      << ", 0x" << m_address[addr].size()
-                      << std::dec << std::endl;
-        }
-        
-        std::cout << "  in_addr_list:" << std::endl;
-        for(int j=0; j<m_task_entries[i].in_addr_list.size(); j++)
-        {
-            uint32_t addr = m_task_entries[i].in_addr_list[j];
-            std::cout << "    [" << j << "] = " << m_task_entries[i].in_addr_list[j] 
-                      << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
-                      << ", 0x" << m_address[addr].size()
-                      << std::dec << std::endl;
-        }
-        
-        std::cout << "  ou_addr_list:" << std::endl;
-        for(int j=0; j<m_task_entries[i].ou_addr_list.size(); j++)
-        {
-            uint32_t addr = m_task_entries[i].ou_addr_list[j];
-            std::cout << "    [" << j << "] = " << m_task_entries[i].ou_addr_list[j] 
-                      << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
-                      << ", 0x" << m_address[addr].size()
-                      << std::dec << std::endl;
-        }
-        
-        std::cout << "  wt_addr_list:" << std::endl;
-        for(int j=0; j<m_task_entries[i].wt_addr_list.size(); j++)
-        {
-            uint32_t addr = m_task_entries[i].wt_addr_list[j];
-            std::cout << "    [" << j << "] = " << m_task_entries[i].wt_addr_list[j] 
-                      << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
-                      << ", 0x" << m_address[addr].size()
-                      << std::dec << std::endl;
-        }
-        
-        std::cout << "  bs_addr_list:" << std::endl;
-        for(int j=0; j<m_task_entries[i].bs_addr_list.size(); j++)
-        {
-            uint32_t addr = m_task_entries[i].bs_addr_list[j];
-            std::cout << "    [" << j << "] = " << m_task_entries[i].bs_addr_list[j] 
-                      << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
-                      << ", 0x" << m_address[addr].size()
-                      << std::dec << std::endl;
-        }
-        
-        std::cout << "  fm_addr_list:" << std::endl;
-        for(int j=0; j<m_task_entries[i].fm_addr_list.size(); j++)
-        {
-            uint32_t addr = m_task_entries[i].fm_addr_list[j];
-            std::cout << "    [" << j << "] = " << m_task_entries[i].fm_addr_list[j] 
-                      << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
-                      << ", 0x" << m_address[addr].size()
-                      << std::dec << std::endl;
-        }
-        
-        std::cout << "  lu_addr_list:" << std::endl;
-        for(int j=0; j<m_task_entries[i].lu_addr_list.size(); j++)
-        {
-            uint32_t addr = m_task_entries[i].lu_addr_list[j];
-            std::cout << "    [" << j << "] = " << m_task_entries[i].lu_addr_list[j] 
-                      << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
-                      << ", 0x" << m_address[addr].size()
-                      << std::dec << std::endl;
-        }
-#endif
+        debugTaskEntrys(m_task_entries[i]);
 
         hirtKernelParamsBuffer_t *pParams = NULL;
         hirtKernelParamMemory_t  paramMem;
@@ -392,23 +304,102 @@ hisdkRet_t hirtModelCtx::submit(const unsigned char* pBufInput, unsigned char* p
         }
 
         hirtKernelBinBuffer_t *pkrnlBin = NULL;
-        hirtInvokeKernel(op_type.c_str(), pParams, &pkrnlBin, 1, pCmdQueue);
-    }
+        hirtInvokeKernel(m_task_entries[i].type.c_str(), pParams, &pkrnlBin, 1, pCmdQueue);
 
 #if 0
-    hirtCmdQueueSync(pCmdQueue);
+        hirtCmdQueueSync(pCmdQueue);
 #endif
+        hirtKernelBinBufferDestroy(pkrnlBin);
+    }
+
     /*copy out the result from the gpu output buffer gmem to the host memory*/
     gmemaddr = m_memory_output.getHandle();
     hirtMemcpy(pBufOutput, &gmemaddr, m_memory_output.size(), HIRT_MEM_TRANS_DIR_GPU2HOST);
-    
-    /*deinit the gpu execution envirement*/
-#if 0
-    hirtEventHandlerDestroy(pEventHandler);
-    hirtSchedulerDestroy(pScheduler);
-    hirtCmdQueueDestroy(pCmdQueue);
-    hirtDestroy();
-#endif
 }
 
+u64_t hirtModelCtx::getInputTensorBufferSize(void)
+{
+    return m_memory_input.size();
+}
 
+u64_t hirtModelCtx::getOutputTensorBufferSize(void)
+{
+    return m_memory_output.size();
+}
+
+void hirtModelCtx::debugTaskEntrys(TaskListEntry &task)
+{
+    std::string op_name = task.name;
+    std::string op_type = task.type;
+    std::cout << "op[" << op_name.c_str() << "]<" << op_type.c_str() << ">==========" <<  std::endl;
+
+    std::cout << "  pr_addr_list:" << std::endl;
+    for(int j=0; j<task.pr_addr_list.size(); j++)
+    {
+        uint32_t addr = task.pr_addr_list[j];
+        std::cout << "    [" << j << "] = " << addr
+                  << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
+                  << ", 0x" << m_address[addr].size()
+                  << std::dec << std::endl;
+    }
+    
+    std::cout << "  in_addr_list:" << std::endl;
+    for(int j=0; j<task.in_addr_list.size(); j++)
+    {
+        uint32_t addr = task.in_addr_list[j];
+        std::cout << "    [" << j << "] = " << task.in_addr_list[j] 
+                  << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
+                  << ", 0x" << m_address[addr].size()
+                  << std::dec << std::endl;
+    }
+    
+    std::cout << "  ou_addr_list:" << std::endl;
+    for(int j=0; j<task.ou_addr_list.size(); j++)
+    {
+        uint32_t addr = task.ou_addr_list[j];
+        std::cout << "    [" << j << "] = " << task.ou_addr_list[j] 
+                  << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
+                  << ", 0x" << m_address[addr].size()
+                  << std::dec << std::endl;
+    }
+    
+    std::cout << "  wt_addr_list:" << std::endl;
+    for(int j=0; j<task.wt_addr_list.size(); j++)
+    {
+        uint32_t addr = task.wt_addr_list[j];
+        std::cout << "    [" << j << "] = " << task.wt_addr_list[j] 
+                  << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
+                  << ", 0x" << m_address[addr].size()
+                  << std::dec << std::endl;
+    }
+    
+    std::cout << "  bs_addr_list:" << std::endl;
+    for(int j=0; j<task.bs_addr_list.size(); j++)
+    {
+        uint32_t addr = task.bs_addr_list[j];
+        std::cout << "    [" << j << "] = " << task.bs_addr_list[j] 
+                  << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
+                  << ", 0x" << m_address[addr].size()
+                  << std::dec << std::endl;
+    }
+    
+    std::cout << "  fm_addr_list:" << std::endl;
+    for(int j=0; j<task.fm_addr_list.size(); j++)
+    {
+        uint32_t addr = task.fm_addr_list[j];
+        std::cout << "    [" << j << "] = " << task.fm_addr_list[j] 
+                  << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
+                  << ", 0x" << m_address[addr].size()
+                  << std::dec << std::endl;
+    }
+    
+    std::cout << "  lu_addr_list:" << std::endl;
+    for(int j=0; j<task.lu_addr_list.size(); j++)
+    {
+        uint32_t addr = task.lu_addr_list[j];
+        std::cout << "    [" << j << "] = " << task.lu_addr_list[j] 
+                  << ", 0x" << std::hex << m_memory[m_address[addr].mem_id()].getHandle() + m_address[addr].offset()
+                  << ", 0x" << m_address[addr].size()
+                  << std::dec << std::endl;
+    }
+}

@@ -123,7 +123,7 @@ __R_HOST
 hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDir_t dir)
 {
     hisdkRet_t e = HISDK_RET_SUCCESS;
-    
+#if 0
     if(nBytes == 0)
     {
         HISDK_ERR_RPTFAIL(HISDK_RET_ERR_BADPARAMETER, "hirtMemcpy size == 0.");
@@ -141,7 +141,7 @@ hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDi
     {
         HISDK_ERR_RPTFAIL(HISDK_RET_ERR_BADPARAMETER, "hirtMemcpy dir err.");
     }
-
+#endif
 fail:
     return e;
 }

@@ -2,6 +2,7 @@
 #define LIBHIRT_MODEL_H__
 
 #include "hirt.h"
+#include "hirt_cqueue.h"
 
 //#ifdef __cplusplus
 //extern "C" {
@@ -132,8 +133,11 @@ public:
     void       unloadModel();
     hisdkRet_t loadMemories();
     void       unloadMemories() {};
-    hisdkRet_t submit(const unsigned char* pBufInput, unsigned char* pBufOutput);
-    
+    hisdkRet_t submit(const unsigned char* pBufInput, unsigned char* pBufOutput, hirtCmdQueue_t *pCmdQueue);
+    u64_t getInputTensorBufferSize(void);
+    u64_t getOutputTensorBufferSize(void);
+    void debugTaskEntrys(TaskListEntry &task);
+
 private:
     hModel m_hModel;
 

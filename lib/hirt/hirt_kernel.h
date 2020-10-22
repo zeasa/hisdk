@@ -22,6 +22,8 @@ __R_HOST
 hisdkRet_t hirtInvokeKernel(const char* function, 
       hirtKernelParamsBuffer_t *pParams, hirtKernelBinBuffer_t **ppKernelBin, 
       hirtTaskDim_t dim, hirtCmdQueue_t *pQueue);
+__R_HOST
+hisdkRet_t hirtKernelBinBufferDestroy(hirtKernelBinBuffer_t *pKernelBin);
 
 #ifdef __cplusplus
 }

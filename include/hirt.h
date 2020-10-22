@@ -119,6 +119,7 @@ typedef struct {
 
 typedef struct
 {
+  u32_t typeVersion;
   u32_t kernelparambuf_maxsize;
   u32_t task_parallelism;
   u32_t task_thread_coreid[HIRT_HIPU200_CORENUMMAX];
