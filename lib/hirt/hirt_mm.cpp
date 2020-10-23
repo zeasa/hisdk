@@ -58,6 +58,7 @@ hisdkRet_t hirtHostFree(void *ptr)
 #define GMEM_ALIGN(x)       (((x & GMEM_ALIGN_MASK) == 0) ? (x) : ((x & GMEM_ALIGN_MASK) + GMEM_ALIGN_CARRY))
 
 static hirtGMemAddress_t memUsedData = 0;
+static hirtGMemAddress_t memUsedShareData = 0;
 static hirtGMemAddress_t memUsedSha0 = 0;
 static hirtGMemAddress_t memUsedSha1 = 0;
 
@@ -73,8 +74,8 @@ hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes, hirtGMemTyp
         memUsedData += GMEM_ALIGN(nBytes);
         break;
     case HIRT_GMEM_TYPE_DATA_SHARE:
-        *pDevAddr = HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR1, 0x0) + memUsedData;
-        memUsedData += GMEM_ALIGN(nBytes);
+        *pDevAddr = HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR1, 0x0) + memUsedShareData;
+        memUsedShareData += GMEM_ALIGN(64*1024*1024);
         break;
     case HIRT_GMEM_TYPE_SHARE:
         *pDevAddr = HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR0, HIRT_HIPU200_MEM_SHA0_OFFSET) + memUsedSha0;
@@ -132,16 +133,19 @@ hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDi
     if(dir == HIRT_MEM_TRANS_DIR_HOST2GPU)
     {
         hidvWriteChipMem((uint64_t)dest, nBytes, const_cast<void*>(src));
+        HISDK_LOG_INFO(LOG_SYSTEM, "<hirtMemcpy:size=%lu, dst=%p", nBytes, dest);
     }
     else if(dir == HIRT_MEM_TRANS_DIR_GPU2HOST)
     {
         hidvReadChipMem((uint64_t)src, nBytes, dest);
+        HISDK_LOG_INFO(LOG_SYSTEM, "<hirtMemcpy:size=%lu, src=%p", nBytes, src);
     }
     else
     {
         HISDK_ERR_RPTFAIL(HISDK_RET_ERR_BADPARAMETER, "hirtMemcpy dir err.");
     }
 #endif
+
 fail:
     return e;
 }

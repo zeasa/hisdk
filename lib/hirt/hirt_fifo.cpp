@@ -53,6 +53,8 @@ hisdkRet_t hirtFifoPut(hirtFifo_t* fifo, void* pdata)
         fifo->is_full = 1;
     }
 
+    sem_post(&fifo->sem_read);
+
     return ret;
     
 fail:

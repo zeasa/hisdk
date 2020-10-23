@@ -238,7 +238,6 @@ hisdkRet_t hirtInvokeKernel(const char* function,
         goto fail;
     }
     pKernelBin->pbuf_host = pbuf;
-    //fill some param in parambuf(dim)
 
     //hirtCmdQueueKernelPut
     hirtCmdQueueKernelPut(pQueue, pParams, pKernelBin, dim);

@@ -106,7 +106,7 @@ void* hirtSchedulerThread(void* arg)
     {
         //block read the cmd queue
         hirtCmdQueueNodeGet(pQueue, &node);
-        
+        HISDK_LOG_INFO(LOG_SYSTEM, "hirtCmdQueueNodeGet successfully!");
         //depend on the cmdnode type
         switch (node.type)
         {
@@ -163,9 +163,9 @@ void* hirtSchedulerThread(void* arg)
             {
                 ((int *)node.buf_param->pbuf_host)[3 + i] = freecores[i];
             }
-
             //copy kernel param from host to device;
             hirtMemcpy((void*)&node.buf_param->pbuf_gpu, node.buf_param->pbuf_host, node.buf_param->max_param, HIRT_MEM_TRANS_DIR_HOST2GPU);
+
             //set paramtable pointer in the core dtcm
             for (int i = 0; i < dim; ++i)
             {

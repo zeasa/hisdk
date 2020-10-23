@@ -7,17 +7,25 @@ NM = $(CROSS_PREFIX)-nm
 OBJCOPY = $(CROSS_PREFIX)-objcopy
 OBJDUMP = $(CROSS_PREFIX)-objdump
 STRIP = $(CROSS_PREFIX)-strip
+
+output_name = kernel_vadd_1c
 config = ./link.lds
-obj = output/start.o output/hpu_api.o output/kernel_main.co
-output_name = kernel
+
 elf = $(output_name).elf
 bin = $(output_name).bin
 data = $(output_name).dat
 hex = $(output_name).hex
 dump = $(output_name).asm
+BIN = kernel_vadd_1c.bin
 
-all: $(obj)
+obj = output/start.o output/hpu_api.o output/kernel_main.co
+
+all: dir $(bin)
+
+dir:
 	mkdir -p output
+
+$(bin): $(obj)
 	$(CC) $(obj) -o output/$(elf) -T $(config) -nostartfiles -nostdlib
 	# -static -lgcc -Wl,--nmagic -Wl,--gc-sections
 	$(OBJDUMP) -DSxtd output/$(elf) > output/$(dump)
