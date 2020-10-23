@@ -45,12 +45,15 @@ hisdkRet_t hirtGetLastErr(void)
 __R_HOST
 hisdkRet_t hirtInit(unsigned int Flags)
 {
-    hisdkRet_t ret = HISDK_RET_SUCCESS;
-    HISDK_LOG_INFO(LOG_SYSTEM, "%s", "hirt Init.");
+    hisdkRet_t e = HISDK_RET_SUCCESS;
 
-    ret = hidvInit();
+    HISDK_ERR_FCALLFAIL( hidvInit() );
 
-    return ret;
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtInit done.");
+    return e;
+fail:
+    HISDK_LOG_INFO(LOG_SYSTEM, "hirtInit failed.");
+    return e;
 }
 
 /**

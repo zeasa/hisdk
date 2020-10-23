@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 	u64_t inputBufSize;
 	u64_t outputBufSize;
     hirtCmdQueue_t *pCmdQueue = NULL;
+    hirtDev_t dev = 0;
 
 	HISDK_LOG_INFO(LOG_SYSTEM, "example_hirt_model program start...");
 
@@ -96,19 +97,16 @@ int main(int argc, char *argv[])
         HISDK_LOG_INFO(LOG_SYSTEM, "parameter error, program exit...");
     }
 
-#if 0
+
     /*prepare gpu execution envirement*/
     hirtInit(0);
-    hirtDev_t dev = 0;
     hirtGetDeviceHandle(&dev, 0);
     hirtSetCurrentDevice(dev);
     
-    hirtCmdQueue_t *pCmdQueue = NULL;
     hirtCmdQueueCreate(&pCmdQueue);
-    
+#if 0    
     hirtScheduler_t *pScheduler = NULL;
     hirtSchedulerCreate(&pScheduler, pCmdQueue);
-    
     hirtEventHandler_t *pEventHandler = NULL;
     hirtEventHandlerCreate(&pEventHandler, pScheduler);
 #endif

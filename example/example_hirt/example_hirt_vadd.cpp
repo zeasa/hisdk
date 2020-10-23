@@ -36,11 +36,6 @@ int main(int argc, char *argv[])
     hirtGetDeviceHandle(&dev, 0);
     hirtSetCurrentDevice(dev);
 
-    //int a, b, out;
-    //srand((unsigned)time(NULL));
-    //a = (int)rand();
-    //b = (int)rand();
-
     hirtCmdQueue_t *pCmdQueue = NULL;
     hirtCmdQueueCreate(&pCmdQueue);
 #if 0
@@ -51,7 +46,7 @@ int main(int argc, char *argv[])
     hirtEventHandlerCreate(&pEventHandler, pScheduler);
 #endif
 
-#define TESTLEN     16
+#define TESTLEN     32
     unsigned char buf1[TESTLEN];
     unsigned char buf2[TESTLEN];
     for (unsigned char i = 0; i < TESTLEN; i++)
@@ -68,19 +63,22 @@ int main(int argc, char *argv[])
 
     hirtMemcpy(buf1, (void*)k_b, TESTLEN, HIRT_MEM_TRANS_DIR_GPU2HOST);
     hirtMemcpy(buf2, (void*)k_a, TESTLEN, HIRT_MEM_TRANS_DIR_GPU2HOST);
+    //hirtMemcpy(buf1, (void*)0x02012000, TESTLEN, HIRT_MEM_TRANS_DIR_GPU2HOST);
+    //hirtMemcpy(buf2, (void*)0x02012020, TESTLEN, HIRT_MEM_TRANS_DIR_GPU2HOST);
 
     for (unsigned char i = 0; i < TESTLEN; i++)
     {
         printf("%x,%x\n", buf1[i], buf2[i]);
     }
 
+#if 0
     hirtKernelParamsBuffer_t *pParams = NULL;
     hirtKernelParamsBufferCreate(&pParams);
     hirtKernelParamsBufferAddParam(pParams, buf1, TESTLEN);
     hirtKernelBinBuffer_t *pkrnlBin = NULL;
     hirtInvokeKernel("kernel.o", pParams, &pkrnlBin, 1, pCmdQueue);
 
-#if 0
+
     hirtKernelParamsBuffer_t *pParams = NULL;
     hirtKernelParamsBufferCreate(&pParams);
     //hirtKernelParamsBufferAddParam(pParams, &k_a, sizeof(int *));

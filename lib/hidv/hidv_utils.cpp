@@ -51,24 +51,30 @@ void hidvDmaReadNOCAddr(uint64_t offset,size_t size,void * dest)
 
 void hidvWriteMMapReg32(uint64_t offset, uint32_t src)
 {
-    *((volatile uint32_t *)((uint64_t)fd_regs_map_base + offset + 0x104000)) = src;
+	//printf("hidvWriteMMapReg32, off=%lx, src=%x\n", offset, src);
+	*((volatile uint32_t *)((uint64_t)fd_regs_map_base + offset + 0x104000)) = src;
 }
 
 uint32_t hidvReadMMapReg32(uint64_t offset)
 {
+	//printf("hidvReadMMapReg32, off=%lx\n", offset);
     return *((volatile uint32_t *)((uint64_t)fd_regs_map_base + offset + 0x104000));
 }
 
 int hidvInitInternal()
 {
     if ((fd_regs = open(HIPU200_DEV_USR_DEFAULT, O_RDWR | O_SYNC)) == -1)
-	   FATAL;
-
+	{
+		FATAL;
+	}
+	   
 	fd_regs_map_base = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd_regs, 0);
 	//printf("fd_regs_map_base 0x%p \n",fd_regs_map_base);
 
 	if (fd_regs_map_base == (void *)-1)
+	{
 		FATAL;
+	}
 
     return 0;
 }
@@ -79,6 +85,9 @@ static ssize_t write_from_buffer(const char *fname, int fd, char *buffer, uint64
 static int transfer_h2c_write(const char *devname, uint64_t addr, uint64_t size, char *buffer)
 {	
 	ssize_t rc;
+
+	//printf("transfer_h2c_write, addr=%lx, size=%lx\n", addr, size);
+
 	int handle_dev = open(devname, O_RDWR);
 
 	if (handle_dev < 0)
@@ -100,6 +109,9 @@ out:
 static int transfer_c2h_read(const char *devname, uint64_t addr, uint64_t size, char *buffer)
 {
 	ssize_t rc;
+
+	//printf("transfer_c2h_read, addr=%lx, size=%lx\n", addr, size);
+
 	int handle_dev = open(devname, O_RDWR | O_NONBLOCK);
 
 	if (handle_dev < 0)

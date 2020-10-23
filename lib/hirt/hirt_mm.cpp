@@ -84,7 +84,7 @@ hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes, hirtGMemTyp
         ret = HISDK_RET_ERR_BADPARAMETER;
     }
 
-    HISDK_LOG_INFO(LOG_SYSTEM, "<GpuMalloc:size=%lu", nBytes);
+    HISDK_LOG_INFO(LOG_SYSTEM, "<GpuMalloc:size=%lu, addr=0x%lx", nBytes, *pDevAddr);
     return ret;
 fail:
     return ret;
@@ -123,7 +123,7 @@ __R_HOST
 hisdkRet_t hirtMemcpy(void *dest, const void *src, size_t nBytes, hirtMemTransDir_t dir)
 {
     hisdkRet_t e = HISDK_RET_SUCCESS;
-#if 0
+#if 1
     if(nBytes == 0)
     {
         HISDK_ERR_RPTFAIL(HISDK_RET_ERR_BADPARAMETER, "hirtMemcpy size == 0.");
