@@ -74,7 +74,7 @@ hisdkRet_t hirtGpuMalloc(hirtGMemAddress_t *pDevAddr, size_t nBytes, hirtGMemTyp
         memUsedData += GMEM_ALIGN(nBytes);
         break;
     case HIRT_GMEM_TYPE_DATA_SHARE:
-        *pDevAddr = HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR1, 0x0) + memUsedShareData;
+        *pDevAddr = HIPU200_NOC_MAKEADDR(HIPU200_NOC_NODEADDR_DDR1, 64*1024*1024*13) + memUsedShareData;
         memUsedShareData += GMEM_ALIGN(64*1024*1024);
         break;
     case HIRT_GMEM_TYPE_SHARE:

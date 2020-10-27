@@ -32,6 +32,16 @@
 .weak _wfi_handle
 .weak _ndma_handle
 
+.equ l2c_csr_start,			0x7f0
+.equ l2c_csr_finish,		0x7f1
+.equ l2c_csr_addr_set_way,	0x7f2
+.equ l2c_csr_mode,			0x7f3
+
+.equ dc_csr_start,			0x7e0
+.equ dc_csr_status,			0x7e1
+.equ dc_csr_addr,			0x7e2
+.equ dc_csr_mode,			0x7e3
+
 # interrupt vector table
 _start:
     j _init                         # U-Mode soft intr/power on: Jump to kernel_entry function
@@ -53,6 +63,30 @@ _start:
 
 _init:
     la sp, __stack_top__            # set the stacke top pointer
+
+	/*invalidate L2 cache*/
+	fence
+	li t0,	0x8003a110
+	csrw l2c_csr_addr_set_way, t0
+	li t0,  0x00000000
+	csrw l2c_csr_mode,  t0
+	li t0,  0x80000001
+	csrw l2c_csr_start, t0
+	fence
+
+__t_flushl2_wait:
+  	csrr  t3, l2c_csr_finish
+  	beqz  t3, __t_flushl2_wait      # if 0 == t3, jump to__t_flushl2_wait 
+  	fence 
+
+	/*invalidate L1 dcache*/
+	csrw dc_csr_addr,  0x00000000
+	csrw dc_csr_mode,  0x00000010
+	csrw dc_csr_start, 0x00000001
+	fence
+
+	/*invalidate L1 icache*/
+	fence.i
 
 	/* Load data section */
 	la a0, __data_load_start__

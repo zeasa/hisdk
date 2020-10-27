@@ -149,7 +149,7 @@ hisdkRet_t hidvInit()
         goto fail;
     }
 
-    hidvWriteChipReg(HIPU200_REG_HPU_CFG_0, HIPU200_CORE_ALL_BIT);// enable clock for all cores
+    hidvWriteChipReg(HIPU200_REG_HPU_CFG_0, 0x03); // enable clock for all cores
 
     //set mmap nmap for core0 and core1
     hidvCoreSetMMAPCodeData(HIPU200_NOC_NODEADDR_COR(0),  HIPU200_DDR_MMAP_CODE_MONO_OFFS(0) >> 26,  HIPU200_DDR_MMAP_DATA_MONO_OFFS(0) >> 26);

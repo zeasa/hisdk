@@ -78,17 +78,28 @@ void _kernel_sync(int rootCoreNum, int idx);
 
 void kernel_entry(void)
 {
-    unsigned int buf_sram_a[SBUF_SIZE] __attribute__((aligned(64)));
-    unsigned int buf_sram_b[SBUF_SIZE] __attribute__((aligned(64)));
-    unsigned int buf_sram_c[SBUF_SIZE] __attribute__((aligned(64)));
+    unsigned char buf_sram_a[SBUF_SIZE] __attribute__((aligned(64)));
+    unsigned char buf_sram_b[SBUF_SIZE] __attribute__((aligned(64)));
+    unsigned char buf_sram_c[SBUF_SIZE] __attribute__((aligned(64)));
+    unsigned int *_flags = (unsigned int *)MMAP_ATOM_START;
+    _flags[0] = 0x70;
 
     int _coreid  = get_hpuid();/*get core id number*/
     int _taskid;
     int i;
     int *_rtcode = (int *)KERNEL_RTCODE_ADDR;                          /*kernel return code to host runtime*/
-    paramTableVAdd_t *_ptable = (paramTableVAdd_t *)KERNEL_PTABLE_ADDR;/*get kernel param table from runtime*/
-    int vlen = _ptable->len;/*kernel input vector length*/
+    paramTableVAdd_t *_ptable = *((paramTableVAdd_t **)KERNEL_PTABLE_ADDR);/*get kernel param table from runtime*/
+
+    int vlen = _ptable->len; /*kernel input vector length*/
     int cnum = _ptable->infoBase.parallelism;
+    
+    _flags[1] = _ptable->srcNocnod_A;
+    _flags[2] = _ptable->srcOffset_A;
+    _flags[3] = _ptable->srcNocnod_B;
+    _flags[4] = _ptable->srcOffset_B;
+    _flags[5] = _ptable->dstNocnod;
+    _flags[6] = _ptable->dstOffset;
+    
 
     /*judge if the parallelism is bigger than the maxcorenum*/
     if( (cnum>HPU_CORE_NUM) || (cnum<1) )
@@ -96,6 +107,7 @@ void kernel_entry(void)
         *_rtcode = 0xdead0001;
         goto fail;
     }
+    
     /*find the taskid of the current core*/
     for (i = 0; i < cnum; ++i)
     {
@@ -105,6 +117,7 @@ void kernel_entry(void)
             break;
         }
     }
+
     /*judge if the taskid can be found in the paramtable*/
     if(i == cnum)
     {
@@ -132,17 +145,23 @@ void kernel_entry(void)
         {
             itemnum = vparts - i * SBUF_SIZE;
         }
-        ndma_len = itemnum * sizeof(unsigned int);
+        ndma_len = itemnum;
 
         // dma load data from ddr input buffer to local sram buffer
-        ndma_loc_addr = (int)&buf_sram_a;
+        ndma_loc_addr = (int)buf_sram_a;
         ndma_rmt_addr = _ptable->srcOffset_A + _taskid * vparts + i * SBUF_SIZE;
+        _flags[1] = ndma_loc_addr;
+        _flags[2] = ndma_rmt_addr;
+        _flags[7] = 0x11;
         ndma_load_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, NOC_NODE_X(_ptable->srcNocnod_A), NOC_NODE_Y(_ptable->srcNocnod_A));
         ndma_wait();
 
         // dma load data from ddr input buffer to local sram buffer 
-        ndma_loc_addr = (int)&buf_sram_b;
+        ndma_loc_addr = (int)buf_sram_b;
         ndma_rmt_addr = _ptable->srcOffset_B + _taskid * vparts + i * SBUF_SIZE;
+        _flags[1] = ndma_loc_addr;
+        _flags[2] = ndma_rmt_addr;
+        _flags[7] = 0x22;
         ndma_load_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, NOC_NODE_X(_ptable->srcNocnod_B), NOC_NODE_Y(_ptable->srcNocnod_B));
         ndma_wait();
 
@@ -153,8 +172,11 @@ void kernel_entry(void)
         }
 
         // dma save data from local sram buffer to ddr output buffer
-        ndma_loc_addr = (int)&buf_sram_c;
+        ndma_loc_addr = (int)buf_sram_c;
         ndma_rmt_addr = _ptable->dstOffset + _taskid * vparts + i * SBUF_SIZE;
+        _flags[1] = ndma_loc_addr;
+        _flags[2] = ndma_rmt_addr;
+        _flags[7] = 0x33;
         ndma_save_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, NOC_NODE_X(_ptable->dstNocnod), NOC_NODE_Y(_ptable->dstNocnod));
         ndma_wait();
     }
@@ -163,6 +185,7 @@ void kernel_entry(void)
     _kernel_sync(0, 0);
     // return code = ok
     *_rtcode = 0x12345678;
+    _flags[7] = 0x12345678;
 
 fail:
     /*send complete interrupt to runtime system

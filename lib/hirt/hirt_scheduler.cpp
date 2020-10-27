@@ -147,8 +147,8 @@ void* hirtSchedulerThread(void* arg)
             pthread_mutex_unlock(&pScoreboard->m_mutex);
 
             //read kernel and download the kernel into gdram
-            hirtMemcpy((void*)&node.buf_kernel->pbuf_gpu, node.buf_kernel->pbuf_host, node.buf_kernel->size, HIRT_MEM_TRANS_DIR_HOST2GPU);
-            
+            hirtMemcpy((void*)node.buf_kernel->pbuf_gpu, node.buf_kernel->pbuf_host, node.buf_kernel->size, HIRT_MEM_TRANS_DIR_HOST2GPU);
+
             //typedef struct
             //{
             //    int typeVersion;
@@ -164,14 +164,17 @@ void* hirtSchedulerThread(void* arg)
                 ((int *)node.buf_param->pbuf_host)[3 + i] = freecores[i];
             }
             //copy kernel param from host to device;
-            hirtMemcpy((void*)&node.buf_param->pbuf_gpu, node.buf_param->pbuf_host, node.buf_param->max_param, HIRT_MEM_TRANS_DIR_HOST2GPU);
+            hirtMemcpy((void*)node.buf_param->pbuf_gpu, node.buf_param->pbuf_host, node.buf_param->max_param, HIRT_MEM_TRANS_DIR_HOST2GPU);
 
             //set paramtable pointer in the core dtcm
             for (int i = 0; i < dim; ++i)
             {
                 uint8_t nodexy = hidvGetNocNodeXY(freecores[i]);
+                uint32_t paddr;
                 hirtGMemAddress_t gaddr = ((hirtGMemAddress_t)nodexy << 32) + HIPU200_KNL_PTABLE_ADDR;
-                hirtMemcpy((void*)gaddr, (void*)&node.buf_param->pbuf_gpu, 4, HIRT_MEM_TRANS_DIR_HOST2GPU);
+                paddr = (node.buf_param->pbuf_gpu & 0xFFFFFFFF) - 0x34000000;
+                paddr += 0x94000000;
+                hirtMemcpy((void*)gaddr, (void*)&paddr, 4, HIRT_MEM_TRANS_DIR_HOST2GPU);
             }
 
             //set up hipucore mmap to pbuf_gpu

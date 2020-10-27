@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     HISDK_LOG_INFO(LOG_SYSTEM, "example_hirt program start...");
 
     hirtInit(0);
+
     hirtDev_t dev = 0;
     hirtGetDeviceHandle(&dev, 0);
     hirtSetCurrentDevice(dev);
@@ -65,20 +66,22 @@ int main(int argc, char *argv[])
     hirtScheduler_t *pScheduler = NULL;
     hirtSchedulerCreate(&pScheduler, pCmdQueue);
 
-#if 0
-    hirtEventHandler_t *pEventHandler = NULL;
-    hirtEventHandlerCreate(&pEventHandler, pScheduler);
-#endif
 
-#define TESTLEN     16
+    //hirtEventHandler_t *pEventHandler = NULL;
+    //hirtEventHandlerCreate(&pEventHandler, pScheduler);
+
+
+#define TESTLEN     32
     unsigned char buf_a[TESTLEN];
     unsigned char buf_b[TESTLEN];
     unsigned char buf_c[TESTLEN];
+    unsigned char buf_d[TESTLEN];
     for (unsigned char i = 0; i < TESTLEN; i++)
     {
         buf_a[i] = 1;
         buf_b[i] = 2;
         buf_c[i] = 0;
+        buf_d[i] = 0;
     }
 
     hirtGMemAddress_t gaddr_a, gaddr_b, gaddr_c;
@@ -95,9 +98,9 @@ int main(int argc, char *argv[])
     ptable_vadd.srcNocnod_A = (u32_t)(gaddr_a >> 32);
     ptable_vadd.srcOffset_A = (u32_t)(gaddr_a & 0xFFFFFFFF);
     ptable_vadd.srcNocnod_B = (u32_t)(gaddr_b >> 32);;
-    ptable_vadd.srcOffset_B = (u32_t)(gaddr_b & 0xFFFFFFFF);;
-    ptable_vadd.dstNocnod   = (u32_t)(gaddr_c >> 32);;
-    ptable_vadd.dstNocnod   = (u32_t)(gaddr_c & 0xFFFFFFFF);;
+    ptable_vadd.srcOffset_B = (u32_t)(gaddr_b & 0xFFFFFFFF);
+    ptable_vadd.dstNocnod   = (u32_t)(gaddr_c >> 32);
+    ptable_vadd.dstOffset   = (u32_t)(gaddr_c & 0xFFFFFFFF);
     ptable_vadd.len = TESTLEN;
     hirtKernelParamsBufferAddParam(pParams, (void*)&ptable_vadd, sizeof(paramTableVAdd_t));
 
@@ -107,13 +110,19 @@ int main(int argc, char *argv[])
 
     usleep(2000*1000);
     hirtMemcpy(buf_c, (void*)gaddr_c, TESTLEN, HIRT_MEM_TRANS_DIR_GPU2HOST);
-
     for (unsigned char i = 0; i < TESTLEN; i++)
     {
         printf("buf_c[%d]=0x%x\n", i, buf_c[i]);
     }
 
-#if 0    
+    //print kernel flags
+    hirtMemcpy(buf_d, (void*)HIPU200_MEM_ATOMIC_START, 32, HIRT_MEM_TRANS_DIR_GPU2HOST);
+    for (unsigned int i = 0; i < 32; i++)
+    {
+        printf("flag[%d]=0x%x\n", i, buf_d[i]);
+    }
+
+#if 0
     hirtGpuFree(k_a);
     hirtGpuFree(k_b);
     hirtDestroyKernelParamsBuffer(pParams);
