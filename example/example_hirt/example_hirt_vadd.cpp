@@ -71,17 +71,15 @@ int main(int argc, char *argv[])
     //hirtEventHandlerCreate(&pEventHandler, pScheduler);
 
 
-#define TESTLEN     32
+#define TESTLEN     64
     unsigned char buf_a[TESTLEN];
     unsigned char buf_b[TESTLEN];
     unsigned char buf_c[TESTLEN];
-    unsigned char buf_d[TESTLEN];
     for (unsigned char i = 0; i < TESTLEN; i++)
     {
-        buf_a[i] = 1;
-        buf_b[i] = 2;
+        buf_a[i] = i;
+        buf_b[i] = 0;
         buf_c[i] = 0;
-        buf_d[i] = 0;
     }
 
     hirtGMemAddress_t gaddr_a, gaddr_b, gaddr_c;
@@ -105,10 +103,11 @@ int main(int argc, char *argv[])
     hirtKernelParamsBufferAddParam(pParams, (void*)&ptable_vadd, sizeof(paramTableVAdd_t));
 
     hirtKernelBinBuffer_t *pkrnlBin = NULL;
-    hirtInvokeKernel("kernel_vadd_1c.bin", pParams, &pkrnlBin, 1, pCmdQueue);
+    hirtInvokeKernel("kernel_vadd_1c.bin", pParams, &pkrnlBin, 2, pCmdQueue);
     //hirtCmdQueueSync(pCmdQueue);
 
     usleep(2000*1000);
+    //hidvWriteChipReg(HIPU200_REG_INT_CLR_0, 0xFFFFFFFF);
     hirtMemcpy(buf_c, (void*)gaddr_c, TESTLEN, HIRT_MEM_TRANS_DIR_GPU2HOST);
     for (unsigned char i = 0; i < TESTLEN; i++)
     {
@@ -116,11 +115,15 @@ int main(int argc, char *argv[])
     }
 
     //print kernel flags
-    hirtMemcpy(buf_d, (void*)HIPU200_MEM_ATOMIC_START, 32, HIRT_MEM_TRANS_DIR_GPU2HOST);
+    hirtMemcpy(buf_c, (void*)(0x100000000+HIPU200_MEM_ATOMIC_START), 32, HIRT_MEM_TRANS_DIR_GPU2HOST);
     for (unsigned int i = 0; i < 32; i++)
     {
-        printf("flag[%d]=0x%x\n", i, buf_d[i]);
+        printf("flag[%d]=0x%x\n", i, buf_c[i]);
     }
+
+    
+    printf("core0_pc=0x%x\n", hirtGetCorePC(hidvGetNocNodeXY(0)));
+    printf("core1_pc=0x%x\n", hirtGetCorePC(hidvGetNocNodeXY(1)));
 
 #if 0
     hirtGpuFree(k_a);

@@ -16,6 +16,8 @@ __R_HOST
 hisdkRet_t  hirtInit(unsigned int Flags);
 __R_HOST
 void        hirtDestroy(void);
+__R_HOST
+uint32_t    hirtGetCorePC(uint8_t node_xy);
 
 #ifdef __cplusplus
 }

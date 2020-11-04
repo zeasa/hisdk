@@ -162,6 +162,7 @@ void* hirtSchedulerThread(void* arg)
             for (int i = 0; i < dim; ++i)
             {
                 ((int *)node.buf_param->pbuf_host)[3 + i] = freecores[i];
+                HISDK_LOG_INFO(LOG_SYSTEM, "freecores = %d!", freecores[i]);
             }
             //copy kernel param from host to device;
             hirtMemcpy((void*)node.buf_param->pbuf_gpu, node.buf_param->pbuf_host, node.buf_param->max_param, HIRT_MEM_TRANS_DIR_HOST2GPU);
@@ -177,6 +178,16 @@ void* hirtSchedulerThread(void* arg)
                 hirtMemcpy((void*)gaddr, (void*)&paddr, 4, HIRT_MEM_TRANS_DIR_HOST2GPU);
             }
 
+            //set core num in the core dtcm(patch:fpga read coreid failed)
+            for (int i = 0; i < dim; ++i)
+            {
+                uint8_t nodexy = hidvGetNocNodeXY(freecores[i]);
+                uint32_t paddr;
+                hirtGMemAddress_t gaddr = ((hirtGMemAddress_t)nodexy << 32) + HIPU200_MEM_ATOMIC_START;
+                paddr = freecores[i];
+                hirtMemcpy((void*)gaddr, (void*)&paddr, 4, HIRT_MEM_TRANS_DIR_HOST2GPU);
+            }
+
             //set up hipucore mmap to pbuf_gpu
             pthread_mutex_lock(&pScoreboard->m_mutex);
             for(int i=0; i<dim; i++)
@@ -189,7 +200,7 @@ void* hirtSchedulerThread(void* arg)
             pthread_mutex_unlock(&pScoreboard->m_mutex);
             
             //config the hipu csr to make hipucore run
-            for (int i = 0; i < dim; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 coremap |= (1 << i);
             }

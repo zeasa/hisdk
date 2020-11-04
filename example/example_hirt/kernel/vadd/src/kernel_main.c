@@ -73,6 +73,8 @@ typedef struct
     u32_t len;
 } paramTableVAdd_t;
 
+#define conv_xy(xy)             (((xy & 0x30) >> 2) | (xy & 0x03))
+
 void *_kernel_malloc(int size, int type);
 void _kernel_sync(int rootCoreNum, int idx);
 
@@ -82,10 +84,10 @@ void kernel_entry(void)
     unsigned char buf_sram_b[SBUF_SIZE] __attribute__((aligned(64)));
     unsigned char buf_sram_c[SBUF_SIZE] __attribute__((aligned(64)));
     unsigned int *_flags = (unsigned int *)MMAP_ATOM_START;
-    _flags[0] = 0x70;
-
-    int _coreid  = get_hpuid();/*get core id number*/
-    int _taskid;
+    
+    //int _coreid = get_hpuid(); /*get core id number*/
+    unsigned int _coreid = _flags[0];
+    unsigned int _taskid;
     int i;
     int *_rtcode = (int *)KERNEL_RTCODE_ADDR;                          /*kernel return code to host runtime*/
     paramTableVAdd_t *_ptable = *((paramTableVAdd_t **)KERNEL_PTABLE_ADDR);/*get kernel param table from runtime*/
@@ -93,6 +95,7 @@ void kernel_entry(void)
     int vlen = _ptable->len; /*kernel input vector length*/
     int cnum = _ptable->infoBase.parallelism;
     
+    _flags[0] = 0x88;
     _flags[1] = _ptable->srcNocnod_A;
     _flags[2] = _ptable->srcOffset_A;
     _flags[3] = _ptable->srcNocnod_B;
@@ -131,55 +134,54 @@ void kernel_entry(void)
         goto fail;
     }
 
-    int vparts = (vlen == 1) ? 1 : ((vlen - 1) / cnum + 1);
-    int vparts_sub = (vparts - 1) / SBUF_SIZE + 1;
+#if 1
+    int vlen_core = 32; //(vlen == 1) ? 1 : ((vlen - 1) / cnum + 1);
+    int iternum_core = (vlen_core - 1) / SBUF_SIZE + 1;
     int ndma_loc_addr, ndma_rmt_addr, ndma_len, itemnum;
 
-    for (int i = 0; i < vparts_sub; ++i)
+    for (int i = 0; i < iternum_core; ++i)
     {
-        if(((i+1) * SBUF_SIZE) <= vparts)
+        if(((i+1) * SBUF_SIZE) <= vlen_core)
         {
             itemnum = SBUF_SIZE;
         }
         else
         {
-            itemnum = vparts - i * SBUF_SIZE;
+            itemnum = vlen_core - i * SBUF_SIZE;
         }
         ndma_len = itemnum;
 
         // dma load data from ddr input buffer to local sram buffer
         ndma_loc_addr = (int)buf_sram_a;
-        ndma_rmt_addr = _ptable->srcOffset_A + _taskid * vparts + i * SBUF_SIZE;
+        ndma_rmt_addr = _ptable->srcOffset_A + _taskid * vlen_core + i * SBUF_SIZE;
         _flags[1] = ndma_loc_addr;
         _flags[2] = ndma_rmt_addr;
-        _flags[7] = 0x11;
-        ndma_load_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, NOC_NODE_X(_ptable->srcNocnod_A), NOC_NODE_Y(_ptable->srcNocnod_A));
+        ndma_load_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, conv_xy(_ptable->srcNocnod_A));
         ndma_wait();
 
         // dma load data from ddr input buffer to local sram buffer 
         ndma_loc_addr = (int)buf_sram_b;
-        ndma_rmt_addr = _ptable->srcOffset_B + _taskid * vparts + i * SBUF_SIZE;
-        _flags[1] = ndma_loc_addr;
-        _flags[2] = ndma_rmt_addr;
-        _flags[7] = 0x22;
-        ndma_load_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, NOC_NODE_X(_ptable->srcNocnod_B), NOC_NODE_Y(_ptable->srcNocnod_B));
+        ndma_rmt_addr = _ptable->srcOffset_B + _taskid * vlen_core + i * SBUF_SIZE;
+        _flags[3] = ndma_loc_addr;
+        _flags[4] = ndma_rmt_addr;
+        ndma_load_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, conv_xy(_ptable->srcNocnod_B));
         ndma_wait();
 
         // do the actual calculation
-        for (i = 0; i < itemnum; ++i)
+        for (int j = 0; j < itemnum; ++j)
         {
-            buf_sram_c[i] = buf_sram_a[i] + buf_sram_b[i];
+            buf_sram_c[j] = buf_sram_a[j] + buf_sram_b[j];
         }
 
         // dma save data from local sram buffer to ddr output buffer
         ndma_loc_addr = (int)buf_sram_c;
-        ndma_rmt_addr = _ptable->dstOffset + _taskid * vparts + i * SBUF_SIZE;
-        _flags[1] = ndma_loc_addr;
-        _flags[2] = ndma_rmt_addr;
-        _flags[7] = 0x33;
-        ndma_save_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, NOC_NODE_X(_ptable->dstNocnod), NOC_NODE_Y(_ptable->dstNocnod));
+        ndma_rmt_addr = _ptable->dstOffset + _taskid * vlen_core + i * SBUF_SIZE;
+        _flags[5] = ndma_loc_addr;
+        _flags[6] = ndma_rmt_addr;
+        ndma_save_data(ndma_loc_addr, ndma_rmt_addr, ndma_len, conv_xy(_ptable->dstNocnod));
         ndma_wait();
     }
+#endif
 
     // synchronize all cores within current task group
     _kernel_sync(0, 0);

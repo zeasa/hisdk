@@ -203,9 +203,8 @@ _ndma_handle:
 ndma_save_data:
     csrw CSR_NDMA_LCADDR, a0        # set local address of ndma
     csrw CSR_NDMA_RTADDR, a1        # set remote address of ndma
-    csrw CSR_NDMA_SIZE, a2          # set transfer length of ndma
-    csrw CSR_NDMA_DESTX, a3         # set node.x location of ndma
-    csrw CSR_NDMA_DESTY, a4         # set node.y location of ndma
+    csrw CSR_NDMA_SIZE,   a2        # set transfer length of ndma
+    csrw CSR_NDMA_DESTXY, a3        # set node.x location of ndma
     fence
     csrwi CSR_NDMA_CTRL, 0          # set read command to ndma
     ret
@@ -214,9 +213,8 @@ ndma_save_data:
 ndma_load_data:
     csrw CSR_NDMA_LCADDR, a0        # set local address of ndma
     csrw CSR_NDMA_RTADDR, a1        # set remote address of ndma
-    csrw CSR_NDMA_SIZE, a2          # set transfer length of ndma
-    csrw CSR_NDMA_DESTX, a3         # set node.x location of ndma
-    csrw CSR_NDMA_DESTY, a4         # set node.y location of ndma
+    csrw CSR_NDMA_SIZE,   a2        # set transfer length of ndma
+    csrw CSR_NDMA_DESTXY, a3        # set node.x location of ndma
     fence
     csrwi CSR_NDMA_CTRL, 1          # set read command to ndma
     ret
@@ -225,18 +223,20 @@ ndma_load_data:
 ndma_atomic_swap:
     csrw CSR_NDMA_LCADDR, a0        # set local address of ndma
     csrw CSR_NDMA_RTADDR, a1        # set remote address of ndma
-    csrwi CSR_NDMA_SIZE, 4          # set transfer length of ndma
-    csrw CSR_NDMA_DESTX, a2         # set node.x location of ndma
-    csrw CSR_NDMA_DESTY, a3         # set node.y location of ndma
+    csrwi CSR_NDMA_SIZE,   4        # set transfer length of ndma
+    csrw CSR_NDMA_DESTXY, a2        # set node.x location of ndma
     fence
     csrwi CSR_NDMA_CTRL, 2          # set read command to ndma
     ret
  
 # function: void ndma_wait(void)
 ndma_wait:
-0:  csrr s0, CSR_NDMA_STATUS        # read NDMA status
-    andi s0, s0, 1                  # only pay attention to bit[0]
-    beqz s0, 0b                     # do-while(s0 != 0)
+0:  csrr t0, CSR_NDMA_STATUS        # read NDMA status
+    lui	t1,0xff000
+    and t0, t0, t1                  # only pay attention to bit[0]
+    beqz t0, 0b                     # do-while(s0 != 0)
+    li   t0, 0xFFFFFFFF
+    csrw CSR_NDMA_CTRL, t0
     ret
 
 # function: void claim_sim_complete(int fail)

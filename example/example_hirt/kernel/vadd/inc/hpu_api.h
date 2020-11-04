@@ -43,9 +43,9 @@ extern void disable_timer_intr(void);
 extern void enable_ndma_intr(void);
 extern void disable_ndma_intr(void);
 // extern void _ndma_handle(void);
-extern void ndma_save_data(int loc_addr, int rmt_addr, int len, int node_x, int not_y);
-extern void ndma_load_data(int loc_addr, int rmt_addr, int len, int node_x, int not_y);
-extern void ndma_atomic_swap(int loc_addr, int rmt_addr, int node_x, int not_y);
+extern void ndma_save_data(int loc_addr, int rmt_addr, int len, int node_xy);
+extern void ndma_load_data(int loc_addr, int rmt_addr, int len, int node_xy);
+extern void ndma_atomic_swap(int loc_addr, int rmt_addr, int node_xy);
 extern void ndma_wait(void);
 extern void claim_sim_complete(int fail);
 

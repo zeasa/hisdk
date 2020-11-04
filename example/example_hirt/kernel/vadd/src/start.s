@@ -88,6 +88,28 @@ __t_flushl2_wait:
 	/*invalidate L1 icache*/
 	fence.i
 
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+
+
 	/* Load data section */
 	la a0, __data_load_start__
 	la a1, __data_start__

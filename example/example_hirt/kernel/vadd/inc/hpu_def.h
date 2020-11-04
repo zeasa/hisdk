@@ -23,7 +23,7 @@
 
 // ==========
 // global definition
-#define CSR_HPU_ID                 0xf15
+#define CSR_HPU_ID                 0xf16
 // -- Scalar region
 // -- NoC DMA
 #define CSR_NDMA_CTRL              0x7c0
@@ -32,6 +32,7 @@
 #define CSR_NDMA_RTADDR            0x7c3
 #define CSR_NDMA_SIZE              0x7c4
 #define CSR_NDMA_DESTX             0x7c5
+#define CSR_NDMA_DESTXY            0x7c5
 #define CSR_NDMA_DESTY             0x7c6
 // -- VMU
 #define CSR_VMU_STATUS             0x7cf

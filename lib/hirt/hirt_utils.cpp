@@ -1,4 +1,5 @@
 #include "hirt_utils.h"
+#include "hirt_mm.h"
 
 /************************************************************************
  * Error handling
@@ -71,3 +72,11 @@ void hirtDestroy(void)
     hidvDestroy();
 }
 
+__R_HOST
+uint32_t hirtGetCorePC(uint8_t node_xy)
+{
+    unsigned int buf[32/sizeof(unsigned int)];
+    uint64_t addr = HIPU200_NOC_MAKEADDR(node_xy, HIPU200_MEM_APC_START);
+    hirtMemcpy(buf, (void*)addr, 32, HIRT_MEM_TRANS_DIR_GPU2HOST);
+    return buf[0];
+}
